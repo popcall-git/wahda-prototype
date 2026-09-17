@@ -205,6 +205,15 @@
   #pg-topup .pq-m-sub{font-size:12px;line-height:1.5}
   #pg-topup .pq-opts{border-top:1px solid var(--line);margin-top:20px;padding:14px 0 2px}
   #pg-topup .btn-primary{margin:16px 0}
+  /* Withdraw page */
+  #pg-withdraw .pq-card{padding:16px;text-align:left}
+  #pg-withdraw .pq-m-lb{padding:0 0 8px}
+  #pg-withdraw .pq-m-sub{font-size:12px;line-height:1.5}
+  #pg-withdraw .pq-opts{border-top:1px solid var(--line);margin-top:20px;padding:14px 0 2px}
+  #pg-withdraw .btn-primary{margin:16px 0}
+  .wd-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;background:var(--card);border:1.5px dashed #BFD3CC;border-radius:14px;padding:12px;margin-top:6px;font-size:14px;font-weight:700;color:var(--brand);font-family:inherit;cursor:pointer}
+  .wd-add:active{background:var(--bg)}
+  .wd-fld-lb{display:block;font-size:12px;font-weight:700;color:var(--ink-3);padding:0 0 6px}
   .wl-more-t{font-size:13.5px;font-weight:600;color:var(--ink)}
   .wl-more-s{font-size:11px;color:var(--ink-3);margin-top:1px}
   .wl-credit{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
@@ -2183,6 +2192,15 @@
       <div class="scroll" id="tupayBody" style="padding:0 20px 8px"></div>
     </section>
 
+    <!-- Withdraw: Wahda Coin -> bank account via SWIFT -->
+    <section class="page" id="pg-withdraw" style="z-index:14">
+      <div class="nav">
+        <button class="back-btn" onclick="closeWithdraw()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="nav-title" data-i18n="wd_t">Withdraw</div>
+      </div>
+      <div class="scroll" id="wdBody" style="padding:0 20px 8px"></div>
+    </section>
+
     <!-- Phone Contacts -->
     <section class="page" id="pg-phc" style="z-index:13">
       <div class="nav">
@@ -2546,6 +2564,10 @@
       <div id="cvFp" style="display:flex;justify-content:center;padding:0 0 10px"></div>
       <div id="cvPad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:2px 6px 6px"></div>
       <div style="text-align:center;font-size:10.5px;color:var(--ink-3);padding:4px 8px 6px" data-i18n="wl_ver_demo">Demo: enter any 6 digits or use fingerprint</div>
+    </div>
+    <div class="sheet" id="sheetWdbank">
+      <div class="sheet-handle"></div>
+      <div id="wdNBBody"></div>
     </div>
 
     <div class="sheet" id="sheetCC">
@@ -3012,6 +3034,21 @@ en:{
  dh_1:"1 · Any 6-digit code will pass verification; enter 000000 to preview the error state.",
  dh_2:"2 · Tap the language button (top right) to switch the prototype between English and Chinese.",
  dh_3:"3 · All buttons are tappable — the full golden flow works end to end.",
+ wd_t:"Withdraw", wd_cur:"Withdraw Currency", wd_amt_ph:"0.00", wd_avail:"Available balance", wd_fee:"Fee", wd_fee_usd:"10.00 USD", wd_eta:"Arrival", wd_eta_v:"0\u20133 business days",
+ wd_method:"Payout Method", wd_bt:"Bank Transfer (SWIFT)", wd_bt_sub:"Send to a bank account via SWIFT", wd_more_soon:"More payout methods coming soon",
+ wd_bank:"Withdrawal Bank Account", wd_bank_note:"Bank details are masked for security", wd_add:"Add New Bank Card",
+ wd_note:"Bank transfers are sent via SWIFT. A 10.00 USD fee applies per withdrawal and funds usually arrive within 0\u20133 business days.",
+ wd_total:"Total deducted", wd_submit:"Submit Withdrawal", wd_processing:"Submitting withdrawal\u2026",
+ wd_need_amt:"Enter an amount first", wd_amt_min:"Minimum withdrawal is 10.00 USD", wd_amt_over:"Amount exceeds your available balance",
+ wd_ok_t:"Withdrawal Submitted", wd_ok_sub:"Your withdrawal has been submitted and is being processed.",
+ wd_sum:"Withdrawal Summary", wd_to:"To",
+ wd_nb_t:"Add Bank Card", wd_holder:"Account Holder", wd_holder_ph:"Name on the bank account",
+ wd_bankname:"Bank Name", wd_bankname_ph:"e.g. Bank Al Rajhi", wd_iban:"IBAN", wd_iban_ph:"SA00 0000 0000 0000 0000 0000",
+ wd_swift:"SWIFT / BIC", wd_swift_ph:"e.g. RJHISARI",
+ wd_nb_note:"Make sure the account holder name matches your bank record. Bank details are masked after saving.",
+ wd_save:"Save Bank Card", wd_cancel:"Cancel",
+ wd_nh:"Enter the account holder name", wd_nn:"Enter the bank name", wd_ni:"Enter a valid IBAN", wd_ns:"Enter a valid SWIFT / BIC code",
+ wd_added:"Bank card added",
  cs_title:"Chat Settings", cs_privacy:"Privacy Settings", cs_theme:"Set Chat Theme", cs_block:"Block",
  cs_hint:"These settings apply to this conversation only.",
  cp_title:"Privacy Settings", cp_hide_mine:"Hide my stories and posts", cp_hide_theirs:"Hide contact's posts and activities", cp_mute:"Mute Notification",
@@ -3231,6 +3268,21 @@ zh:{
  dh_1:"1 · 任意 6 位验证码均可通过；输入 000000 可查看错误状态。",
  dh_2:"2 · 点击右上角按钮可在中英文之间切换原型语言。",
  dh_3:"3 · 所有按钮均可点击，完整黄金流程可走通。",
+ wd_t:"提现", wd_cur:"提现币种", wd_amt_ph:"0.00", wd_avail:"可用余额", wd_fee:"手续费", wd_fee_usd:"10.00 USD", wd_eta:"到账时间", wd_eta_v:"0\u20133 个工作日",
+ wd_method:"收款方式", wd_bt:"银行转账（SWIFT）", wd_bt_sub:"通过 SWIFT 转入您的银行账户", wd_more_soon:"更多收款方式即将上线",
+ wd_bank:"提现银行卡", wd_bank_note:"银行卡信息已脱敏展示，保障账户安全", wd_add:"添加新的银行卡",
+ wd_note:"提现通过 SWIFT 银行转账，通常 0\u20133 个工作日到账；每笔提现收取 10.00 USD 手续费。",
+ wd_total:"合计扣款", wd_submit:"提交提现", wd_processing:"正在提交提现\u2026",
+ wd_need_amt:"请先输入提现金额", wd_amt_min:"单笔提现最低 10.00 USD", wd_amt_over:"提现金额超出可用余额",
+ wd_ok_t:"提现已提交", wd_ok_sub:"您的提现申请已提交，正在处理中。",
+ wd_sum:"提现详情", wd_to:"收款账户",
+ wd_nb_t:"添加银行卡", wd_holder:"持卡人姓名", wd_holder_ph:"与银行账户一致的姓名",
+ wd_bankname:"银行名称", wd_bankname_ph:"例如：Bank Al Rajhi", wd_iban:"IBAN", wd_iban_ph:"SA00 0000 0000 0000 0000 0000",
+ wd_swift:"SWIFT / BIC", wd_swift_ph:"例如：RJHISARI",
+ wd_nb_note:"请确保持卡人姓名与银行预留信息一致；保存后银行卡信息将脱敏显示。",
+ wd_save:"保存银行卡", wd_cancel:"取消",
+ wd_nh:"请填写持卡人姓名", wd_nn:"请填写银行名称", wd_ni:"请填写有效的 IBAN", wd_ns:"请填写有效的 SWIFT / BIC 代码",
+ wd_added:"银行卡已添加",
  cs_title:"聊天设置", cs_privacy:"隐私设置", cs_theme:"设置聊天背景", cs_block:"加入黑名单",
  cs_hint:"以下设置仅对当前会话生效。",
  cp_title:"隐私设置", cp_hide_mine:"隐藏我的动态和帖子", cp_hide_theirs:"隐藏联系人的帖子和动态", cp_mute:"消息免打扰",
@@ -3294,6 +3346,7 @@ function applyLang(){
  if(document.getElementById("pg-wmore").classList.contains("active"))renderWmore();
  if(document.getElementById("pg-whist").classList.contains("active"))renderWhist();
  if(document.getElementById("pg-wcard").classList.contains("active"))renderWcard();
+ if(document.getElementById("pg-withdraw").classList.contains("active"))renderWithdraw();
  if(document.getElementById("sheetCardVerify").classList.contains("show"))renderCardVerify();
  if(document.getElementById("pg-wp2p").classList.contains("active"))renderP2p();
  if(document.getElementById("pg-p2phist").classList.contains("active"))renderP2pHist();
@@ -6058,6 +6111,174 @@ function tuFinish(){
  closeTuPay();
  closeTopup();
 }
+/* ---------- Withdraw: Wahda Coin -> bank account (SWIFT) ---------- */
+var WD_FEE_USD=10,WD_MIN_USD=10;
+var WD_BANKS=[
+ {n:"Bank Al Rajhi",ic:"R",bg:"linear-gradient(135deg,#185FA5,#0E4E8A)",iban:"SA03 8000 0000 6080 1016 7519",swift:"RJHISARI"},
+ {n:"Alinma Bank",ic:"A",bg:"linear-gradient(135deg,#0E7C66,#0a5c4d)",iban:"SA44 0500 0068 4000 0123 4567",swift:"INMASARI"}];
+var WD_METHODS=[{k:"wd_bt",sub:"wd_bt_sub",ic:"B",bg:"linear-gradient(135deg,#185FA5,#0E4E8A)"}];
+var wdCur=0,wdAmt="",wdMethod=0,wdBank=0,wdOpen=false,wdSent=false,wdSnap=null,wdTimer=0;
+function wdRate(i){return WCUR[i].r}
+function wdAvail(){return WAL_USD*WCUR[wdCur].r}
+function wdMask(iban){var d=String(iban).replace(/[^0-9A-Za-z]/g,"");return "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 "+d.slice(-4)}
+function wdCalc(){
+ var a=parseFloat(wdAmt)||0,r=wdRate(wdCur);
+ return {a:a,r:r,usd:+(a/r).toFixed(2),feeUsd:WD_FEE_USD,feeLocal:+(WD_FEE_USD*r).toFixed(2),totalUsd:+(a/r+WD_FEE_USD).toFixed(2)};
+}
+function wdFeeText(c){
+ if(wdCur===0)return t("wd_fee_usd");
+ return wlFmt(c.feeLocal)+" "+WCUR[wdCur].c+" (\u2248 "+t("wd_fee_usd")+")";
+}
+function openWithdraw(){
+ wdSent=false;wdOpen=false;wdTimer=0;
+ raisePage("pg-withdraw");
+ document.getElementById("pg-withdraw").classList.add("active");
+ renderWithdraw();
+}
+function closeWithdraw(){
+ if(wdTimer){clearTimeout(wdTimer);wdTimer=0}
+ document.getElementById("pg-withdraw").classList.remove("active");
+ if(wdSent){wdSent=false;wdAmt="";wdSnap=null}
+}
+function wdSetCur(i){wdCur=i;wdOpen=false;renderWithdraw()}
+function wdToggleCur(){wdOpen=!wdOpen;renderWithdraw()}
+function wdPickBank(i){wdBank=i;renderWithdraw()}
+function wdInput(v){
+ var el=document.getElementById("wdAmtIn");
+ wdAmt=v.replace(/[^0-9.]/g,"");
+ if(el&&el.value!==wdAmt)el.value=wdAmt;
+ var box=document.getElementById("wdNoteBox");
+ if(box)box.innerHTML=wdNoteHtml();
+}
+function wdNoteHtml(){
+ var c=wdCalc(),x=WCUR[wdCur];
+ return '<div class="pq-m-sub">'+t("wd_avail")+': '+x.s+wlFmt(wdAvail())+'</div>'
+  +'<div class="pq-m-sub" style="margin-top:2px">'+t("wd_fee")+': '+wdFeeText(c)+'</div>'
+  +'<div class="pq-m-sub" style="margin-top:2px">'+t("wd_eta")+': '+t("wd_eta_v")+'</div>'
+  +(c.a>0?'<div class="pq-m-sub" style="margin-top:2px;font-weight:700;color:var(--ink)">'+t("wd_total")+': '+x.s+wlFmt(c.a+c.feeLocal)+'</div>':'');
+}
+function wdTick(){
+ return '<span class="pq-tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+}
+function wdRow(lb,val){
+ return '<div style="display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)"><span class="pq-m-sub" style="flex:none">'+lb+'</span><span style="font-size:13.5px;font-weight:700;color:var(--ink);text-align:right;line-height:1.5">'+val+'</span></div>';
+}
+function renderWithdraw(){
+ var el=document.getElementById("wdBody");if(!el)return;
+ var x=WCUR[wdCur],c=wdCalc(),h="";
+ if(wdSent){
+  var s=wdSnap||c,sx=WCUR[s.cur].s,bs=WD_BANKS[s.bank];
+  h='<div class="p2p-okwrap" style="padding-bottom:4px">'
+   +'<span style="width:64px;height:64px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+   +'<div style="font-size:19px;font-weight:800;color:var(--ink);margin-top:16px">'+t("wd_ok_t")+'</div>'
+   +'<div style="font-size:26px;font-weight:800;color:var(--ink);margin-top:10px">'+sx+wlFmt(s.a)+'</div>'
+   +'<div style="font-size:13px;color:var(--ink-3);margin-top:8px;line-height:1.6">'+t("wd_ok_sub")+'</div></div>'
+   +'<div class="pq-card" style="text-align:left">'
+   +'<div class="pq-m-lb" style="font-size:14px;font-weight:800;color:var(--ink);text-transform:none">'+t("wd_sum")+'</div>'
+   +wdRow(t("wd_to"),bs.n+'<br><span style="font-weight:600;color:var(--ink-3);font-size:12px">'+wdMask(bs.iban)+' \u00b7 SWIFT '+bs.swift+'</span>')
+   +wdRow(t("wd_fee"),wlFmt(s.feeLocal)+' '+WCUR[s.cur].c)
+   +wdRow(t("wd_eta"),t("wd_eta_v"))
+   +'</div>'
+   +'<button class="btn btn-primary" style="width:100%;margin:16px 0 12px" onclick="wdDone()">'+t("p2p_done")+'</button>';
+  el.innerHTML=h;el.scrollTop=0;
+  return;
+ }
+ h='<div class="pq-card" style="margin-top:16px">'
+  +'<div class="pq-m-lb">'+t("wd_cur")+'</div>'
+  +'<div style="display:flex;align-items:center;gap:12px">'
+  +'<button onclick="wdToggleCur()" style="flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:7px 10px;cursor:pointer;font-family:inherit">'
+  +'<span class="pq-coin" style="width:24px;height:24px;font-size:9px">'+x.c.slice(0,2)+'</span>'
+  +'<span style="font-size:14.5px;font-weight:800;color:var(--ink)">'+x.c+'</span>'
+  +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex:none;transform:rotate('+(wdOpen?180:0)+'deg);transition:.2s"><path d="M6 9l6 6 6-6" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+  +'<input class="input" id="wdAmtIn" type="text" inputmode="decimal" style="flex:1;min-width:0;border:none;background:transparent;text-align:right;font-size:24px;font-weight:800;padding:4px 2px;box-shadow:none" placeholder="'+t("wd_amt_ph")+'" value="'+wdAmt+'" oninput="wdInput(this.value)">'
+  +'<span style="font-size:13px;font-weight:800;color:var(--ink-3);flex:none">'+x.c+'</span></div>';
+ if(wdOpen){
+  h+='<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px">'+WCUR.map(function(cc,i){
+   return '<button class="bt-opt'+(i===wdCur?" sel":"")+'" onclick="wdSetCur('+i+')">'
+    +'<span style="flex:1;font-size:14px;font-weight:600;text-align:left">'+cc.c+' \u00b7 '+t("tu_cn_"+cc.c.toLowerCase())+'</span>'
+    +'<span class="pq-m-sub" style="flex:none">'+t("wd_avail")+' '+cc.s+wlFmt(WAL_USD*cc.r)+'</span></button>';
+  }).join("")+'</div>';
+ }
+ h+='</div>'
+  +'<div id="wdNoteBox" style="margin:8px 17px 0;text-align:left">'+wdNoteHtml()+'</div>'
+  +'<div class="pq-opts" style="margin-top:8px"><div class="pq-m-lb">'+t("wd_method")+'</div>'
+  +WD_METHODS.map(function(m,i){
+   return '<button class="pq-mrow'+(wdMethod===i?" sel":"")+'" onclick="wdMethod='+i+';renderWithdraw()">'
+    +'<span class="pq-coin" style="background:'+m.bg+'">'+m.ic+'</span>'
+    +'<span style="flex:1;min-width:0;text-align:left"><span class="pq-m-nm">'+t(m.k)+'</span><span class="pq-m-sub">'+t(m.sub)+'</span></span>'
+    +wdTick()+'</button>';
+  }).join("")
+  +'<div class="pq-m-sub" style="padding:8px 6px 0">'+t("wd_more_soon")+'</div></div>'
+  +'<div class="pq-opts" style="margin-top:12px"><div class="pq-m-lb">'+t("wd_bank")+'</div>'
+  +WD_BANKS.map(function(b,i){
+   return '<button class="pq-mrow'+(wdBank===i?" sel":"")+'" onclick="wdPickBank('+i+')">'
+    +'<span class="pq-coin" style="background:'+b.bg+'">'+b.ic+'</span>'
+    +'<span style="flex:1;min-width:0;text-align:left"><span class="pq-m-nm">'+b.n+'</span><span class="pq-m-sub">'+wdMask(b.iban)+' \u00b7 SWIFT '+b.swift+'</span></span>'
+    +wdTick()+'</button>';
+  }).join("")
+  +'<button class="wd-add" onclick="openWdNB()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>'+t("wd_add")+'</span></button>'
+  +'<div class="pq-m-sub" style="padding:10px 6px 0">'+t("wd_bank_note")+'</div></div>'
+  +'<div style="margin:14px 17px 0;text-align:left"><div class="pq-m-sub" style="line-height:1.6">'+t("wd_note")+'</div></div>'
+  +'<button class="btn btn-primary" id="wdSubmitBtn" style="width:100%;margin:16px 0 12px" onclick="wdSubmit()"><span class="spinner"></span><span id="wdSubmitLbl">'+t("wd_submit")+'</span></button>';
+ el.innerHTML=h;el.scrollTop=0;
+}
+function wdSubmit(){
+ var c=wdCalc();
+ if(!(c.a>0)){toast(t("wd_need_amt"));return}
+ if(c.usd<WD_MIN_USD){toast(t("wd_amt_min"));return}
+ if(c.totalUsd>WAL_USD){toast(t("wd_amt_over"));return}
+ if(wdTimer)return;
+ wdSnap={a:c.a,r:c.r,usd:c.usd,feeLocal:c.feeLocal,totalUsd:c.totalUsd,cur:wdCur,bank:wdBank};
+ var btn=document.getElementById("wdSubmitBtn"),lb=document.getElementById("wdSubmitLbl");
+ if(btn)btn.classList.add("loading");
+ if(lb)lb.textContent=t("wd_processing");
+ wdTimer=setTimeout(function(){
+  wdTimer=0;
+  WAL_USD=+(WAL_USD-wdSnap.totalUsd).toFixed(2);
+  WTXS.unshift({ic:"\u2193",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",n:{en:"Withdraw \u00b7 "+WD_BANKS[wdSnap.bank].n,zh:"\u63d0\u73b0 \u00b7 "+WD_BANKS[wdSnap.bank].n},tm:{en:"Just now",zh:"\u521a\u521a"},v:-wdSnap.usd});
+  wdSent=true;wdAmt="";
+  renderWallet();renderWithdraw();
+ },1600);
+}
+function wdDone(){wdSent=false;wdAmt="";wdSnap=null;closeWithdraw()}
+/* add withdrawal bank card */
+function openWdNB(){
+ renderWdNB();
+ openSheet("sheetWdbank");
+}
+function wdFld(lb,id,ph){
+ return '<div style="padding:0 0 12px"><label class="wd-fld-lb" for="'+id+'">'+t(lb)+'</label>'
+  +'<input class="input" id="'+id+'" type="text" autocomplete="off" style="width:100%" placeholder="'+t(ph)+'"></div>';
+}
+function renderWdNB(){
+ var h='<div style="font-weight:600;font-size:15px;padding:2px 8px 10px">'+t("wd_nb_t")+'</div>'
+  +'<div style="padding:0 8px">'
+  +wdFld("wd_holder","wdNBHolder","wd_holder_ph")
+  +wdFld("wd_bankname","wdNBName","wd_bankname_ph")
+  +wdFld("wd_iban","wdNBIban","wd_iban_ph")
+  +wdFld("wd_swift","wdNBSwift","wd_swift_ph")
+  +'</div>'
+  +'<div style="padding:0 8px 4px"><div class="pq-m-sub" style="line-height:1.6">'+t("wd_nb_note")+'</div></div>'
+  +'<button class="btn btn-primary" style="width:100%;margin:12px 0 6px" onclick="wdSaveBank()">'+t("wd_save")+'</button>'
+  +'<button class="sheet-item" style="justify-content:center;color:var(--ink-3);font-weight:600" onclick="closeSheets()">'+t("wd_cancel")+'</button>';
+ document.getElementById("wdNBBody").innerHTML=h;
+}
+function wdSaveBank(){
+ var holder=(document.getElementById("wdNBHolder").value||"").trim();
+ var name=(document.getElementById("wdNBName").value||"").trim();
+ var iban=(document.getElementById("wdNBIban").value||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
+ var swift=(document.getElementById("wdNBSwift").value||"").replace(/[^0-9A-Za-z]/g,"").toUpperCase();
+ if(!holder){toast(t("wd_nh"));return}
+ if(!name){toast(t("wd_nn"));return}
+ if(!/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(iban)){toast(t("wd_ni"));return}
+ if(!/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(swift)){toast(t("wd_ns"));return}
+ var pal=["linear-gradient(135deg,#185FA5,#0E4E8A)","linear-gradient(135deg,#0E7C66,#0a5c4d)","linear-gradient(135deg,#5262ED,#3a48b8)","linear-gradient(135deg,#C9A24B,#a08032)"];
+ WD_BANKS.push({n:name,ic:name.charAt(0).toUpperCase(),bg:pal[WD_BANKS.length%pal.length],iban:iban,swift:swift,holder:holder});
+ wdBank=WD_BANKS.length-1;
+ closeSheets();
+ toast(t("wd_added"));
+ renderWithdraw();
+}
 /* scan demo: simulate a scanned QR payload */
 function scanDemo(kind){
  var w=document.getElementById("scanWrap");
@@ -7717,7 +7938,7 @@ function renderWallet(){
   +'<div class="wl-hero-sub">'+(wlMasked?"· · ·":"≈ $"+wlFmt(WAL_USD)+" · 1 Coin = $1.00")+'</div>'
   +'<div class="wl-curs">'+WCUR.map(function(x,i){return '<button class="wl-cur'+(i===wlCur?" on":"")+'" onclick="wlCur='+i+';renderWallet()">'+x.c+'</button>'}).join("")+'</div>'
   +'<div class="wl-psrow"><div class="wl-hero-note">'+t("wl_rate_note")+'</div><button class="wl-pslink" onclick="openPayset()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.8l1.2 2.6 2.8-.6 1 2.7 2.7 1-.6 2.8 2.1 2-2.1 2 .6 2.8-2.7 1-1 2.7-2.8-.6-1.2 2.6-1.2-2.6-2.8.6-1-2.7-2.7-1 .6-2.8-2.1-2 2.1-2-.6-2.8 2.7-1 1-2.7 2.8.6L12 2.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>'+t("wl_ps_t")+'</span></button></div></div>';
- var acts=[[t("wl_topup"),topupIc,"openTopup()"],[t("wl_withdraw"),withdrawIc,""],[t("wl_p2p"),p2pIc,"openP2p()"],[t("wl_cards"),cardsIc,"openWcard()"]];
+ var acts=[[t("wl_topup"),topupIc,"openTopup()"],[t("wl_withdraw"),withdrawIc,"openWithdraw()"],[t("wl_p2p"),p2pIc,"openP2p()"],[t("wl_cards"),cardsIc,"openWcard()"]];
  h+='<div class="wl-acts">'+acts.map(function(a){var act=a[2]||("toast(t(\'it_toast\',\'"+a[0]+"\'))");return '<button class="wl-act" onclick="'+act+'"><span class="wl-act-ic">'+a[1]+'</span><span>'+a[0]+'</span></button>'}).join("")+'</div>';
  h+='<button class="wl-more" onclick="openWmore()"><div style="flex:1;min-width:0"><div class="wl-more-t">'+t("wl_more")+'</div><div class="wl-more-s">'+t("wl_more_sub")+'</div></div>'+chevIc+'</button>';
  var lim=WALCR.lim,used=Math.min(WALCR.used,WALCR.lim),pct=lim>0?Math.min(100,Math.round(used/lim*100)):100;
