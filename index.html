@@ -101,6 +101,10 @@
   .home-head{padding:14px 24px 4px;display:flex;align-items:center;justify-content:space-between}
   .home-head .hi{font-size:18px;font-weight:700}
   .home-head .sub{font-size:13px;color:var(--ink-2);margin-top:2px}
+  .np-bar{margin:8px 24px 0;background:linear-gradient(135deg,#0E7C66,#0a5c4d);border:none;border-radius:10px;color:#fff;padding:5px 12px;display:flex;align-items:center;gap:9px;cursor:pointer;font-family:inherit;text-align:left}
+  .np-bar:active{opacity:.9}
+  .feed-avwrap{position:relative;flex:none}
+  .av-live{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.4px;color:#fff;background:#E24B4A;border:1.5px solid var(--card);border-radius:6px;padding:0 3px;line-height:10px;white-space:nowrap;pointer-events:none}
   .avatar-sm{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
   /* feeds sub-tabs + filter */
   .feed-tabs-row{flex:none;display:flex;align-items:center;gap:8px;padding:6px 24px 0;border-bottom:1px solid var(--line)}
@@ -463,6 +467,14 @@
   .plc-chiprow{display:flex;margin-top:10px;padding:0 4px}
   .plc-chiprow .f-chip{cursor:default}
   .plc-sec{margin:14px 4px 0;padding-top:12px;border-top:1px solid var(--line)}
+  .plc-ptgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:2px}
+  .plc-pt{background:rgba(14,124,102,.07);border-radius:9px;padding:7px 2px 6px;text-align:center}
+  .plc-pt .n{font-size:10px;font-weight:700;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plc-pt .tm{font-size:11.5px;font-weight:800;color:var(--ink);margin-top:1px}
+  .plc-pt.done{opacity:.45}
+  .plc-pt.next{background:rgba(14,124,102,.12)}
+  .plc-pt.next .n{color:#0E7C66}
+  .plc-pt.next .tm{color:#0E7C66}
   .plc-sec-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
   .plc-kv{display:flex;gap:12px;padding:5px 0;font-size:13px;line-height:1.45}
   .plc-kv b{flex:none;width:120px;font-weight:500;color:var(--ink-3)}
@@ -1163,6 +1175,14 @@
     </div>
     <!-- Home (Root) -->
     <section class="page" id="pg-home">
+      <button class="np-bar" id="npBar" onclick="chTool('prayer')">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M4.5 21v-6a7.5 7.5 0 0115 0v6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 7.5V5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.6c.7.8 1 1.4 1 2a1 1 0 11-2 0c0-.6.3-1.2 1-2z" fill="currentColor"/><path d="M2.5 21h19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9.5px;opacity:.85" data-i18n="it_next">Next prayer</div>
+          <div style="font-size:12.5px;font-weight:800;margin-top:0" id="npTime">Asr 15:42 · 1h 23m</div>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="flex:none;opacity:.8"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <div class="home-head" id="homeHead">
         <div><div class="hi" id="homeHi">Assalamu alaikum</div><div class="sub" data-i18n="h_sub">Explore today's community highlights</div></div>
         <div style="display:flex;align-items:center;gap:2px">
@@ -2652,7 +2672,7 @@
       <button class="it-banner" onclick="chTool('prayer')">
         <div style="text-align:left">
           <div style="font-size:11px;opacity:.85" data-i18n="it_next">Next prayer</div>
-          <div style="font-size:17px;font-weight:800;margin-top:2px">Asr 15:42 · 1h 23m</div>
+          <div style="font-size:17px;font-weight:800;margin-top:2px" id="qpPrayerTime">Asr 15:42 · 1h 23m</div>
         </div>
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M20 13.5A8 8 0 1110.5 4 6.5 6.5 0 0020 13.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
@@ -2932,7 +2952,7 @@ en:{
  wl_ps_default:"Default for Wahda Pay", wl_ps_tap_set:"Tap to set as default", wl_ps_m_note:"Your default method is pre-selected when paying via Wahda Pay.",
  wl_ps_close_warn:"Closing your wallet will clear your Wahda Coin balance and Wahda Credit. This action cannot be undone.", wl_ps_close_go:"Confirm Close", wl_ps_close_ok:"Close request submitted (demo)",
  wl_ps_coin_s:"Coin Balance", wl_ps_credit_s:"Credit",
- aev_paid:"Paid Event", aev_paid_sw:"Charge for attendance", aev_paid_sub:"Attendees pay via Wahda Pay", aev_price_hint:"Ticket price",
+ aev_paid:"Paid Event", aev_paid_sw:"Charge for attendance", aev_paid_sub:"Attendees pay via Wahda Pay", aev_price_hint:"Ticket price", ev_qr_t:"Entry Pass", ev_qr_paid:"Paid · {0} Wahda Coin", ev_qr_sub:"Show this QR code at the door — the organizer will scan it to check you in.",
  ev_pay_note:"Payment is processed via Wahda Pay", evpay_t:"Wahda Pay", evpay_amt:"Amount Due", evpay_to:"Pay to", evpay_confirm:"Confirm & Pay", evpay_ok_t:"Payment Successful", evpay_back:"Returning to event in {0}s", evpay_pin_t:"Wahda Pay \u00b7 Confirm Payment", evpay_pin_sub:"Enter your 6-digit payment PIN to complete this payment",
  bt_title:"BUS", bt_tag:"LOCAL SERVICE PARTNER", bt_sub:"City-to-city bus tickets \u00b7 Pay with Wahda Coin", bt_trip:"Select Trip", bt_from:"From", bt_to:"To", bt_ca:"City A", bt_cb:"City B", bt_cc:"City C", bt_cd:"City D", bt_dep_v:"Today \u00b7 18:30", bt_fare:"Fare", bt_order_t:"Booking Confirmed", bt_tno:"Ticket No.", bt_seat:"Seat", bt_bus:"Bus", bt_show:"Show this e-ticket to the driver when boarding", bt_again:"Book Another", bt_back:"Returning to ticket in {0}s", bt_slot:"Departure", bt_today:"Today",
  pnb_t:"Events & Community Nearby", pnb_sub:"Events and communities around this place", pnb_hint:"Sorted by distance from {0}", pnb_ev:"Events", pnb_cm:"Community",
@@ -2949,7 +2969,7 @@ en:{
  vb_toast_add:"Thanks! Your Halal verification was counted", vb_toast_rm:"Verification removed",
  vb_pin_toast:"{0} · Verified by {1} members",
  plc_dir:"Directions", plc_dir_toast:"Directions — next iteration.",
- d_addr:"Address", d_country:"Country", d_city:"City", d_district:"District / Area", d_street:"Street Name", d_building:"Building No. / Name", d_unit:"Unit / Floor",
+ d_addr:"Address", d_country:"Country", d_city:"City", d_district:"District / Area", d_street:"Street Name", d_building:"Building No. / Name", d_unit:"Unit / Floor", plc_pt:"Today's Prayer Times",
  d_details:"More details", d_hours:"Open Hours", d_phone:"Contact Number", d_web:"Website", d_photos:"Place photos", d_cover:"Cover photo",
  pl_new:"New", pl_mine:"Published by you", pl_added:"Place published — pending review",
  pl_detail:"Place detail screen — next iteration.", pl_search:"Search places — next iteration.",
@@ -2986,7 +3006,7 @@ en:{
  acc_add:"Add account", acc_add_toast:"Add account — next iteration.",
  ct_title:"Contacts",
  fp_title:"Profile", fp_member:"Personal Account", fp_fl:"followers", fp_fg:"following", fp_more:"more", flist_title:"Followers & Followings", flist_fg:"Followings",
- fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reviews:"Reviews", fp_more_toast:"More actions — next iteration.",
+ fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reviews:"Reviews", fp_more_toast:"More actions — next iteration.", fp_up_hd:"Upcoming Activities", fp_up_remind:"Remind me", fp_up_reminded:"✓ Reminded", fp_up_toast:"Reminder saved to your calendar", fp_up_min:"min", fp_up_livesoon:"Live soon",
  fp_p1:"Jumu'ah carpool list for this Friday is up — reply to join!", fp_p1t:"2 d ago",
  fp_p2:"Alhamdulillah, our iftar drive served 120 families this week.", fp_p2t:"5 d ago",
  fp_rv1t:"Al-Hakim Mosque", fp_rv1c:"Mosque", fp_rv1d:"9 Months ago",
@@ -3166,7 +3186,7 @@ zh:{
  wl_ps_default:"Wahda Pay 默认支付方式", wl_ps_tap_set:"点击设为默认", wl_ps_m_note:"通过 Wahda Pay 支付时将默认选中此方式。",
  wl_ps_close_warn:"注销后钱包中的 Wahda Coin 余额与 Wahda 信用将被清空，且无法恢复。", wl_ps_close_go:"确认注销", wl_ps_close_ok:"注销申请已提交（演示）",
  wl_ps_coin_s:"Coin 余额", wl_ps_credit_s:"信用",
- aev_paid:"是否付费", aev_paid_sw:"向参与者收取费用", aev_paid_sub:"参与者通过 Wahda Pay 支付", aev_price_hint:"票价",
+ aev_paid:"是否付费", aev_paid_sw:"向参与者收取费用", aev_paid_sub:"参与者通过 Wahda Pay 支付", aev_price_hint:"票价", ev_qr_t:"入场凭证", ev_qr_paid:"已支付 · {0} Wahda Coin", ev_qr_sub:"入场时向主办方出示此二维码，扫码核销。",
  ev_pay_note:"通过 Wahda Pay 网关完成支付", evpay_t:"Wahda Pay", evpay_amt:"应付金额", evpay_to:"收款方", evpay_confirm:"确认支付", evpay_ok_t:"支付成功", evpay_back:"{0} 秒后返回活动页", evpay_pin_t:"Wahda Pay · 确认支付", evpay_pin_sub:"输入 6 位支付密码完成本次支付",
  bt_title:"BUS", bt_tag:"本地服务商家", bt_sub:"城际巴士车票 · 支持 Wahda Coin 支付", bt_trip:"选择行程", bt_from:"出发城市", bt_to:"到达城市", bt_ca:"A 城", bt_cb:"B 城", bt_cc:"C 城", bt_cd:"D 城", bt_dep_v:"今天 18:30", bt_fare:"票价", bt_order_t:"订票成功", bt_tno:"票号", bt_seat:"座位", bt_bus:"班次", bt_show:"上车时请向司机出示此电子车票", bt_again:"再次购票", bt_back:"{0} 秒后返回车票", bt_slot:"出发班次", bt_today:"今天",
  pnb_t:"周边活动与社群", pnb_sub:"该地点附近的活动与社群", pnb_hint:"按与{0}的距离由近及远排序", pnb_ev:"活动", pnb_cm:"社群",
@@ -3183,7 +3203,7 @@ zh:{
  vb_toast_add:"感谢认证！你的 Halal 认证已计入", vb_toast_rm:"已取消认证",
  vb_pin_toast:"{0} · {1} 位成员认证",
  plc_dir:"路线导航", plc_dir_toast:"路线导航——下一轮迭代补充。",
- d_addr:"地址", d_country:"国家", d_city:"城市", d_district:"区域", d_street:"街道名称", d_building:"楼栋号 / 名称", d_unit:"单元 / 楼层",
+ d_addr:"地址", d_country:"国家", d_city:"城市", d_district:"区域", d_street:"街道名称", d_building:"楼栋号 / 名称", d_unit:"单元 / 楼层", plc_pt:"今日礼拜时间",
  d_details:"更多信息", d_hours:"营业时间", d_phone:"联系电话", d_web:"网站", d_photos:"地点照片", d_cover:"封面照片",
  pl_new:"新", pl_mine:"你发布的地点", pl_added:"地点已发布，待审核",
  pl_detail:"地点详情页——下一轮迭代补充。", pl_search:"搜索地点——下一轮迭代补充。",
@@ -3220,7 +3240,7 @@ zh:{
  acc_add:"添加账号", acc_add_toast:"添加账号——下一轮迭代补充。",
  ct_title:"联系人",
  fp_title:"个人主页", fp_member:"个人账号", fp_fl:"粉丝", fp_fg:"关注中", fp_more:"展开", flist_title:"粉丝与关注", flist_fg:"关注中",
- fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reviews:"评价", fp_more_toast:"更多操作——下一轮迭代补充。",
+ fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reviews:"评价", fp_more_toast:"更多操作——下一轮迭代补充。", fp_up_hd:"直播预告", fp_up_remind:"提醒我", fp_up_reminded:"✓ 已设提醒", fp_up_toast:"已写入日历提醒", fp_up_min:"分钟", fp_up_livesoon:"即将开播",
  fp_p1:"周五主麻拼车表更新了——回复即可参加！", fp_p1t:"2 天前",
  fp_p2:"感谢真主，我们这周的开饭公益送餐服务了 120 户家庭。", fp_p2t:"5 天前",
  fp_rv1t:"Al-Hakim 清真寺", fp_rv1c:"清真寺", fp_rv1d:"9 个月前",
@@ -3359,6 +3379,7 @@ function applyLang(){
  if(document.getElementById("pg-phc").classList.contains("active"))renderPhc(phcCur);
  if(document.getElementById("sheetGsqF").classList.contains("show"))renderGsqFilter();
  if(document.getElementById("itPanel").classList.contains("open"))renderQp(document.getElementById("qpSearch").value);
+ npTick();
 }
 function toggleLang(){lang=lang==="en"?"zh":"en";applyLang()}
 
@@ -4226,6 +4247,64 @@ function fpSendReq(){
  renderFProfile();
  toast(t("gp_req_sent"));
 }
+/* ---------- profile: upcoming live activities ---------- */
+var LIVE_SCHEDULES={
+ "Layla M.":{emoji:"📖",t:{en:"Weekly Quran recitation circle · night session",zh:"每周诵经圈 · 夜场直播"},inH:26,dur:60},
+ "Amira K.":{emoji:"📖",t:{en:"Madrasa open class: tajwid for kids",zh:"宗教学校公开课：儿童泰智韦德"},inH:50,dur:45},
+ "Yusuf I.":{emoji:"🍛",t:{en:"Halal food tour · Riyadh old town",zh:"清真美食探店 · 利雅得老城"},inH:74,dur:90},
+ "Hafsa W.":{emoji:"✍️",t:{en:"Henna art live · Eid designs",zh:"海娜手绘直播 · 开斋节款"},inH:98,dur:60},
+ "Aisha K.":{emoji:"📖",t:{en:"Tafsir live Q&A · Surah Al-Kahf",zh:"经注直播问答 · 山洞章"},inH:122,dur:60}
+};
+var fpReminded={};
+function fpFmtDT(d){
+ var wd=lang==="zh"?"周"+"日一二三四五六".charAt(d.getDay()):["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+ var hh=("0"+d.getHours()).slice(-2),mi=("0"+d.getMinutes()).slice(-2);
+ var md=lang==="zh"?(d.getMonth()+1)+"月"+d.getDate()+"日":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]+" "+d.getDate();
+ return wd+", "+md+" · "+hh+":"+mi;
+}
+function fpLiveEntry(f){
+ var r=liveRoomOf(f.n);if(!r)return "";
+ return '<div class="cm-sec" style="margin:16px 0 0">'+t("lv_title")+'</div>'+pdLiveCard(r,"");
+}
+function fpUpcoming(f){
+ var s=LIVE_SCHEDULES[f.n];if(!s)return "";
+ var start=new Date(Date.now()+s.inH*3600e3);
+ return '<div class="cm-sec" style="margin:16px 0 8px">'+t("fp_up_hd")+'</div>'
+  +'<div class="fp-item" style="display:flex;gap:11px;align-items:flex-start">'
+  +'<div style="width:46px;height:46px;border-radius:12px;flex:none;background:'+lvGrad(f.n)+';display:flex;align-items:center;justify-content:center;font-size:22px;position:relative">'+s.emoji
+  +'<span style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:700;letter-spacing:.5px;background:var(--gold);color:#fff;border-radius:6px;padding:1px 5px;white-space:nowrap">LIVE</span></div>'
+  +'<div style="flex:1;min-width:0"><div class="fp-item-title">'+txt(s.t)+'</div>'
+  +'<div class="fp-item-meta" style="margin-top:3px"><span>📅 '+fpFmtDT(start)+'</span><span>'+s.dur+' '+t("fp_up_min")+'</span></div>'
+  +'<div class="fp-item-cat" style="margin-top:4px">'+t("fp_up_livesoon")+'</div></div>'
+  +(fpReminded[f.n]
+    ?'<button class="follow-btn" style="cursor:default;opacity:.55">'+t("fp_up_reminded")+'</button>'
+    :'<button class="follow-btn" id="fpRemindBtn" onclick="fpRemind(event,\''+f.n+'\')">'+t("fp_up_remind")+'</button>')
+  +'</div>';
+}
+function fpRemind(ev,host){
+ if(ev)ev.stopPropagation();
+ var s=LIVE_SCHEDULES[host];if(!s)return;
+ var start=new Date(Date.now()+s.inH*3600e3),end=new Date(start.getTime()+s.dur*60e3);
+ function pad(n){return("0"+n).slice(-2)}
+ function fpIcsDT(d){return ""+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(d.getHours())+pad(d.getMinutes())+"00"}
+ var ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wahda//Live Schedule//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
+  "UID:wahda-live-"+host.replace(/\W/g,"").toLowerCase()+"-"+fpIcsDT(start)+"@wahda.app",
+  "DTSTAMP:"+fpIcsDT(new Date()),
+  "DTSTART:"+fpIcsDT(start),
+  "DTEND:"+fpIcsDT(end),
+  "SUMMARY:"+txt(s.t)+" · Wahda Live",
+  "DESCRIPTION:"+host+" is going live on Wahda. Open the app to join the room.",
+  "BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:Wahda live starts in 15 minutes","END:VALARM",
+  "END:VEVENT","END:VCALENDAR"].join("\r\n");
+ var blob=new Blob([ics],{type:"text/calendar"});
+ var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+ a.download="wahda-live-"+host.replace(/\W/g,"").toLowerCase()+".ics";
+ document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},400);
+ fpReminded[host]=true;
+ var btn=document.getElementById("fpRemindBtn");
+ if(btn){btn.style.opacity=".55";btn.style.cursor="default";btn.textContent=t("fp_up_reminded")}
+ toast(t("fp_up_toast"));
+}
 function renderFProfile(){
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return;
  var person='<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="10" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M4.5 19c1-3 3-4.4 5.5-4.4s4.5 1.4 5.5 4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -4244,7 +4323,7 @@ function renderFProfile(){
   +'<div class="fp-stat"><b>'+fmtN(f.f*9)+'</b> <span>'+t("fp_fg")+'</span></div></div></div></div>'
   +'<div class="fp-bio">'+txt(f.bio)+' <span class="fp-more">'+t("fp_more")+'</span></div>'
   +'<div class="fp-loc">'+pin+txt(f.loc)+'</div>'
-  +fpActions()+'<div class="fp-tabs"><button class="fp-tab'+(fpTab==="posts"?" on":"")+'" onclick="fpSetTab(\'posts\')">'+t("fp_tab_posts")+'</button>'
+  +fpActions()+fpLiveEntry(f)+fpUpcoming(f)+'<div class="fp-tabs"><button class="fp-tab'+(fpTab==="posts"?" on":"")+'" onclick="fpSetTab(\'posts\')">'+t("fp_tab_posts")+'</button>'
   +'<button class="fp-tab'+(fpTab==="reviews"?" on":"")+'" onclick="fpSetTab(\'reviews\')">'+t("fp_tab_reviews")+'</button>'
   +'</div>'
   +content+fpSections();
@@ -4553,6 +4632,15 @@ function evStarRow(cls,on){ /* on = number of filled stars, cls = extra class pe
  for(var k=1;k<=5;k++)h+='<span class="ev-star'+(k<=on?" on":"")+'" '+(cls?'data-k="'+k+'" onclick="'+cls+'('+k+')"':"")+'>★</span>';
  return h+'</div>';
 }
+function evQrHtml(e){
+ /* deterministic seed per event+user; QR filled by qrFill after innerHTML */
+ var seed=txt(e.n)+"|"+txt(ACCOUNTS[curAcct].n);
+ var no="WD-EV-"+("0000"+(fpHash(seed)%10000)).slice(-4)+"-"+("0000"+(fpHash(txt(e.n))%10000)).slice(-4);
+ return '<div class="ev-sec" style="margin-bottom:20px"><div class="ev-sec-h"><span class="ev-sec-t">'+t("ev_qr_t")+'</span><span class="ev-sec-n">'+t("ev_qr_paid",e.price)+'</span></div>'
+  +'<div class="qr-code" style="margin:4px auto 0"><div class="qr-in" id="evQr"></div></div>'
+  +'<div style="text-align:center;margin-top:12px"><div style="font-size:14px;font-weight:800;letter-spacing:.08em">'+no+'</div>'
+  +'<div style="font-size:12.5px;color:var(--ink-3);margin-top:6px;line-height:1.55;max-width:240px;margin-left:auto;margin-right:auto">'+t("ev_qr_sub")+'</div></div></div>';
+}
 function renderEvent(){
  var e=EVENTS[evOpenIdx];if(!e)return;
  var h='<div class="ev-hero" style="background:'+e.cover+'"><div class="ev-hero-t">'+e.emoji+'<div style="margin-top:6px">'+txt(e.n)+'</div></div></div>';
@@ -4615,8 +4703,10 @@ function renderEvent(){
   }
  }else if(e.role==="booked"){
   h+='<div class="btn btn-ghost" style="margin:6px 0 20px;opacity:.7;cursor:default;justify-content:center"><span>'+t("ev_joined")+'</span></div>';
+  if(e.price)h+=evQrHtml(e); /* paid attendees get check-in QR at page bottom */
  }
  var sc=document.getElementById("evScroll");sc.innerHTML=h;sc.scrollTop=0;
+ if(e.role==="booked"&&e.price){var qel=document.getElementById("evQr");if(qel)qrFill(qel,txt(e.n)+"|"+txt(ACCOUNTS[curAcct].n))}
 }
 function evJoin(){
  var e=EVENTS[evOpenIdx];if(!e||e.role!=="open")return;
@@ -7050,6 +7140,15 @@ function openPost(i){
  document.getElementById("pg-post").classList.add("active");
 }
 function closePost(){document.getElementById("pg-post").classList.remove("active");postOpenIdx=-1}
+function liveRoomOf(name){return typeof LIVE_ROOMS!=="undefined"?LIVE_ROOMS.filter(function(r){return r.host===name})[0]:null}
+function pdLiveCard(r,extra){
+ return '<div class="feed-card" style="'+(extra||"margin-top:12px")+';padding:12px;cursor:pointer" onclick="openLiveRoom(\''+r.k+'\')">'
+  +'<div style="display:flex;gap:12px;align-items:center">'
+  +'<div class="lv-cover" style="width:92px;height:76px;border-radius:12px;flex:none;background:'+lvGrad(r.host)+'"><span class="lv-badge"><i></i>LIVE</span><span class="lv-emoji" style="font-size:28px">'+r.emoji+'</span></div>'
+  +'<div style="flex:1;min-width:0"><div class="feed-name">'+r.host+'<span class="lv-badge" style="position:static;margin-left:6px"><i></i>LIVE</span></div>'
+  +'<div class="feed-text" style="font-weight:600;margin-top:3px">'+txt(r.t)+'</div>'
+  +'<div class="feed-time" style="margin-top:4px">👁 '+t("lv_viewers",lvFmtV(r.v))+' · '+t("lv_watch")+' →</div></div></div></div>';
+}
 function renderPostDetail(f){
  var i=postOpenIdx;
  var chip=f.cm?'<div class="feed-chip" style="margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
@@ -7064,6 +7163,8 @@ function renderPostDetail(f){
  if(f.rp>0){
   html+='<div class="pd-idrow"><div class="pd-mini" style="background:#5E7A8B">'+f.rby.charAt(0)+'</div><span>'+t("pd_reposted")+' <b>'+f.rby+'</b></span></div>';
  }
+ var lr=liveRoomOf(f.n);
+ if(lr)html+=pdLiveCard(lr);
  html+='</div>';
  /* comments */
  var list="";
@@ -7178,6 +7279,9 @@ function lvFollowingStrip(){
  return '<div class="lv-fhd">'+t("lv_flive")+'</div><div class="lv-frow" style="padding-bottom:4px">'
   +fr.map(function(r){return lvCard(r,true)}).join("")+'</div>';
 }
+function feedAv(f){
+ return '<div class="feed-avwrap"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div>'+(liveRoomOf(f.n)?'<i class="av-live">LIVE</i>':"")+'</div>';
+}
 function renderHome(){
  var body=document.getElementById("homeBody");
  var list=FEEDS.filter(feedMatches);
@@ -7187,7 +7291,7 @@ function renderHome(){
  var cards=list.map(function(f,i){
   var idx=FEEDS.indexOf(f);
   var chip=f.cm?'<div class="feed-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
-  return '<div class="feed-card" onclick="openPost('+idx+')"><div class="feed-user"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type)+chip+faBar(f,idx)+'</div>';
+  return '<div class="feed-card" onclick="openPost('+idx+')"><div class="feed-user">'+feedAv(f)+'<div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type)+chip+faBar(f,idx)+'</div>';
  });
  if(feedTab==="foryou"){cards.splice(1,0,feedLiveCard());cards.splice(4,0,feedAdCard())}
  body.innerHTML=(feedTab==="following"?lvFollowingStrip():"")+cards.join("")+'<div class="feed-end">'+t("feed_end")+'</div>';
@@ -7468,6 +7572,24 @@ function closeITPanel(){
  document.getElementById("itBackdrop").classList.remove("show");
 }
 function chTool(kind){toast(t("it_toast",t("it_"+kind)))}
+/* ---------- next prayer banner ---------- */
+var PRAYERS=[["Fajr","晨礼","05:12"],["Dhuhr","晌礼","12:31"],["Asr","晡礼","15:42"],["Maghrib","昏礼","18:24"],["Isha","宵礼","19:36"]];
+function npNext(){
+ var now=new Date(),nm=now.getHours()*60+now.getMinutes();
+ function min(t){return (+t.slice(0,2))*60+(+t.slice(3))}
+ for(var i=0;i<PRAYERS.length;i++){var dt=min(PRAYERS[i][2])-nm;if(dt>0)return {p:PRAYERS[i],dt:dt}}
+ return {p:PRAYERS[0],dt:24*60-nm+min(PRAYERS[0][2])};
+}
+function npTick(){
+ var nx=npNext(),h=Math.floor(nx.dt/60),m=nx.dt%60;
+ var cnt;
+ if(lang==="zh"){cnt=(h?h+" 小时":"")+(m?(h?" ":"")+m+" 分钟":(h?"":"0 分钟"))}
+ else{cnt=(h?h+"h":"")+(m?(h?" ":"")+m+"m":"")}
+ var s=(lang==="zh"?nx.p[1]:nx.p[0])+" "+nx.p[2]+" · "+cnt;
+ var el=document.getElementById("npTime");if(el)el.textContent=s;
+ var qp=document.getElementById("qpPrayerTime");if(qp)qp.textContent=s;
+}
+setInterval(npTick,30e3);
 /* ---------- group square ---------- */
 var GSQ_GROUPS=[
  {k:"quran",ini:"Q",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",n:{en:"Quran Study Circle",zh:"古兰学习圈"},cat:"gcat_1",mem:64,req:true,act:150,joined:true},
@@ -8180,6 +8302,23 @@ function itPanelOpen(){return document.getElementById("itPanel").classList.conta
  window.addEventListener("pointerup",up);
 })();
 function clearPinHi(){document.querySelectorAll(".pin.hi").forEach(function(d){d.classList.remove("hi")})}
+function plcPrayerTimes(p){
+ /* per-mosque iqaamah offset: each masjid's schedule differs by a few minutes */
+ var off=fpHash(p.n)%7;
+ var now=new Date(),cur=now.getHours()*60+now.getMinutes();
+ var nextIdx=-1;
+ var times=PRAYERS.map(function(pr,i){
+  var t=pr[2].split(":"),m=(+t[0])*60+(+t[1])+off;
+  if(m>=cur&&nextIdx<0)nextIdx=i;
+  return m;
+ });
+ var cells=PRAYERS.map(function(pr,i){
+  var hh=Math.floor(times[i]/60),mm=times[i]%60;
+  var cls=nextIdx<0?" done":(i<nextIdx?" done":(i===nextIdx?" next":""));
+  return '<div class="plc-pt'+cls+'"><div class="n">'+(lang==="zh"?pr[1]:pr[0])+'</div><div class="tm">'+("0"+hh).slice(-2)+":"+("0"+mm).slice(-2)+'</div></div>';
+ }).join("");
+ return '<div class="plc-sec"><div class="plc-sec-label">'+t("plc_pt")+'</div><div class="plc-ptgrid">'+cells+'</div></div>';
+}
 function openPlaceSheet(p){
  clearPinHi();
  var pinEl=document.querySelector('.pin[data-pi="'+PLACES.indexOf(p)+'"]');
@@ -8198,6 +8337,7 @@ function openPlaceSheet(p){
   });
  }
  var addrSec=addrRows?'<div class="plc-sec"><div class="plc-sec-label">'+t("d_addr")+'</div>'+addrRows+'</div>':"";
+ var ptSec=(p.cat==="mosque")?plcPrayerTimes(p):"";
  var photos="";
  if(p.photos>0){
   var grads=["linear-gradient(135deg,#CBE2CF,#9FC7B2)","linear-gradient(135deg,#E8DFC8,#CFC3A0)","linear-gradient(135deg,#D7E3EC,#A9C0D2)"];
@@ -8214,7 +8354,7 @@ function openPlaceSheet(p){
   cover
   +'<div class="plc-head" style="margin-top:'+(p.cover?"12px":"4px")+'"><div class="plc-ic" style="background:'+CATS[p.cat].c+'">'+catIcon(p.cat)+'</div>'
   +'<div class="plc-titlewrap"><div class="place-name">'+p.n+tag+'</div><div class="place-sub" style="margin-top:3px">'+t("cat_"+p.cat)+' · '+p.dist+' km</div></div></div>'
-  +desc+catChip+addrSec+photos+detSec
+  +desc+catChip+ptSec+addrSec+photos+detSec
   +'<div class="plc-ver"><div class="plc-ver-num">'+shield+(p.ver||0)+'</div><div class="plc-ver-label">'+t("vb_count",p.ver||0)+'</div></div>'
   +'<div class="plc-actions"><button class="btn btn-secondary" onclick="toast(t(\'plc_dir_toast\'))" data-i18n="plc_dir">Directions</button>'
   +'<button class="btn btn-primary" onclick="verifyFromSheet('+PLACES.indexOf(p)+')">'+(p.verifiedByMe?t("vb_done"):t("vb_verify"))+'</button></div>'
@@ -8316,6 +8456,7 @@ function switchTab(name){
  closePlusMenu();
  var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isFeed=!isMsg&&!isPl&&!isHub&&!isNf;
  document.getElementById("homeHead").style.display=isFeed?"flex":"none";
+ document.getElementById("npBar").style.display=isFeed?"flex":"none";
  document.getElementById("feedTabsRow").style.display=isFeed?"flex":"none";
  document.getElementById("itHintFeeds").style.display=isFeed?"flex":"none";
  document.getElementById("itHintMsg").style.display=isMsg?"flex":"none";
@@ -8574,6 +8715,7 @@ function toast(msg){
 }
 
 renderCC();
+npTick();
 </script>
 </body>
 </html>
