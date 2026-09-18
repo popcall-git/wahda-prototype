@@ -1019,6 +1019,11 @@
           <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#000" d="M16.7 12.9c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.9-1.6 0-3.1 1-4 2.4-1.7 2.9-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.4 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.4-1-2.4-3.7zM14.4 5.6c.7-.8 1.1-1.9 1-3.1-1 .1-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
           <span data-i18n="si_apple">Sign in with Apple</span>
         </button>
+        <button class="social-btn" id="guestBtn" onclick="guestEnter()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="#0E7C66" stroke-width="1.8"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" stroke="#0E7C66" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span data-i18n="m_guest">Continue as Guest</span>
+        </button>
+        <p class="fineprint" id="gmNote" style="display:none;text-align:center;color:var(--brand);font-weight:600" data-i18n="gm_note">Completing sign-up will return you to where you left off.</p>
       </div>
       <div class="sticky-bottom">
         <button class="btn btn-primary" id="methodCta" disabled onclick="methodNext()"><span data-i18n="m_cta">Continue</span></button>
@@ -2408,7 +2413,7 @@
         <div class="sch-chips" id="lvChips" style="margin-top:14px"></div>
         <div class="lv-grid" id="lvGrid"></div>
       </div>
-      <button class="lv-golive" onclick="toast(t('st_next',t('lv_golive')))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M8.2 8.2a5.4 5.4 0 000 7.6M15.8 8.2a5.4 5.4 0 010 7.6M5.4 5.4a9.4 9.4 0 000 13.2M18.6 5.4a9.4 9.4 0 010 13.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n="lv_golive">Go Live</span></button>
+      <button class="lv-golive" onclick="goLiveTap()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M8.2 8.2a5.4 5.4 0 000 7.6M15.8 8.2a5.4 5.4 0 010 7.6M5.4 5.4a9.4 9.4 0 000 13.2M18.6 5.4a9.4 9.4 0 010 13.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n="lv_golive">Go Live</span></button>
     </section>
     <section class="page lv-room" id="pg-liveview" style="z-index:15">
       <div class="nav">
@@ -2862,6 +2867,9 @@ en:{
  w_login_toast:"Existing-user login uses the same fast flow — enter your number and verify.",
  w_legal:"By continuing you agree to our Terms of Service and Privacy Policy.",
  m_title:"Create your account", m_sub:"Choose how you'd like to verify. You can add the other one later in settings.",
+ m_guest:"Continue as Guest", gm_entered:"You're browsing as a guest. Sign up anytime to unlock all features.",
+ gm_gate:"Sign up to continue — we'll bring you right back.", gm_note:"Completing sign-up will return you to where you left off.",
+ gm_hub_t:"You're browsing as a guest", gm_hub_b:"Sign up to follow, comment and join events & communities.", gm_hub_go:"Sign up",
  m_phone:"Phone number", m_rec:"Fastest", m_phone_desc:"We'll text you a 6-digit code",
  m_email:"Email address", m_email_desc:"We'll email you a 6-digit code",
  m_cta:"Continue",
@@ -3096,6 +3104,9 @@ zh:{
  w_login_toast:"老用户登录走同样的快速流程——输入号码并验证即可。",
  w_legal:"继续即表示你同意我们的服务条款与隐私政策。",
  m_title:"创建你的账号", m_sub:"选择一种验证方式，另一种可以稍后在设置中添加。",
+ m_guest:"以游客身份进入", gm_entered:"游客模式浏览中——注册后可解锁全部功能。",
+ gm_gate:"注册后即可继续——完成注册将返回当前页面。", gm_note:"完成注册后将自动返回你刚才停留的页面。",
+ gm_hub_t:"你正在以游客身份浏览", gm_hub_b:"注册后可关注、评论并参加活动与社区。", gm_hub_go:"去注册",
  m_phone:"手机号", m_rec:"最快", m_phone_desc:"我们将发送 6 位短信验证码",
  m_email:"邮箱地址", m_email_desc:"我们将发送 6 位邮箱验证码",
  m_cta:"继续",
@@ -3593,16 +3604,61 @@ function back(){
  pageEl(target).classList.add("active","back-anim");
 }
 var homeEntered=false;
+/* ---------- guest mode ---------- */
+var isGuest=false,guestReturn=null,guestBackId="home",guestPending=false;
+function guestEnter(){
+ isGuest=true;guestReturn=null;guestBackId="home";guestPending=false;
+ feedTab="foryou";
+ var n=document.getElementById("gmNote");if(n)n.style.display="none";
+ enterApp();
+ setTimeout(function(){toast(t("gm_entered"))},650);
+}
+/* returns true = allowed; false = guest redirected to sign-up (registration page) */
+function guestGate(reopenFn){
+ if(!isGuest)return true;
+ guestReturn=reopenFn||null;
+ var act=document.querySelector(".page.active");
+ guestBackId=act?act.id:"home";
+ guestPending=true;
+ var n=document.getElementById("gmNote");if(n)n.style.display="block";
+ var gb=document.getElementById("guestBtn");if(gb)gb.style.display="none";
+ toast(t("gm_gate"));
+ stack=["method"];
+ document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});
+ pageEl("method").classList.add("active");
+ return false;
+}
+function guestReopen(){
+ if(guestReturn){var f=guestReturn;guestReturn=null;f();return}
+ var id=guestBackId;guestBackId="home";
+ if(id==="pg-post"&&postOpenIdx>-1)openPost(postOpenIdx);
+ else if(id==="pg-fprofile"){if(fpIdx>-1)openFProfile(fpIdx);else if(fpGuest)openProfileByName(fpGuest.n)}
+ else if(id==="pg-comm"&&typeof commIdx!=="undefined"&&commIdx>-1)openCommDetail(commIdx);
+ else if(id==="pg-event"&&typeof evOpenIdx!=="undefined"&&evOpenIdx>-1)openEvent(evOpenIdx);
+ else if(id==="pg-hub")switchTab("hub");
+ /* home & others: enterApp already lands on Feeds */
+}
+function guestGateHub(){guestGate(function(){switchTab("hub")})}
+function syncGuestUI(){
+ document.querySelectorAll('.ftab[data-ftab="following"],.ftab[data-ftab="community"]').forEach(function(b){b.style.display=isGuest?"none":""});
+ if(isGuest&&feedTab!=="foryou")feedTab="foryou";
+ var mb=document.getElementById("msgBadge");if(mb)mb.style.display=isGuest?"none":(msgUnreadTotal()>0?"flex":"none");
+}
 function enterApp(skipped){
  if(skipped)toast(t("v_note"));
+ var reopen=guestPending;
+ if(reopen){guestPending=false;isGuest=false}
  stack=["home"];
  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});
  pageEl("home").classList.add("active");
  if(!homeEntered){renderHome();homeEntered=true}
+ syncGuestUI();
+ if(reopen)renderHome();
  switchTab("feeds");
  newFeedsSeen=false; /* auto-landing is not a user tap: bell dot stays until the user taps Feeds */
  updateDots();
  showSplash();
+ if(reopen)setTimeout(guestReopen,750);
 }
 
 /* ---------- method ---------- */
@@ -3931,7 +3987,7 @@ function renderMsgs(){
 function msgUnreadTotal(){return MSGS.reduce(function(s,m){return s+m.unread},0)}
 function refreshMsgBadge(){
  var b=document.getElementById("msgBadge"),n=msgUnreadTotal();
- if(n>0){b.style.display="flex";b.textContent=n}else{b.style.display="none"}
+ if(!isGuest&&n>0){b.style.display="flex";b.textContent=n}else{b.style.display="none"}
 }
 function openChat(i){
  var m=MSGS[i];
@@ -4174,8 +4230,7 @@ function findFriendIdx(name){
  return -1;
 }
 function openProfileByName(name,bio,loc){
- var idx=findFriendIdx(name);
- if(idx>-1){openFProfile(idx);return}
+ if(!isGuest){var idx=findFriendIdx(name);if(idx>-1){openFProfile(idx);return}}
  raisePage("pg-fprofile");
  fpGuest={n:name,f:Math.max(name.replace(/[^A-Za-z]/g,"").length*7%160+14,14),
   bio:bio||{en:"Wahda community member",zh:"Wahda 社区成员"},loc:loc||{en:"Riyadh, Saudi Arabia",zh:"利雅得，沙特阿拉伯"}};
@@ -4186,6 +4241,7 @@ function openProfileByName(name,bio,loc){
 /* ---------- friend profile (My Hub visual language) ---------- */
 var fpIdx=-1,fpTab="posts";
 function openFProfile(i){
+ if(isGuest){var fr=FRIENDS[i];openProfileByName(fr.n,fr.bio,fr.loc);return}
  raisePage("pg-fprofile");
  fpIdx=i;fpGuest=null;fpTab="posts";fpRequested=false;
  renderFProfile();
@@ -4194,6 +4250,7 @@ function openFProfile(i){
 function closeFProfile(){document.getElementById("pg-fprofile").classList.remove("active")}
 function fpSetTab(tb){fpTab=tb;renderFProfile()}
 function fpChat(){
+ if(isGuest&&!guestGate(null))return;
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return;
  if(fpGuest){openChatPeer({n:f.n,ini:f.n.charAt(0),type:"dm",unread:0});return}
  var idx=-1;
@@ -4227,6 +4284,7 @@ function fpActions(){
  return '<div class="fp-actions">'+fol+req+'</div>';
 }
 function fpToggleFollow(){
+ if(isGuest&&!guestGate(null))return;
  var f=fpGuest||FRIENDS[fpIdx];if(!f||!fpGuest)return;
  follows[f.n]=!follows[f.n];
  renderFProfile();
@@ -4235,6 +4293,7 @@ function fpToggleFollow(){
  toast(follows[f.n]?t("fw_toast_add",f.n):t("fw_toast_rm",f.n));
 }
 function openFpReq(){
+ if(isGuest&&!guestGate(null))return;
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return;
  document.getElementById("fpReqAv").textContent=f.n.charAt(0);
  document.getElementById("fpReqName").textContent=f.n;
@@ -4363,6 +4422,7 @@ function openCommByKey(key){
  openCommDetail(i);
 }
 function openCommDetail(i){
+ if(isGuest&&!guestGate(null))return;
  commIdx=i;renderCommDetail();
  raisePage("pg-comm");
  document.getElementById("pg-comm").classList.add("active");
@@ -4457,7 +4517,8 @@ function renderHub(){
  var pin='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>';
  var walletIc='<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="14.5" r="1.2" fill="currentColor"/></svg>';
  var tabDefs=[["posts","hb_tab_posts"],["saved","hb_tab_saved"],["comm","hb_tab_comm"],["events","hb_tab_events"],["reviews","hb_tab_reviews"]];
- var tabs='<div class="fp-tabs hub-tabs">'+tabDefs.map(function(td){
+ var guestBan=isGuest?'<div style="background:var(--brand-soft);border:1px solid #cfe5df;border-radius:14px;padding:12px 14px;margin:12px 0 4px;display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800">'+t("gm_hub_t")+'</div><div style="font-size:11.5px;color:var(--ink-2);margin-top:2px">'+t("gm_hub_b")+'</div></div><button style="flex:none;background:var(--brand);color:#fff;border:none;border-radius:99px;font-size:12px;font-weight:700;padding:8px 14px;font-family:inherit;cursor:pointer" onclick="guestGateHub()">'+t("gm_hub_go")+'</button></div>':"";
+ var tabs=guestBan+'<div class="fp-tabs hub-tabs">'+tabDefs.map(function(td){
   return '<button class="fp-tab'+(hubTab===td[0]?" on":"")+'" onclick="hubSetTab(\''+td[0]+'\')">'+t(td[1])+'</button>';
  }).join("")+'</div>';
  var content="";
@@ -4612,6 +4673,7 @@ function evCard(idx,badge){
 }
 function evSetTab(tb){evTab=tb;renderHub()}
 function openEvent(i){
+ if(isGuest&&!guestGate(null))return;
  evOpenIdx=i;
  raisePage("pg-event");
  renderEvent();
@@ -4957,6 +5019,7 @@ function setEvStars(k){
  e.myRating=k;renderEvent();toast(t("ev_my_rate",k));
 }
 function evSend(){
+ if(isGuest&&!guestGate(null))return;
  var inp=document.getElementById("evInput"),v=inp.value.trim();
  if(!v||evOpenIdx<0)return;
  EVENTS[evOpenIdx].cmts.push({n:txt(ACCOUNTS[curAcct].n),tm:"now",tx:{en:v,zh:v}});
@@ -6924,6 +6987,7 @@ function openFilterSheet(){
 }
 function resetFilter(){fMedia="all";fDate="all";renderChips("fChipsMedia",MEDIA_TYPES,"media");renderChips("fChipsDate",DATE_RANGES,"date")}
 function setFeedTab(tab){
+ if(isGuest&&tab!=="foryou")tab="foryou";
  feedTab=tab;
  document.querySelectorAll(".ftab").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-ftab")===tab)});
  renderHome();
@@ -6937,11 +7001,13 @@ function feedMediaBlock(type){
  return '<div class="feed-media'+cls+'">'+ic+'<span>'+label+'</span></div>';
 }
 function followBtn(f){
+ if(isGuest)return '<button class="follow-btn" onclick="event.stopPropagation();toggleFollow(\''+f.n+'\')">+ '+t("fw_add")+'</button>';
  if(findFriendIdx(f.n)>-1)return '<button class="follow-btn on" style="cursor:default"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:4px"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t("fw_on")+'</button>';
  if(follows[f.n])return '<button class="follow-btn on" onclick="event.stopPropagation();toggleFollow(\''+f.n+'\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:4px"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t("fw_on")+'</button>';
  return '<button class="follow-btn" onclick="event.stopPropagation();toggleFollow(\''+f.n+'\')">+ '+t("fw_add")+'</button>';
 }
 function toggleFollow(name){
+ if(isGuest&&!guestGate(null))return;
  if(findFriendIdx(name)>-1)return;
  follows[name]=!follows[name];
  if(feedTab==="following"&&!follows[name]){renderHome();return}
@@ -6998,12 +7064,13 @@ function postChanged(f){
  if(document.getElementById("hubHead").style.display==="flex")renderHub();
  if(document.getElementById("pg-post").classList.contains("active"))renderPostDetail(f);
 }
-function toggleLike(i){var f=FEEDS[i];f.likedByMe=!f.likedByMe;f.like+=f.likedByMe?1:-1;postChanged(f)}
+function toggleLike(i){if(isGuest&&!guestGate(null))return;var f=FEEDS[i];f.likedByMe=!f.likedByMe;f.like+=f.likedByMe?1:-1;postChanged(f)}
 function toggleRepost(i){var f=FEEDS[i];f.repostedByMe=!f.repostedByMe;f.rp+=f.repostedByMe?1:-1;postChanged(f);if(f.repostedByMe)toast(t("pd_rp_toast"))}
-function repostAction(i){var f=FEEDS[i];if(f.repostedByMe)toggleRepost(i);else openRepostSheet(i)}
+function repostAction(i){if(isGuest&&!guestGate(null))return;var f=FEEDS[i];if(f.repostedByMe)toggleRepost(i);else openRepostSheet(i)}
 /* share sheet */
 var shareTarget=-1,shareSel={};
 function openShareSheet(i){
+ if(isGuest&&!guestGate(null))return;
  shareTarget=i;shareSel={};
  renderShareList();
  document.getElementById("shareCta").textContent=t("sh_send");
@@ -7050,7 +7117,7 @@ function confirmRepost(){
  postChanged(f);
  toast(t("pd_rp_toast"));
 }
-function toggleSave(i){var f=FEEDS[i];f.savedByMe=!f.savedByMe;postChanged(f);toast(f.savedByMe?t("pd_sv_add"):t("pd_sv_rm"))}
+function toggleSave(i){if(isGuest&&!guestGate(null))return;var f=FEEDS[i];f.savedByMe=!f.savedByMe;postChanged(f);toast(f.savedByMe?t("pd_sv_add"):t("pd_sv_rm"))}
 /* comment list helpers: sort = relevant (pool order) | new (by time) */
 var pdSort="relevant";
 function pdPool(f,full){
@@ -7200,6 +7267,7 @@ function toggleCmtLike(btn,base){
 }
 function replyCmt(name){var inp=document.getElementById("pdInput");inp.value="@"+name+" ";inp.focus()}
 function sendComment(){
+ if(isGuest&&!guestGate(null))return;
  var f=FEEDS[postOpenIdx];if(!f)return;
  var inp=document.getElementById("pdInput"),v=inp.value.trim();
  if(!v){toast(t("cmt_empty"));return}
@@ -7247,6 +7315,7 @@ function lvCatSet(v){lvCat=v;renderLive();document.getElementById("pg-live").que
 function openLive(){lvCat="all";renderLive();raisePage("pg-live");document.getElementById("pg-live").classList.add("active")}
 function closeLive(){document.getElementById("pg-live").classList.remove("active")}
 function openLiveRoom(k){
+ if(isGuest&&!guestGate(null))return;
  var r=LIVE_ROOMS.filter(function(x){return x.k===k})[0];if(!r)return;
  lvOpenIdx=LIVE_ROOMS.indexOf(r);
  document.getElementById("lrvCover").style.background=lvGrad(r.host);
@@ -7400,6 +7469,7 @@ function openPlCatFilter(){renderPlCats();openSheet("sheetPlCat")}
 var pnbPlace=-1,pnbTab="ev";
 function pnbDist(seed){return +(0.3+(fpHash(seed)%80)/10).toFixed(1)}
 function openPnb(pi){
+ if(isGuest&&!guestGate(function(){switchTab("places")}))return;
  pnbPlace=pi;pnbTab="ev";
  pnbRender();
  raisePage("pg-pnear");
@@ -7437,7 +7507,8 @@ function pnbRender(){
  var el=document.getElementById("pnearBody");el.innerHTML=h;el.scrollTop=0;
 }
 /* ---------- create hub (center +) ---------- */
-function openCreateHub(){openSheet("sheetCreate")}
+function openCreateHub(){if(isGuest&&!guestGate(null))return;openSheet("sheetCreate")}
+function goLiveTap(){if(isGuest&&!guestGate(null))return;toast(t("st_next",t("lv_golive")))}
 function chAction(kind){
  closeSheets();
  if(kind==="post"){openNewPost();return}
@@ -8416,7 +8487,7 @@ function initAddForm(){
  document.getElementById("phCover").className="ph-slot ph-cover";document.getElementById("phCover").innerHTML=PH_EMPTY;
  document.querySelectorAll(".ph-row .ph-slot").forEach(function(s){s.className="ph-slot";s.innerHTML=PH_EMPTY});
 }
-function openAddPlace(){initAddForm();document.getElementById("pg-addplace").classList.add("active")}
+function openAddPlace(){if(isGuest&&!guestGate(null))return;initAddForm();document.getElementById("pg-addplace").classList.add("active")}
 function closeAddPlace(){document.getElementById("pg-addplace").classList.remove("active")}
 function pickApPin(e){
  var m=document.getElementById("apMap"),r=m.getBoundingClientRect();
@@ -8449,6 +8520,9 @@ function submitPlace(){
 }
 function switchTab(name){
  if(name!=="feeds"&&name!=="messages"&&name!=="places"&&name!=="hub"&&name!=="notif"){toast(t("tab_soon",I18N[lang]["tab_"+name]));name="feeds"}
+ if(name==="messages"&&isGuest&&!guestGate(function(){switchTab("messages")}))return;
+ if(name==="hub"&&isGuest&&!guestGate(function(){switchTab("hub")}))return;
+ if(name==="notif"&&isGuest&&!guestGate(function(){switchTab("notif")}))return;
  curTab=name;
  closeITPanel();
  var tabHi=name==="notif"?"feeds":name;
