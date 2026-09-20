@@ -12,6 +12,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Wahda">
+<script>
+/* 判定「已安装到主屏幕」，命中则给 <html> 加 appmode 类。
+   多路探测的原因：Chrome 完整安装（WebAPK）走 display-mode，而旧版「添加到主屏幕」快捷方式
+   只在 referrer 里带 android-app://，媒体查询命中不了，页面就会比屏幕长、底部导航被挤出屏幕。 */
+(function(){
+  var d=document.documentElement;
+  function isAppMode(){
+    try{
+      if(window.matchMedia&&(matchMedia("(display-mode: standalone)").matches
+        ||matchMedia("(display-mode: minimal-ui)").matches
+        ||matchMedia("(display-mode: fullscreen)").matches))return true;
+    }catch(e){}
+    if(window.navigator.standalone===true)return true;          /* iOS 主屏幕图标 */
+    var r=document.referrer||"";
+    if(r.indexOf("android-app://")===0||r.indexOf("ios-app://")===0)return true;
+    if(/[?&]app=1(&|$)/.test(location.search))return true;      /* 手动预览：?app=1 */
+    return false;
+  }
+  if(isAppMode())d.className=(d.className?d.className+" ":"")+"appmode";
+})();
+</script>
 <style>
   :root{
     --brand:#0E7C66; --brand-dark:#0A5D4E; --brand-soft:#E3F2EE;
@@ -928,12 +949,22 @@
   .cm-sec{font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:18px 20px 6px}
   .cm-desc{padding:0 20px;font-size:14px;line-height:1.6;color:var(--ink-2)}
   .cm-memrow{margin:8px 20px 0;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;gap:10px}
-  /* PWA standalone：仅「安装到主屏幕」后生效，浏览器里打开完全不受影响 */
-  @media (display-mode: standalone){
-    body{padding:0;background:var(--bg)}
-    .page-head{display:none}
-    .statusbar{display:none}
-    .phone{width:100%;max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;box-shadow:none}
+  /* App 模式（已装到主屏幕）：整机框铺满一屏，隐藏外层页头、手机壳边框与假状态栏。
+     用 html.appmode 类而非 @media (display-mode) —— 后者对「添加到主屏幕」快捷方式不生效。 */
+  html.appmode,html.appmode body{height:100vh;height:100dvh;overflow:hidden}
+  html.appmode body{padding:0;background:var(--bg)}
+  html.appmode .page-head{display:none}
+  html.appmode .statusbar{display:none}
+  html.appmode .phone{width:100%;max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;box-shadow:none}
+  html.appmode .tabbar{border-radius:0}
+  html.appmode .demo-hint{display:none}
+  /* 手机宽度视口兜底：整机框高度改为弹性填充剩余空间（不再写死 800px），
+     任何安装形态下都保证一屏内可见底部导航，不需要往下滑。 */
+  @media (max-width:520px){
+    html,body{height:100vh;height:100dvh;overflow:hidden}
+    body{padding:8px 10px 12px}
+    .page-head{margin-bottom:8px}
+    .phone{width:100%;max-width:none;height:auto;flex:1 1 auto;min-height:0}
   }
 </style>
 </head>
