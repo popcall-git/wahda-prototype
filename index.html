@@ -830,8 +830,6 @@
   .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;display:none}
   .btn.loading .spinner{display:inline-block}
   @keyframes spin{to{transform:rotate(360deg)}}
-  /* demo hint */
-  .demo-hint{width:100%;max-width:430px;margin-top:18px;background:#FFF9E8;border:1px solid #EADFC2;border-radius:12px;padding:12px 16px;font-size:13px;line-height:1.6;color:#6E5A1E}
   /* group members (tap the group name in a group chat) */
   .chat-nav-mid.tap{cursor:pointer}
   .gm-head{display:flex;align-items:center;gap:12px;padding:2px 0 14px}
@@ -957,7 +955,6 @@
   html.appmode .statusbar{display:none}
   html.appmode .phone{width:100%;max-width:none;height:100vh;height:100dvh;border:none;border-radius:0;box-shadow:none}
   html.appmode .tabbar{border-radius:0}
-  html.appmode .demo-hint{display:none}
   /* 手机宽度视口兜底：整机框高度改为弹性填充剩余空间（不再写死 800px），
      任何安装形态下都保证一屏内可见底部导航，不需要往下滑。 */
   @media (max-width:520px){
@@ -2889,13 +2886,6 @@
   </div>
 </div>
 
-<div class="demo-hint" id="demoHint">
-  <b data-i18n="dh_t">Demo tips</b><br>
-  <span data-i18n="dh_1">1 · Any 6-digit code will pass verification; enter 000000 to preview the error state.</span><br>
-  <span data-i18n="dh_2">2 · Tap the language button (top right) to switch the prototype between English and Chinese.</span><br>
-  <span data-i18n="dh_3">3 · All buttons are tappable — the full golden flow works end to end.</span>
-</div>
-
 <script>
 /* ---------- i18n ---------- */
 var I18N = {
@@ -3104,10 +3094,6 @@ en:{
  av_camera:"Take photo", av_gallery:"Choose from gallery", av_cancel:"Cancel", av_set:"Photo added (simulated)",
  cc_pick:"Select country or region",
  weaknet:"Weak connection — your code may arrive slower.",
- dh_t:"Demo tips",
- dh_1:"1 · Any 6-digit code will pass verification; enter 000000 to preview the error state.",
- dh_2:"2 · Tap the language button (top right) to switch the prototype between English and Chinese.",
- dh_3:"3 · All buttons are tappable — the full golden flow works end to end.",
  wd_t:"Withdraw", wd_cur:"Withdraw Currency", wd_amt_ph:"0.00", wd_avail:"Available balance", wd_fee:"Fee", wd_fee_usd:"10.00 USD", wd_eta:"Arrival", wd_eta_v:"0\u20133 business days",
  wd_method:"Payout Method", wd_bt:"Bank Transfer (SWIFT)", wd_bt_sub:"Send to a bank account via SWIFT", wd_more_soon:"More payout methods coming soon",
  wd_bank:"Withdrawal Bank Account", wd_bank_note:"Bank details are masked for security", wd_add:"Add New Bank Card",
@@ -3341,10 +3327,6 @@ zh:{
  av_camera:"拍摄照片", av_gallery:"从相册选择", av_cancel:"取消", av_set:"头像已添加（模拟）",
  cc_pick:"选择国家或地区",
  weaknet:"网络信号较弱，验证码可能会延迟送达。",
- dh_t:"演示提示",
- dh_1:"1 · 任意 6 位验证码均可通过；输入 000000 可查看错误状态。",
- dh_2:"2 · 点击右上角按钮可在中英文之间切换原型语言。",
- dh_3:"3 · 所有按钮均可点击，完整黄金流程可走通。",
  wd_t:"提现", wd_cur:"提现币种", wd_amt_ph:"0.00", wd_avail:"可用余额", wd_fee:"手续费", wd_fee_usd:"10.00 USD", wd_eta:"到账时间", wd_eta_v:"0\u20133 个工作日",
  wd_method:"收款方式", wd_bt:"银行转账（SWIFT）", wd_bt_sub:"通过 SWIFT 转入您的银行账户", wd_more_soon:"更多收款方式即将上线",
  wd_bank:"提现银行卡", wd_bank_note:"银行卡信息已脱敏展示，保障账户安全", wd_add:"添加新的银行卡",
