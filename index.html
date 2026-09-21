@@ -8411,6 +8411,7 @@ function plcPrayerTimes(p){
   if(m>=cur&&nextIdx<0)nextIdx=i;
   return m;
  });
+ if(nextIdx<0)nextIdx=0; /* 当日五场全部结束：高亮次日 Fajr，避免整块变灰 */
  var cells=PRAYERS.map(function(pr,i){
   var hh=Math.floor(times[i]/60),mm=times[i]%60;
   var cls=nextIdx<0?" done":(i<nextIdx?" done":(i===nextIdx?" next":""));
