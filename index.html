@@ -5147,6 +5147,34 @@ function mapaySuccess(){
  btCd=true;
  mapayRender();
 }
+/* ---------- Wahda Premium subscription record (owned by the shell) ----------
+   Single source of truth for the account's current plan + expiry. Persisted so
+   the "days remaining" shown at the top of the Reels Premium page keeps
+   counting down between visits. Pushed to the Reels iframe by the ctx and
+   subpay-done bridge messages. */
+var SUB_DAYS={weekly:7,monthly:30,quarterly:90,yearly:365};
+var subState=(function(){
+ try{
+  var s=JSON.parse(localStorage.getItem("wahda_sub_v1")||"null");
+  if(s&&s.plan&&s.expiresAt>Date.now())return s;
+ }catch(e){}
+ /* demo account sits mid-cycle on Monthly (18 days left) */
+ var st={plan:"monthly",name:"Monthly",expiresAt:Date.now()+18*864e5};
+ try{localStorage.setItem("wahda_sub_v1",JSON.stringify(st))}catch(e){}
+ return st;
+})();
+function subPersist(){try{localStorage.setItem("wahda_sub_v1",JSON.stringify(subState))}catch(e){}}
+function subSet(plan){
+ if(!plan)return null;
+ subState={plan:plan.id,name:plan.name,expiresAt:Date.now()+(SUB_DAYS[plan.id]||30)*864e5};
+ subPersist();
+ return subState;
+}
+function subPayload(){
+ if(isGuest||!subState)return null;          /* guests have no subscription */
+ return {plan:subState.plan,name:subState.name,expiresAt:subState.expiresAt};
+}
+
 /* ---------- Wahda Pay gateway (Wahda Premium subscription, from Reels) ----------
    same flow as paid events and mini-app purchases: amount due in Wahda Coin →
    payment method → PIN/fingerprint confirm → success + return */
@@ -5232,8 +5260,9 @@ function subPaySuccess(){
  WTXS.unshift({ic:"👑",g:"linear-gradient(135deg,#C9A24B,#a08032)",
   n:{en:"Wahda Premium · "+p.name,zh:"Wahda Premium · "+p.name},tm:{en:"Just now",zh:"刚刚"},v:-amt});
  subPayDone=true;
+ subSet(p);
  subPayRender();
- bxReply({wahdaMsg:"subpay-done",plan:{id:p.id,name:p.name}});
+ bxReply({wahdaMsg:"subpay-done",plan:{id:p.id,name:p.name},sub:subPayload()});
 }
 function setEvStars(k){
  var e=EVENTS[evOpenIdx];if(!e)return;
@@ -8811,7 +8840,7 @@ function switchTab(name){
  closePlusMenu();
  var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isRe=name==="reels",isFeed=!isMsg&&!isPl&&!isHub&&!isNf&&!isRe;
  document.getElementById("reelsHost").style.display=isRe?"block":"none";
- if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html";if(rf)bxReply({wahdaMsg:"ctx",guest:isGuest})}
+ if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html";if(rf)bxReply({wahdaMsg:"ctx",guest:isGuest,sub:subPayload()})}
  document.getElementById("homeHead").style.display=isFeed?"flex":"none";
  document.getElementById("feedTabsRow").style.display=isFeed?"flex":"none";
  document.getElementById("itHintFeeds").style.display=isFeed?"flex":"none";
@@ -8955,7 +8984,7 @@ window.addEventListener("message",function(e){
  if(!d.wahdaMsg)return;
  switch(d.wahdaMsg){
   case "ready":
-   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest});bxFlushDrama();break;
+   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest,sub:subPayload()});bxFlushDrama();break;
   case "gate":
    /* guest tapped a poster (play) or Share in Reels: bounce to sign-up, then resume */
    bxGateReels(d.action||"play",d.title);

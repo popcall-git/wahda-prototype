@@ -728,6 +728,34 @@
   }
   .sub-hero h1 { font-size: 23px; font-weight: 900; letter-spacing: -.4px; }
   .sub-hero p { font-size: 12.5px; color: var(--text-2); margin-top: 7px; line-height: 1.5; }
+  /* current plan banner — account subscription type + days remaining */
+  .sub-status {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px; border-radius: 16px; margin: 4px 0 16px;
+    background: var(--card); border: 1.5px solid rgba(0,0,0,.10);
+  }
+  .sub-status.active {
+    background: linear-gradient(135deg, rgba(14,124,102,.10), rgba(201,162,75,.13));
+    border-color: rgba(14,124,102,.30);
+  }
+  .ss-ic {
+    width: 38px; height: 38px; border-radius: 12px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.05); color: var(--text-3);
+  }
+  .sub-status.active .ss-ic {
+    background: linear-gradient(150deg, rgba(14,124,102,.22), rgba(201,162,75,.22));
+    color: var(--accent-deep);
+  }
+  .ss-txt { flex: 1; min-width: 0; }
+  .ss-kicker { font-size: 9.5px; font-weight: 900; letter-spacing: .7px; color: var(--text-3); }
+  .ss-name { font-size: 14px; font-weight: 800; margin-top: 2px; }
+  .ss-note { font-size: 10.5px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+  .ss-days { flex: none; text-align: right; }
+  .ss-days b { font-size: 22px; font-weight: 900; letter-spacing: -.6px; color: var(--accent); }
+  .ss-days span { font-size: 9.5px; font-weight: 800; color: var(--text-3); margin-left: 3px; letter-spacing: .2px; }
+  .ss-days.dim b { color: var(--text-3); }
+  .ss-days.soon b { color: var(--hot); }
   .sub-perks {
     background: var(--card); border: 1px solid rgba(0,0,0,.08);
     border-radius: 16px; padding: 14px; margin-bottom: 20px;
@@ -1161,6 +1189,7 @@
       <h2>Wahda Premium</h2>
     </div>
     <div class="sub-body" id="subBody">
+      <div id="subStatus"></div>
       <div class="sub-hero">
         <div class="sub-crown">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0E7C66" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5l-1.3-9.2 5.1 3.1L12 5.2l4.7 6.2 5.1-3.1-1.3 9.2z"/><path d="M3.5 17.5h17"/><path d="M9.6 17.5l2.4-3 2.4 3"/></svg>
@@ -2014,7 +2043,7 @@
   }
   window.addEventListener('message', function (e) {
     const d = e.data || {};
-    if (d.wahdaMsg === 'ctx') { guestMode = !!d.guest; return; }
+    if (d.wahdaMsg === 'ctx') { guestMode = !!d.guest; setSubState(d.guest ? null : d.sub); return; }
     if (d.wahdaMsg === 'friends') {
       shareContacts = (d.contacts || []).map(shellPerson);
       shareGroups = (d.groups || []).map(shellPerson);
@@ -2025,6 +2054,7 @@
     } else if (d.wahdaMsg === 'subpay-done') {
       /* the shell's Wahda Pay gateway charged the wallet — show the receipt */
       const p = planOf((d.plan && d.plan.id) || curPlan) || planOf(curPlan);
+      if (d.sub) setSubState(d.sub);           /* the shell owns the account record */
       if (p) renderPremiumActive(p);
       return;
     } else if (d.wahdaMsg === 'resumeShare') {
@@ -2173,6 +2203,53 @@
 
   function planOf(id){ return PLANS.filter(p => p.id === id)[0]; }
 
+  /* ---------- current subscription banner (top of the Premium page) ----------
+     The app shell owns the account record and pushes it over postMessage
+     (ctx / subpay-done); when this page is opened on its own we fall back to
+     the shared localStorage record written by the shell. */
+  const SUB_DAYS = { weekly:7, monthly:30, quarterly:90, yearly:365 };
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const SS_CROWN = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5l-1.3-9.2 5.1 3.1L12 5.2l4.7 6.2 5.1-3.1-1.3 9.2z"/><path d="M3.5 17.5h17"/></svg>';
+  const SS_USER = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.6"/><path d="M4.8 20c.6-3.7 3.6-5.6 7.2-5.6s6.6 1.9 7.2 5.6"/></svg>';
+  let subState = null;                                  /* { plan, name, expiresAt } | null */
+
+  function subDaysLeft(exp) { return exp ? Math.max(0, Math.ceil((exp - Date.now()) / 86400000)) : 0; }
+  function subEndLabel(exp) {
+    const d = new Date(exp);
+    return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function saveSubLocal() { try { localStorage.setItem('wahda_sub_v1', JSON.stringify(subState)); } catch (e) {} }
+  function setSubState(s) { subState = (s && s.plan) ? s : null; renderSubStatus(); }
+
+  function subStatusHTML() {
+    const kicker = '<div class="ss-kicker">CURRENT PLAN</div>';
+    if (!subState) {
+      return `<div class="sub-status free">
+        <span class="ss-ic">${SS_USER}</span>
+        <div class="ss-txt">${kicker}
+          <div class="ss-name">Free</div>
+          <div class="ss-note">${guestMode ? 'Sign up to unlock Wahda Premium' : 'No active subscription'}</div>
+        </div>
+        <div class="ss-days dim"><b>—</b><span>days left</span></div>
+      </div>`;
+    }
+    const days = subDaysLeft(subState.expiresAt);
+    return `<div class="sub-status active">
+      <span class="ss-ic">${SS_CROWN}</span>
+      <div class="ss-txt">${kicker}
+        <div class="ss-name">Wahda Premium · ${subState.name || ''}</div>
+        <div class="ss-note">${days > 0
+          ? 'Renews ' + subEndLabel(subState.expiresAt) + ' · auto-renew on'
+          : 'Expired — renew to keep ad-free viewing'}</div>
+      </div>
+      <div class="ss-days${days <= 3 ? ' soon' : ''}"><b>${days}</b><span>days left</span></div>
+    </div>`;
+  }
+  function renderSubStatus() {
+    const box = document.getElementById('subStatus');
+    if (box) box.innerHTML = subStatusHTML();
+  }
+
   function renderPlans() {
     const list = document.getElementById('planList');
     if (!list) return;
@@ -2200,6 +2277,7 @@
     const body = document.getElementById('subBody');
     if (body.querySelector('.sub-done')) body.innerHTML = subBodyInit;   // restore after a previous success
     document.getElementById('subFoot').style.display = '';
+    renderSubStatus();
     renderPlans();
     document.getElementById('subView').classList.add('show');
   }
@@ -2224,7 +2302,13 @@
   }
 
   function renderPremiumActive(p) {
+    /* refresh the banner; the shell's record wins when it sent one over */
+    if (!subState || subState.plan !== p.id || subState.expiresAt <= Date.now()) {
+      subState = { plan:p.id, name:p.name, expiresAt:Date.now() + (SUB_DAYS[p.id] || 30) * 86400000 };
+      saveSubLocal();
+    }
     document.getElementById('subBody').innerHTML = `
+      <div id="subStatus">${subStatusHTML()}</div>
       <div class="sub-done show">
         <div class="tick">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
@@ -2241,6 +2325,14 @@
       </div>`;
     document.getElementById('subFoot').style.display = 'none';
     toast('Subscription active · ' + p.name + ' · $' + p.price);
+  }
+
+  /* standalone (no app shell around us): read the shared subscription record directly */
+  if (!EMBEDDED) {
+    try {
+      const s = JSON.parse(localStorage.getItem('wahda_sub_v1') || 'null');
+      if (s && s.plan) setSubState(s);
+    } catch (e) {}
   }
 
   /* ================= Watch history page ================= */
