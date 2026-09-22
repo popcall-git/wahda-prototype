@@ -8711,7 +8711,7 @@ function switchTab(name){
  closePlusMenu();
  var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isRe=name==="reels",isFeed=!isMsg&&!isPl&&!isHub&&!isNf&&!isRe;
  document.getElementById("reelsHost").style.display=isRe?"block":"none";
- if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html"}
+ if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html";if(rf)bxReply({wahdaMsg:"ctx",guest:isGuest})}
  document.getElementById("homeHead").style.display=isFeed?"flex":"none";
  document.getElementById("feedTabsRow").style.display=isFeed?"flex":"none";
  document.getElementById("itHintFeeds").style.display=isFeed?"flex":"none";
@@ -8840,7 +8840,11 @@ window.addEventListener("message",function(e){
  if(!d.wahdaMsg)return;
  switch(d.wahdaMsg){
   case "ready":
-   reelsReady=true;bxFlushDrama();break;
+   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest});bxFlushDrama();break;
+  case "gate":
+   /* guest tapped a poster in Reels: bounce to sign-up, then come back and play */
+   guestGate(function(){pendingDrama=d.title||"";switchTab("reels");bxFlushDrama()});
+   break;
   case "friends":
    bxReply({wahdaMsg:"friends",rid:d.rid,contacts:bxContacts(),groups:bxGroups()});break;
   case "share":

@@ -1621,6 +1621,10 @@
   function synOf(d){ return synBank[d.cat] || synBank._; }
 
   function openPlayer(title, ep) {
+    if (guestMode) {                                   /* guest: browsing is free, playback needs an account */
+      try { window.parent.postMessage({ wahdaMsg: 'gate', title: title }, '*'); } catch (e) {}
+      return;
+    }
     const d = dramaMap[title]; if (!d) return;
     curDrama = d;
     curEp = Math.max(1, Math.min(ep || 1, epsOf(d)));
@@ -1965,6 +1969,9 @@
      really writes into that conversation and "Post" really creates a feed post.
      Opened standalone the sheet says so instead of faking a send. */
   const EMBEDDED = (function () { try { return !!(window.parent && window.parent !== window) } catch (e) { return false } })();
+  /* guest mode is pushed by the host shell: guests may browse Reels,
+     but any play action is handed back to the shell's sign-up gate */
+  let guestMode = false;
   let shareContacts = [];
   let shareGroups = [];
   let shareLoaded = false, shareLoading = false, shareFailed = false, shareTabCur = 'contacts';
@@ -2007,6 +2014,7 @@
   }
   window.addEventListener('message', function (e) {
     const d = e.data || {};
+    if (d.wahdaMsg === 'ctx') { guestMode = !!d.guest; return; }
     if (d.wahdaMsg === 'friends') {
       shareContacts = (d.contacts || []).map(shellPerson);
       shareGroups = (d.groups || []).map(shellPerson);
