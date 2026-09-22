@@ -2,2012 +2,791 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wahda · Reels</title>
-<script>
-  /* Embedded in the Wahda UX Demo main shell: hide our own bottom nav +
-     home indicator so the shell's single tabbar is used for all tabs. */
-  if (window.parent && window.parent !== window) {
-    document.documentElement.classList.add('embedded');
-  }
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Wahda Reels</title>
 <style>
-  html.embedded .statusbar, html.embedded .tabbar, html.embedded .home-indicator { display: none !important; }
+  /* Wahda Reels — short-video feed (Douyin-style), light-theme sheets on a dark video canvas */
   :root {
-    /* Wahda light theme — aligned with the app shell palette
-       (bg #F4F2EE / card #FFFFFF / ink #1C1B18 / brand #0E7C66) */
-    --bg: #F4F2EE;
-    --surface: #FFFFFF;
-    --surface-2: #EFECE5;
-    --card: #FFFFFF;
-    --text: #1C1B18;
-    --text-2: #6B6A66;
-    --text-3: #9B9993;
-    --accent: #0E7C66;
-    --accent-deep: #0A5D4E;
-    --accent-soft: #E1EFEB;
-    --hot: #E24B4A;
-    --new: #E8A13C;
-    --ad: #5B7CFA;
-    --radius: 14px;
+    --bg: #F4F2EE; --surface: #FFFFFF; --surface-2: #EFECE5; --card: #FFFFFF;
+    --text: #1C1B18; --text-2: #6B6A66; --text-3: #9B9993;
+    --accent: #0E7C66; --accent-deep: #0A5D4E; --accent-soft: #E1EFEB;
+    --hot: #E24B4A; --like: #FE2C55; --gold: #C9803B; --radius: 14px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; }
-  body {
-    font-family: -apple-system, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
-    background: #E9E6E0;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px 0;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif; background: #000; overflow: hidden; }
+  button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
+  img { display: block; }
 
-  /* ===== Phone shell (preview only) ===== */
-  .phone {
-    width: 390px;
-    height: 844px;
-    background: var(--bg);
-    border-radius: 44px;
-    box-shadow: 0 0 0 10px #17171d, 0 24px 60px rgba(0,0,0,.6);
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+  /* standalone preview chrome (hidden inside the app shell) */
+  #statusbar {
+    display: none; height: 44px; align-items: center; justify-content: space-between;
+    padding: 0 24px; color: #fff; font-size: 14px; font-weight: 700;
+    position: relative; z-index: 40;
   }
-  @media (max-width: 430px) {
-    body { padding: 0; }
-    .phone { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+  #homebar { display: none; height: 22px; position: relative; z-index: 40; }
+  #homebar::after {
+    content: ""; position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+    width: 130px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.85);
   }
+  body.standalone { background: #000; }
+  body.standalone #statusbar, body.standalone #homebar { display: flex; }
+  body.standalone #stage { height: calc(100% - 66px); }
 
-  /* ===== Status bar ===== */
-  .statusbar {
-    height: 47px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px; font-size: 14px; font-weight: 600;
-    background: var(--bg); z-index: 30;
-  }
-  .statusbar .icons { display: flex; gap: 5px; align-items: center; }
-  .sig { display: flex; gap: 2px; align-items: flex-end; }
-  .sig i { width: 3px; background: var(--text); border-radius: 1px; display: block; }
-  .battery { width: 24px; height: 12px; border: 1.5px solid rgba(0,0,0,.32); border-radius: 4px; position: relative; }
-  .battery::before { content:""; position:absolute; inset: 1.5px; right: 5px; background: var(--text); border-radius: 2px; }
-  .battery::after { content:""; position:absolute; right:-4px; top:3px; width:2px; height:5px; background: rgba(0,0,0,.32); border-radius: 0 2px 2px 0; }
+  #stage { position: relative; height: 100%; overflow: hidden; background: #000; }
 
-  /* ===== Sticky header: search ===== */
-  .header {
-    flex-shrink: 0; z-index: 20;
-    background: var(--bg);
-    padding: 6px 16px 10px;
-  }
-  .search-row { display: flex; align-items: center; gap: 10px; }
-  .search-box {
-    flex: 1; height: 40px;
-    background: var(--surface);
-    border-radius: 20px;
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 14px;
-    color: var(--text-3); font-size: 14px;
-    border: 1px solid transparent;
-    transition: border-color .2s;
-  }
-  .search-box:active { border-color: var(--accent); }
-  .search-box.focus { border-color: var(--accent); }
-  .search-box svg { flex-shrink: 0; }
-  .search-box input {
-    flex: 1; min-width: 0;
-    background: none; border: none; outline: none; padding: 0;
-    color: var(--text); font-size: 14px; font-family: inherit;
-    -webkit-appearance: none; appearance: none;
-  }
-  .search-box input::placeholder { color: var(--text-3); }
-  .search-box input::-webkit-search-cancel-button,
-  .search-box input::-webkit-search-decoration { display: none; }
-  .search-box .clr {
-    display: none; flex-shrink: 0;
-    width: 20px; height: 20px; border-radius: 50%;
-    align-items: center; justify-content: center;
-    background: rgba(0,0,0,.1); color: var(--text-2);
-    font-size: 11px; line-height: 1; cursor: pointer;
-  }
-  .search-box .clr.on { display: flex; }
-  .search-box .mic { width: 30px; height: 30px; margin: 0 -6px 0 0; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
-
-  /* ===== Inline search results (replaces the feed while a query is typed) ===== */
-  #searchRes { display: none; padding: 2px 0 24px; }
-  body.searching #searchRes { display: block; }
-  body.searching .banner-wrap,
-  body.searching #cwSection,
-  body.searching #chips,
-  body.searching #lists { display: none !important; }
-  .sr-head { padding: 6px 16px 8px; font-size: 12.5px; color: var(--text-3); }
-  .sr-head b { color: var(--text); font-weight: 800; }
-  .sr-chips { display: flex; gap: 8px; padding: 4px 16px 6px; overflow-x: auto; }
-  .sr-chips::-webkit-scrollbar { display: none; }
-  .sr-chip {
-    flex-shrink: 0; height: 32px; padding: 0 14px; border-radius: 16px;
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface); color: var(--accent);
-    border: 1px solid var(--accent);
-    font-size: 12.5px; font-weight: 700;
-  }
-  .sr-sec { padding: 12px 16px 2px; font-size: 13px; font-weight: 800; color: var(--text); }
-  .sr-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 16px; cursor: pointer;
-  }
-  .sr-row:active { background: rgba(0,0,0,.04); }
-  .sr-art {
-    width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
-    position: relative; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
-  }
-  .sr-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .sr-info { flex: 1; min-width: 0; }
-  .sr-title {
-    font-size: 14px; font-weight: 700; color: var(--text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .sr-meta { margin-top: 4px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-3); }
-  .sr-meta .rate { color: #C9803B; font-weight: 800; }
-  .sr-cat {
-    padding: 1px 7px; border-radius: 8px; font-size: 10.5px; font-weight: 700;
-    color: var(--accent); background: rgba(14,124,102,.1);
-  }
-  .sr-empty { padding: 36px 28px; text-align: center; }
-  .sr-empty b { display: block; margin-bottom: 8px; font-size: 15px; font-weight: 800; color: var(--text); }
-  .sr-empty span { font-size: 13px; line-height: 1.6; color: var(--text-3); }
-  .history-btn {
-    width: 40px; height: 40px; border-radius: 20px;
-    background: var(--surface);
+  /* ---------- top bar ---------- */
+  .top-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 30;
     display: flex; align-items: center; justify-content: center;
-    color: var(--text-2); flex-shrink: 0;
+    padding: 10px 12px 16px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
   }
-  .sub-entry {
-    background: linear-gradient(150deg, rgba(14,124,102,.22), rgba(14,124,102,.06));
-    border: 1px solid rgba(14,124,102,.4);
+  .ftabs { display: flex; align-items: center; gap: 22px; pointer-events: auto; }
+  .ftabs button {
+    color: rgba(255,255,255,.72); font-size: 16px; font-weight: 700;
+    padding: 3px 1px 7px; position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  }
+  .ftabs button.on { color: #fff; font-weight: 900; }
+  .ftabs button.on::after {
+    content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 26px; height: 3px; border-radius: 2px; background: #fff;
+  }
+  .tb-ic {
+    position: absolute; top: 8px; pointer-events: auto;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    background: rgba(0,0,0,.22);
+  }
+  .tb-ic:active { background: rgba(0,0,0,.4); }
+  #muteBtn { right: 56px; }
+  #srchBtn { right: 12px; }
+
+  /* ---------- video pager ---------- */
+  .pager {
+    position: absolute; inset: 0; overflow-y: scroll; overscroll-behavior: contain;
+    scroll-snap-type: y mandatory; scrollbar-width: none; background: #000;
+  }
+  .pager::-webkit-scrollbar { display: none; }
+  .pager.hidden { display: none; }
+  .vcard {
+    position: relative; height: 100%; scroll-snap-align: start; scroll-snap-stop: always;
+    overflow: hidden; background: #000; color: #fff;
+  }
+  .vmedia { position: absolute; inset: 0; }
+  .vcover {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    animation: kb 16s ease-in-out infinite alternate; animation-play-state: paused;
+  }
+  .vcard.playing .vcover { animation-play-state: running; }
+  @keyframes kb {
+    from { transform: scale(1.06); }
+    to { transform: scale(1.16) translate(-1.2%, 1%); }
+  }
+  .vscrim-b { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.38) 42%, rgba(0,0,0,.66) 100%); pointer-events: none; }
+  .vscrim-t { position: absolute; left: 0; right: 0; top: 0; height: 15%; background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0)); pointer-events: none; }
+
+  /* play / pause flash */
+  .pp-flash {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%) scale(.6);
+    width: 76px; height: 76px; border-radius: 50%; background: rgba(0,0,0,.35);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    opacity: 0; pointer-events: none;
+  }
+  .pp-flash.show { animation: ppPop .55s ease forwards; }
+  @keyframes ppPop {
+    0% { opacity: .95; transform: translate(-50%,-50%) scale(.6); }
+    60% { opacity: .95; transform: translate(-50%,-50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(1.05); }
   }
 
-  /* ===== Scroll body ===== */
-  .scroll-body {
-    flex: 1; overflow-y: auto; overscroll-behavior: contain;
-    scrollbar-width: none;
-    padding-bottom: 96px;
+  /* double-tap heart burst */
+  .burst { position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; pointer-events: none; z-index: 25; animation: burst .9s ease forwards; color: var(--like); }
+  @keyframes burst {
+    0% { transform: scale(.2) rotate(-14deg); opacity: 0; }
+    30% { transform: scale(1.18) rotate(6deg); opacity: 1; }
+    55% { transform: scale(.94) rotate(-2deg); opacity: 1; }
+    100% { transform: scale(1.3) translateY(-40px) rotate(0deg); opacity: 0; }
   }
-  .scroll-body::-webkit-scrollbar { display: none; }
 
-  /* ===== Banner carousel ===== */
-  .banner-wrap { padding: 4px 16px 0; }
-  .banner-track {
-    display: flex; gap: 12px;
-    overflow-x: auto; scroll-snap-type: x mandatory;
-    scrollbar-width: none; border-radius: var(--radius);
+  /* ---------- right action rail ---------- */
+  .vright {
+    position: absolute; right: 8px; bottom: 24px; z-index: 12;
+    display: flex; flex-direction: column; align-items: center; gap: 17px; width: 54px;
   }
-  .banner-track::-webkit-scrollbar { display: none; }
-  .banner {
-    flex: 0 0 100%; scroll-snap-align: center;
-    height: 150px; border-radius: var(--radius);
-    position: relative; overflow: hidden;
-    padding: 18px;
-    display: flex; flex-direction: column; justify-content: flex-end;
-  }
-  /* AI-generated photo backdrop + scrim for text legibility */
-  .banner .bg {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; z-index: 0;
-  }
-  .banner::after {
-    content: ""; position: absolute; inset: 0; z-index: 1;
-    background: linear-gradient(180deg, rgba(10,10,18,.1) 25%, rgba(10,10,18,.8) 100%);
-  }
-  .banner .tag, .banner h3, .banner p, .banner .banner-cta { position: relative; z-index: 2; }
-  .banner .tag {
-    position: absolute; top: 12px; left: 12px;
-    font-size: 11px; font-weight: 700; letter-spacing: .5px;
-    padding: 4px 10px; border-radius: 20px;
-    background: rgba(0,0,0,.35); backdrop-filter: blur(4px);
-    color: #FFFFFF;
-  }
-  .banner h3 {
-    font-size: 19px; font-weight: 800; line-height: 1.25;
-    color: #FFFFFF;
-    text-shadow: 0 1px 3px rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.35);
-  }
-  .banner p { font-size: 12px; margin-top: 4px; color: rgba(255,255,255,.88); text-shadow: 0 1px 3px rgba(0,0,0,.5); }
-  .banner-cta {
-    margin-top: 10px; align-self: flex-start;
-    font-size: 12px; font-weight: 700;
-    background: rgba(255,255,255,.92); color: #111;
-    padding: 6px 14px; border-radius: 16px;
-  }
-  .b1 { background: linear-gradient(120deg, #0f766e 0%, #134e4a 55%, #1e293b 100%); }
-  .b2 { background: linear-gradient(120deg, #7c2d92 0%, #4c1d95 55%, #1e1b4b 100%); }
-  .b3 { background: linear-gradient(120deg, #b45309 0%, #7c2d12 55%, #292524 100%); }
-  .banner-dots { display: flex; gap: 6px; justify-content: center; padding: 10px 0 2px; }
-  .banner-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--surface-2); transition: all .3s; }
-  .banner-dots i.on { width: 18px; background: var(--accent); }
-
-  /* ===== Category chips ===== */
-  .chips {
-    display: flex; gap: 8px; overflow-x: auto;
-    padding: 10px 16px 6px; scrollbar-width: none;
-  }
-  .chips::-webkit-scrollbar { display: none; }
-  .chip {
-    flex-shrink: 0; height: 34px; padding: 0 16px;
-    border-radius: 17px; font-size: 13px; font-weight: 600;
-    background: var(--surface); color: var(--text-2);
-    display: flex; align-items: center; gap: 6px;
-    border: 1px solid transparent; cursor: pointer;
-    transition: all .2s;
-  }
-  .chip.on { background: var(--accent); color: #FFFFFF; border-color: var(--accent); }
-  .chip .emoji { font-size: 14px; }
-
-  /* ===== Section header ===== */
-  .section-head {
-    display: flex; align-items: baseline; justify-content: space-between;
-    padding: 14px 16px 10px;
-  }
-  .section-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
-  .section-head .more { color: var(--text-3); display: flex; align-items: center; }
-
-  /* ===== Continue Watching (compact landscape cards) ===== */
-  .cw-row { display: flex; gap: 10px; overflow-x: auto; padding: 2px 16px 6px; scrollbar-width: none; }
-  .cw-row::-webkit-scrollbar { display: none; }
-  .cw-card { flex: 0 0 148px; cursor: pointer; }
-  .cw-thumb {
-    width: 100%; aspect-ratio: 16/9;
-    border-radius: 10px; overflow: hidden; position: relative;
-    background: var(--surface);
-  }
-  .cw-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cw-thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%); }
-  .cw-ep {
-    position: absolute; top: 5px; left: 5px; z-index: 2;
-    font-size: 9px; font-weight: 700; color: #fff;
-    background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 6px;
-    backdrop-filter: blur(2px);
-  }
-  .cw-play {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 2;
-    width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+  .r-ava { position: relative; margin-bottom: 3px; }
+  .r-ava-c {
+    width: 46px; height: 46px; border-radius: 50%; border: 2px solid #fff;
     display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 800; color: #fff;
   }
-  .cw-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,.25); z-index: 2; }
-  .cw-progress i { display: block; height: 100%; background: var(--accent); border-radius: 0 2px 2px 0; }
-  .cw-title { font-size: 12px; font-weight: 700; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cw-left { font-size: 10px; color: var(--text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .r-follow {
+    position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%);
+    width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900;
+    line-height: 1; box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  }
+  .vcard.followed .r-follow { background: #fff; color: var(--accent-deep); }
+  .vcard.followed .r-follow::after { content: "✓"; font-size: 12px; }
+  .vcard.followed .r-follow span { display: none; }
+  .r-act { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #fff; }
+  .r-act svg { filter: drop-shadow(0 1px 3px rgba(0,0,0,.4)); }
+  .r-act b { font-size: 11px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.45); }
+  .r-act .ic-heart { color: #fff; }
+  .vcard.liked .ic-heart { color: var(--like); }
+  .vcard.liked .ic-heart path { fill: var(--like); }
+  .vcard.liked .r-act.lik b { color: var(--like); }
+  .vcard.faved .ic-star { color: #FFC24B; }
+  .vcard.faved .ic-star path { fill: #FFC24B; }
+  .pop { animation: pop .32s ease; }
+  @keyframes pop { 40% { transform: scale(1.35); } }
+  .r-disc {
+    width: 44px; height: 44px; border-radius: 50%; overflow: hidden;
+    border: 5px solid #1a1a1a; margin-top: 2px;
+    animation: spin 7s linear infinite; animation-play-state: paused;
+    box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  }
+  .vcard.playing .r-disc { animation-play-state: running; }
+  .r-disc img { width: 100%; height: 100%; object-fit: cover; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ===== Horizontal poster rows ===== */
-  .row {
-    display: flex; gap: 10px; overflow-x: auto;
-    padding: 2px 16px 8px; scrollbar-width: none;
+  /* ---------- bottom info ---------- */
+  .vinfo {
+    position: absolute; left: 14px; right: 78px; bottom: 22px; z-index: 12;
+    display: flex; flex-direction: column; gap: 7px; max-width: 78%;
   }
-  .row::-webkit-scrollbar { display: none; }
-  .poster-card { position: relative; flex: 0 0 118px; }
-  .poster {
-    width: 100%; aspect-ratio: 2/3;
-    border-radius: 12px; overflow: hidden;
-    position: relative;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 8px;
-  }
-  .poster .art { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: .9; }
-  .poster .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .poster::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.65) 100%);
-  }
-  .poster .meta { position: relative; z-index: 2; }
-  .poster .title { font-size: 12px; font-weight: 700; line-height: 1.3; }
-  .poster .sub { font-size: 10px; color: rgba(255,255,255,.75); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
-  .poster .rating { color: #C9803B; font-weight: 700; }
-  .badge {
-    position: absolute; top: 6px; left: 6px; z-index: 3;
-    font-size: 9px; font-weight: 800; letter-spacing: .5px;
-    padding: 2px 6px; border-radius: 5px; color: #fff;
-  }
-  .badge.hot { background: var(--hot); box-shadow: 0 2px 8px rgba(255,77,94,.45); }
-  .badge.new { background: var(--new); color: #3d2600; box-shadow: 0 2px 8px rgba(255,176,32,.4); }
-  .badge.hotnew { background: linear-gradient(90deg, var(--hot), var(--new)); }
-  .plays { position: absolute; top: 6px; right: 6px; z-index: 3; font-size: 9px; color: rgba(255,255,255,.85); background: rgba(0,0,0,.35); padding: 2px 6px; border-radius: 9px; backdrop-filter: blur(2px); display:flex; align-items:center; gap:3px; }
-
-  /* gradient art variants */
-  .g1 { background: linear-gradient(160deg, #0d9488, #134e4a 70%); }
-  .g2 { background: linear-gradient(160deg, #a21caf, #4c1d95 70%); }
-  .g3 { background: linear-gradient(160deg, #ea580c, #7c2d12 70%); }
-  .g4 { background: linear-gradient(160deg, #2563eb, #1e3a8a 70%); }
-  .g5 { background: linear-gradient(160deg, #db2777, #831843 70%); }
-  .g6 { background: linear-gradient(160deg, #16a34a, #14532d 70%); }
-  .g7 { background: linear-gradient(160deg, #64748b, #1e293b 70%); }
-  .g8 { background: linear-gradient(160deg, #d97706, #78350f 70%); }
-  .g9 { background: linear-gradient(160deg, #0891b2, #164e63 70%); }
-  .g10 { background: linear-gradient(160deg, #dc2626, #7f1d1d 70%); }
-
-  /* ===== Ad strip (thin horizontal banner) ===== */
-  .ad-card {
-    margin: 4px 16px 10px;
-    border-radius: 12px; overflow: hidden;
-    background: var(--card);
-    border: 1px solid rgba(91,124,250,.25);
-    position: relative;
-    display: flex; align-items: center;
-    padding: 8px 12px; gap: 10px;
-  }
-  .ad-art {
-    width: 36px; height: 36px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; border-radius: 10px;
-    background: linear-gradient(160deg, rgba(91,124,250,.35), rgba(91,124,250,.08));
-  }
-  .ad-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .ad-label {
-    align-self: flex-start;
-    font-size: 8px; font-weight: 700; letter-spacing: .8px;
-    color: var(--ad); border: 1px solid rgba(91,124,250,.5);
-    padding: 1px 6px; border-radius: 7px;
-  }
-  .ad-body .ad-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ad-body .ad-desc { font-size: 10px; color: var(--text-2); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ad-body .ad-cta {
-    flex-shrink: 0; align-self: center;
-    font-size: 10px; font-weight: 700; color: #0b1437;
-    background: var(--ad); padding: 4px 9px; border-radius: 10px;
-  }
-
-  /* ===== Ad strip — subscription promo variant ===== */
-  .ad-card.ad-promo {
-    background: linear-gradient(100deg, rgba(14,124,102,.16), rgba(14,124,102,.05) 58%, var(--card));
-    border-color: rgba(14,124,102,.45);
-    box-shadow: 0 6px 18px rgba(14,124,102,.10);
-  }
-  .ad-promo .ad-art {
-    width: 44px; height: 44px;
-    flex-direction: column; line-height: 1.05;
-    background: linear-gradient(150deg, #0E7C66, #0f766e);
-    color: #FFFFFF; font-size: 13px; font-weight: 900; letter-spacing: -.3px;
-  }
-  .ad-promo .ad-art small { font-size: 7px; letter-spacing: .6px; }
-  .ad-promo .ad-title { font-size: 12px; }
-  .ad-promo .ad-cta { background: var(--accent); color: #FFFFFF; }
-  .ad-tag {
-    align-self: flex-start;
-    font-size: 8px; font-weight: 800; letter-spacing: .7px;
-    color: var(--new); border: 1px solid rgba(255,176,32,.5);
-    padding: 1px 6px; border-radius: 7px;
-  }
-
-  /* ===== Ranking vertical list (Top 50) ===== */
-  .rank-list { padding: 0 16px 8px; }
-  .rank-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 0;
-    border-bottom: .5px solid rgba(0,0,0,.07);
-    cursor: pointer;
-  }
-  .rank-row:last-child { border-bottom: none; }
-  .rank-no { width: 24px; font-size: 17px; font-weight: 900; font-style: italic; color: var(--text-3); text-align: center; flex-shrink: 0; }
-  .rank-no.top { color: var(--accent); }
-  .rank-poster { width: 56px; aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; position: relative; flex-shrink: 0; background: var(--surface); }
-  .rank-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .rank-info { flex: 1; min-width: 0; }
-  .rank-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rank-tags { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
-  .rank-tags span { font-size: 9px; padding: 2px 7px; border-radius: 8px; background: var(--surface-2); color: var(--text-2); font-weight: 600; }
-  .rank-stats { font-size: 10px; color: var(--text-3); margin-top: 5px; display: flex; gap: 10px; }
-  .rank-rating { font-size: 14px; font-weight: 800; color: #C9803B; flex-shrink: 0; }
-
-  /* ===== Skeleton loader (unused for static 20-list demo, kept for future) ===== */
-  .skeleton-row { display: flex; gap: 10px; padding: 2px 16px 0; overflow: hidden; }
-  .skel { border-radius: 12px; background: var(--surface); position: relative; overflow: hidden; }
-  .skel::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(0,0,0,.045), transparent);
-    animation: shimmer 1.4s infinite;
-  }
-  @keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
-  .skel-card { flex: 0 0 118px; aspect-ratio: 2/3; }
-  .loading { text-align: center; color: var(--text-3); font-size: 12px; padding: 16px 0 4px; }
-  .loading.hide { display: none; }
-
-  /* ===== Bottom nav (Wahda UX: Feeds / Places / FAB / Chats / My Hub) ===== */
-  .tabbar {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 84px; z-index: 40;
-    background: rgba(255,255,255,.94); backdrop-filter: blur(20px);
-    border-top: .5px solid rgba(0,0,0,.09);
-    display: flex; align-items: flex-start;
-    padding: 10px 10px 0;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .tab {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    color: var(--text-3); font-size: 10px; font-weight: 600;
-    position: relative; cursor: pointer;
-  }
-  .tab.on { color: var(--accent); }
-  .tab .ico { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
-  .tab .dot {
-    position: absolute; top: -2px; left: calc(50% + 6px);
-    min-width: 16px; height: 16px; padding: 0 4px;
-    background: var(--hot); border-radius: 8px;
-    font-size: 9px; font-weight: 700; color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid var(--bg);
-  }
-  .fab {
-    flex: 1; display: flex; justify-content: center;
-  }
-  .fab button {
-    width: 54px; height: 54px; margin-top: -22px;
-    border-radius: 50%; border: 3px solid var(--bg);
-    background: var(--accent-deep); color: #fff;
-    font-size: 26px; font-weight: 300; line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.18);
-    cursor: pointer;
-  }
-  .home-indicator {
-    position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
-    width: 134px; height: 5px; border-radius: 3px; background: rgba(0,0,0,.3); z-index: 50;
-  }
-
-  /* ===== Vertical player (fullscreen overlay) ===== */
-  .player { position: absolute; inset: 0; z-index: 70; background: #000; display: none; }
-  .player.show { display: block; }
-  .pv-media { position: absolute; inset: 0; overflow: hidden; }
-  .pv-media img { width: 100%; height: 100%; object-fit: cover; opacity: .94; }
-  .pv-media.playing img { animation: kenburns 20s ease-in-out infinite alternate; }
-  @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.14); } }
-  .pv-shade { position: absolute; left: 0; right: 0; height: 150px; pointer-events: none; }
-  .pv-shade.top { top: 0; background: linear-gradient(180deg, rgba(0,0,0,.62), transparent); }
-  .pv-shade.bottom { bottom: 0; background: linear-gradient(0deg, rgba(0,0,0,.78), transparent); }
-  .pv-tap { position: absolute; inset: 0; cursor: pointer; }
-  .pv-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 10px; padding: 14px 14px 0; z-index: 6; }
-  .pv-btn {
-    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
-    background: rgba(0,0,0,.35); backdrop-filter: blur(4px); color: #fff;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .pv-title { flex: 1; font-size: 15px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pv-playbtn {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 5;
-    width: 66px; height: 66px; border-radius: 50%; border: none; cursor: pointer;
-    background: rgba(0,0,0,.45); backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity .2s;
-  }
-  .pv-playbtn.hide { opacity: 0; pointer-events: none; }
-  .pv-rail { position: absolute; right: 10px; bottom: 170px; display: flex; flex-direction: column; gap: 18px; align-items: center; z-index: 6; }
-  .pv-rail .ritem { display: flex; flex-direction: column; align-items: center; gap: 3px; color: #fff; font-size: 10px; font-weight: 600; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
-  .pv-info {
-    position: absolute; left: 0; right: 54px; bottom: 78px; padding: 0 16px; z-index: 6;
-    color: #fff; transition: opacity .25s, transform .25s;
-  }
-  .pv-info.hide { opacity: 0; transform: translateY(8px); pointer-events: none; }
-  .pv-tags { display: flex; gap: 6px; margin-bottom: 8px; }
-  .pv-tags span { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: rgba(255,255,255,.16); backdrop-filter: blur(4px); }
-  .pv-tags span.res { color: var(--accent); }
-  .pv-name { font-size: 18px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.55); }
-  .pv-syn {
-    font-size: 12px; line-height: 1.5; color: rgba(255,255,255,.82); margin-top: 5px;
+  .vhandle { font-size: 15.5px; font-weight: 800; display: flex; align-items: center; gap: 5px; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
+  .vhandle .vf { width: 15px; height: 15px; border-radius: 50%; background: #20A4F3; color: #fff; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .vcap {
+    font-size: 13px; line-height: 1.5; color: rgba(255,255,255,.96);
+    text-shadow: 0 1px 4px rgba(0,0,0,.5);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .pv-more { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--accent); margin-top: 7px; cursor: pointer; }
-  .pv-progress { position: absolute; left: 16px; right: 16px; bottom: 64px; height: 3px; border-radius: 2px; background: rgba(255,255,255,.22); z-index: 6; }
-  .pv-progress i { display: block; height: 100%; width: 0%; background: var(--accent); border-radius: 2px; transition: width .2s linear; }
-  .pv-epbar {
-    position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 6;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px; border-radius: 14px; cursor: pointer;
-    background: rgba(0,0,0,.45); backdrop-filter: blur(8px);
-    color: #fff; font-size: 13px; font-weight: 700;
-  }
-  .pv-epbar .eps { color: rgba(255,255,255,.6); font-weight: 600; font-size: 12px; margin-left: 2px; }
-  .pv-epbar .chev { color: rgba(255,255,255,.7); display: flex; }
-  .pv-epbar .pb-left { display: flex; align-items: center; gap: 8px; }
-  .pv-speed-chip {
-    font-size: 10.5px; font-weight: 800; letter-spacing: .3px;
-    padding: 3px 8px; border-radius: 20px;
-    background: var(--accent); color: #FFFFFF;
-  }
-  /* subtitle overlay (media layer -> always light text) */
-  .pv-sub {
-    position: absolute; left: 58px; right: 58px; bottom: 198px; z-index: 6;
-    text-align: center; pointer-events: none;
-  }
-  .pv-sub span {
-    display: inline-block; padding: 6px 13px; border-radius: 9px;
-    background: rgba(0,0,0,.62); backdrop-filter: blur(4px);
-    color: #FFFFFF; font-size: 13.5px; font-weight: 600; line-height: 1.45;
-    text-shadow: 0 1px 3px rgba(0,0,0,.65);
-  }
-  .pv-sub[hidden] { display: none; }
+  .vcap.expanded { -webkit-line-clamp: unset; }
+  .vcap .tag { font-weight: 800; }
+  .vcap-more { align-self: flex-start; font-size: 12px; font-weight: 700; color: rgba(255,255,255,.78); padding: 1px 0; }
+  .vmusic { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.94); text-shadow: 0 1px 4px rgba(0,0,0,.5); max-width: 100%; }
+  .mq { overflow: hidden; flex: 1; min-width: 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+  .mq i { display: inline-block; font-style: normal; white-space: nowrap; padding-right: 34px; }
+  .vcard.playing .mq i { animation: mq 8s linear infinite; }
+  @keyframes mq { to { transform: translateX(-50%); } }
+  .vloc { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.82); text-shadow: 0 1px 4px rgba(0,0,0,.5); }
 
-  /* ===== Playback settings sheet ===== */
-  .ps-body { overflow-y: auto; padding: 2px 18px 22px; }
-  .ps-group { padding: 10px 0 2px; border-bottom: .5px solid rgba(0,0,0,.07); }
-  .ps-group:last-of-type { border-bottom: none; }
-  .ps-label {
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
-    color: var(--text-3); margin-bottom: 9px;
-  }
-  .ps-label b { font-size: 11px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--accent); }
-  .ps-opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .ps-opt {
-    position: relative; padding: 9px 14px; border-radius: 10px; cursor: pointer;
-    border: 1px solid rgba(0,0,0,.09); background: var(--surface-2); color: var(--text);
-    font-size: 13px; font-weight: 700; font-family: inherit;
-  }
-  .ps-opt.on { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
-  .ps-opt small { display: block; font-size: 9.5px; font-weight: 600; opacity: .7; margin-top: 1px; }
-  .ps-note { font-size: 11.5px; line-height: 1.5; color: var(--text-3); margin-top: 12px; }
+  /* progress bar */
+  .vprog { position: absolute; left: 0; right: 0; bottom: 0; height: 2.5px; background: rgba(255,255,255,.24); z-index: 14; }
+  .vprog i { display: block; height: 100%; width: 0; background: #fff; animation: prog linear infinite; animation-play-state: paused; }
+  .vcard.playing .vprog i { animation-play-state: running; }
+  @keyframes prog { from { width: 0; } to { width: 100%; } }
 
-  /* ===== Episode sheet ===== */
-  .ep-mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 7; display: none; }
-  .ep-mask.show { display: block; }
-  .ep-sheet {
-    position: absolute; left: 0; right: 0; bottom: 0; max-height: 62%; z-index: 8;
-    background: var(--surface); border-radius: 20px 20px 0 0;
-    transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1);
-    display: flex; flex-direction: column;
+  /* swipe hint on the first card */
+  .sw-hint {
+    position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 26;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    color: rgba(255,255,255,.85); font-size: 11.5px; font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0,0,0,.5); pointer-events: none;
+    animation: hintFloat 1.6s ease-in-out infinite; transition: opacity .4s;
   }
-  .ep-sheet.show { transform: translateY(0); }
-  .ep-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 6px; font-size: 15px; font-weight: 800; }
-  .ep-sheet-head span { font-size: 12px; color: var(--text-3); font-weight: 600; }
-  .ep-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 8px 18px 24px; overflow-y: auto; }
-  .ep-item {
-    height: 38px; border-radius: 10px; border: none; cursor: pointer;
-    background: var(--surface-2); color: var(--text-2);
-    font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .ep-item.cur { background: var(--accent); color: #FFFFFF; }
+  .sw-hint.gone { opacity: 0; }
+  @keyframes hintFloat { 50% { transform: translateX(-50%) translateY(7px); } }
 
-  /* ===== Comments & Share sheets (reuse ep-sheet shell) ===== */
-  .cmt-list { overflow-y: auto; padding: 2px 18px 10px; max-height: 300px; }
-  .cmt-row { display: flex; gap: 10px; padding: 11px 0; border-bottom: .5px solid rgba(0,0,0,.07); }
-  .cmt-row:last-child { border-bottom: none; }
+  /* following-tab empty state */
+  .fw-empty {
+    height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; color: var(--text-2); text-align: center; padding: 0 44px; scroll-snap-align: start;
+    background: var(--bg);
+  }
+  .fw-empty .fe-ic { width: 64px; height: 64px; border-radius: 22px; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--text-3); border: 1px solid rgba(0,0,0,.08); }
+  .fw-empty p { font-size: 13px; line-height: 1.5; }
+  .fw-empty button { height: 40px; padding: 0 22px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 800; }
+
+  /* ---------- light sheets (comments / share) ---------- */
+  .mask { position: absolute; inset: 0; z-index: 80; background: rgba(0,0,0,.42); opacity: 0; pointer-events: none; transition: opacity .22s; }
+  .mask.show { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 90;
+    background: var(--bg); border-radius: 20px 20px 0 0; transform: translateY(102%);
+    transition: transform .28s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column;
+    max-height: 68%;
+  }
+  .sheet.show { transform: none; }
+  .sh-grab { width: 40px; height: 4.5px; border-radius: 3px; background: rgba(0,0,0,.16); margin: 9px auto 0; flex: none; }
+  .sh-head { display: flex; align-items: center; justify-content: center; position: relative; padding: 10px 16px 8px; flex: none; }
+  .sh-head b { font-size: 14px; font-weight: 800; color: var(--text); }
+  .sh-x { position: absolute; right: 12px; top: 4px; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+  /* comments */
+  .cmt-list { overflow-y: auto; padding: 2px 16px 10px; display: grid; gap: 15px; }
+  .cmt-row2 { display: flex; gap: 10px; align-items: flex-start; }
   .cmt-ava {
-    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800; color: #0c0c12;
+    width: 34px; height: 34px; border-radius: 50%; flex: none; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800;
   }
   .cmt-body { flex: 1; min-width: 0; }
-  .cmt-name { font-size: 12px; font-weight: 700; }
-  .cmt-text { font-size: 13px; line-height: 1.45; color: var(--text); margin-top: 2px; }
-  .cmt-meta { font-size: 10px; color: var(--text-3); margin-top: 4px; display: flex; gap: 10px; align-items: center; }
-  .cmt-meta .clike { cursor: pointer; display: flex; align-items: center; gap: 3px; }
-  .cmt-input-row { display: flex; gap: 8px; padding: 10px 16px 18px; border-top: .5px solid rgba(0,0,0,.09); }
+  .cmt-name { font-size: 11.5px; color: var(--text-3); font-weight: 700; }
+  .cmt-text { font-size: 13.5px; color: var(--text); line-height: 1.45; margin-top: 2px; word-break: break-word; }
+  .cmt-meta { display: flex; gap: 14px; margin-top: 5px; font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+  .cmt-meta .clike { display: flex; align-items: center; gap: 4px; }
+  .cmt-meta .clike.on { color: var(--like); }
+  .cmt-input-row { display: flex; gap: 9px; padding: 9px 14px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(0,0,0,.07); background: var(--bg); flex: none; }
   .cmt-input-row input {
-    flex: 1; height: 40px; border: none; outline: none;
-    background: var(--surface-2); color: var(--text);
-    border-radius: 20px; padding: 0 16px; font-size: 13px;
-    font-family: inherit;
+    flex: 1; height: 40px; border: none; outline: none; border-radius: 20px;
+    background: var(--surface); padding: 0 16px; font-size: 13.5px; color: var(--text);
   }
-  .cmt-input-row button {
-    height: 40px; padding: 0 18px; border: none; border-radius: 20px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-weight: 800; font-size: 13px;
-  }
-  .share-tabs { display: flex; gap: 6px; padding: 4px 18px 8px; }
-  .share-tabs button {
-    flex: 1; height: 34px; border: none; border-radius: 17px; cursor: pointer;
-    background: var(--surface-2); color: var(--text-2); font-size: 13px; font-weight: 700;
-  }
-  .share-tabs button.on { background: var(--accent); color: #FFFFFF; }
-  .share-list { overflow-y: auto; padding: 4px 18px 20px; max-height: 320px; }
-  .share-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
-  .share-row .cmt-ava { width: 40px; height: 40px; font-size: 15px; }
-  .share-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .share-name small { display: block; font-size: 10px; color: var(--text-3); font-weight: 500; margin-top: 1px; }
-  .share-send {
-    height: 32px; padding: 0 16px; border: none; border-radius: 16px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-size: 12px; font-weight: 800;
-  }
-  .share-send.sent { background: var(--surface-2); color: var(--accent); }
-  .share-post-box { padding: 6px 2px 2px; }
+  .cmt-send { height: 40px; padding: 0 18px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 800; }
+  .cmt-send:disabled { opacity: .4; }
+
+  /* share */
+  .share-tabs { display: flex; gap: 8px; padding: 2px 16px 10px; flex: none; }
+  .share-tabs button { flex: 1; height: 36px; border-radius: 18px; background: var(--surface); font-size: 13px; font-weight: 700; color: var(--text-2); border: 1px solid rgba(0,0,0,.08); }
+  .share-tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .share-list { overflow-y: auto; padding: 2px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .share-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+  .share-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; color: var(--text); }
+  .share-name small { display: block; font-size: 11px; color: var(--text-3); font-weight: 600; margin-top: 1px; }
+  .share-send { height: 32px; padding: 0 16px; border-radius: 16px; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 800; }
+  .share-send.sent { background: var(--surface-2); color: var(--text-2); }
+  .share-send:disabled { opacity: .55; }
+  .share-post-box { display: grid; gap: 10px; }
   .share-post-box textarea {
-    width: 100%; height: 74px; border: none; outline: none; resize: none;
-    background: var(--surface-2); color: var(--text);
-    border-radius: 12px; padding: 12px 14px; font-size: 13px; font-family: inherit;
+    height: 84px; border: none; outline: none; resize: none; border-radius: 14px;
+    background: var(--surface); padding: 12px 14px; font-size: 13.5px; color: var(--text); font-family: inherit; line-height: 1.5;
   }
-  .share-post-box .post-btn {
-    margin-top: 10px; width: 100%; height: 42px; border: none; border-radius: 14px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-weight: 800; font-size: 14px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  /* simulated published post */
-  .my-post { background: var(--card); border: 1px solid rgba(0,0,0,.08); border-radius: 14px; padding: 12px; }
-  .my-post.posted { animation: postPop .35s cubic-bezier(.2,.8,.2,1); }
-  @keyframes postPop { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .post-btn { height: 44px; border-radius: 14px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 800; }
+  .share-hint { font-size: 11.5px; color: var(--text-3); text-align: center; line-height: 1.5; padding: 2px 8px 6px; }
+  .mp-card { display: flex; gap: 10px; background: var(--surface); border-radius: 14px; padding: 10px; }
+  .mp-thumb { width: 62px; height: 82px; border-radius: 10px; overflow: hidden; flex: none; background: var(--surface-2); }
+  .mp-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .mp-title { font-size: 13.5px; font-weight: 800; color: var(--text); }
+  .mp-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .mp-tags span { font-size: 10px; font-weight: 700; color: var(--accent-deep); background: var(--accent-soft); padding: 3px 8px; border-radius: 8px; }
+  .mp-view { height: 42px; border-radius: 14px; background: var(--surface); color: var(--accent-deep); font-size: 13px; font-weight: 800; border: 1px solid rgba(0,0,0,.08); }
+  .my-post.posted { display: grid; gap: 10px; }
   .mp-head { display: flex; align-items: center; gap: 9px; }
-  .mp-head .cmt-ava { width: 36px; height: 36px; }
-  .mp-who { font-size: 13px; font-weight: 700; }
-  .mp-who small { display: block; font-size: 10px; color: var(--text-3); font-weight: 500; margin-top: 1px; }
-  .mp-text { font-size: 13px; line-height: 1.5; margin-top: 9px; color: var(--text); }
-  .mp-card { display: flex; gap: 10px; margin-top: 10px; padding: 10px; border-radius: 12px; background: var(--surface-2); }
-  .mp-thumb { width: 64px; aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
-  .mp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .mp-info { flex: 1; min-width: 0; }
-  .mp-title { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mp-syn {
-    font-size: 11px; line-height: 1.45; color: var(--text-2); margin-top: 3px;
+  .mp-who { font-size: 13.5px; font-weight: 800; color: var(--text); }
+  .mp-who small { display: block; font-size: 11px; color: var(--text-3); font-weight: 600; }
+  .mp-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+
+  /* ---------- search overlay (light) ---------- */
+  .srch {
+    position: absolute; inset: 0; z-index: 70; background: var(--bg);
+    transform: translateY(4%); opacity: 0; pointer-events: none; transition: all .24s;
+    display: flex; flex-direction: column;
+  }
+  .srch.show { transform: none; opacity: 1; pointer-events: auto; }
+  .sr-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 10px; border-bottom: 1px solid rgba(0,0,0,.06); background: var(--bg); }
+  .sr-box { flex: 1; display: flex; align-items: center; gap: 8px; height: 40px; border-radius: 20px; background: var(--surface); padding: 0 14px; border: 1px solid rgba(0,0,0,.08); }
+  .sr-box svg { color: var(--text-3); flex: none; }
+  .sr-box input { flex: 1; min-width: 0; border: none; outline: none; background: none; font-size: 13.5px; color: var(--text); }
+  .sr-box input::placeholder { color: var(--text-3); }
+  #srClear { display: none; color: var(--text-3); }
+  #srClear.show { display: flex; }
+  .sr-cancel { font-size: 14px; font-weight: 700; color: var(--accent-deep); }
+  .sr-body { flex: 1; overflow-y: auto; padding: 14px 16px 24px; }
+  .sr-sec { font-size: 11.5px; font-weight: 800; letter-spacing: .4px; color: var(--text-3); margin-bottom: 10px; }
+  .sr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .sr-chips button { height: 32px; padding: 0 14px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(0,0,0,.08); font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+  .sr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .sr-cell { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 9/14; background: var(--surface-2); cursor: pointer; }
+  .sr-cell img { width: 100%; height: 100%; object-fit: cover; }
+  .sr-cell .sc-play { position: absolute; left: 6px; bottom: 5px; color: #fff; font-size: 10px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.6); display: flex; align-items: center; gap: 3px; }
+  .sr-cell .sc-cap {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 7px 6px; color: #fff; font-size: 10.5px; font-weight: 700; line-height: 1.35;
+    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.62));
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .mp-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
-  .mp-tags span { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 7px; background: rgba(14,124,102,.14); color: var(--accent); }
-  .mp-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--text-3); font-weight: 600; }
-  .mp-stats span { display: flex; align-items: center; gap: 4px; }
-  .mp-view {
-    width: 100%; height: 40px; margin-top: 12px; border-radius: 12px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; border: none;
-    font-size: 13px; font-weight: 800; font-family: inherit;
-  }
-  .share-hint {
-    padding: 14px 2px; font-size: 12.5px; line-height: 1.6; color: var(--text-3);
-  }
-  .share-hint b { color: var(--accent); font-weight: 800; }
-  /* favorited state */
-  .dt-bottom-actions .save-wide.on { background: rgba(14,124,102,.16); color: var(--accent); }
+  .sr-empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 40px 0; }
 
-  /* ===== Drama detail page ===== */
-  .detail { position: absolute; inset: 0; z-index: 80; background: var(--bg); display: none; overflow-y: auto; scrollbar-width: none; }
-  .detail.show { display: block; }
-  .detail::-webkit-scrollbar { display: none; }
-  .dt-hero { position: relative; height: 300px; }
-  .dt-hero img { width: 100%; height: 100%; object-fit: cover; }
-  .dt-hero::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,.32) 0%, rgba(0,0,0,0) 35%, var(--bg) 100%);
-  }
-  .dt-hero .pv-btn { position: absolute; top: 14px; left: 14px; z-index: 3; }
-  .dt-body { padding: 0 18px 30px; margin-top: -46px; position: relative; z-index: 2; }
-  .dt-title { font-size: 22px; font-weight: 800; }
-  .dt-meta { font-size: 12px; color: var(--text-2); margin-top: 6px; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
-  .dt-meta .rating { color: #C9803B; font-weight: 800; }
-  .dt-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-  .dt-tags span { font-size: 10px; padding: 4px 10px; border-radius: 9px; background: var(--surface-2); color: var(--text-2); font-weight: 600; }
-  .dt-actions { display: flex; gap: 10px; margin-top: 16px; }
-  .dt-actions .play {
-    flex: 1; height: 44px; border: none; border-radius: 14px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-weight: 800; font-size: 14px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .dt-actions .save {
-    width: 44px; height: 44px; border: none; border-radius: 14px; cursor: pointer;
-    background: var(--surface-2); color: var(--text);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .dt-sec { font-size: 15px; font-weight: 800; margin: 22px 0 10px; }
-  .dt-syn { font-size: 13px; line-height: 1.65; color: var(--text-2); margin-top: 14px; }
-
-  /* More Like This related grid */
-  .dt-rel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
-  .dt-rel-card { cursor: pointer; }
-  .dt-rel-poster { width: 100%; aspect-ratio: 2/3; border-radius: 10px; overflow: hidden; position: relative; background: var(--surface); }
-  .dt-rel-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .dt-rel-rate { position: absolute; top: 5px; right: 5px; font-size: 9px; font-weight: 700; color: #ffd60a; background: rgba(0,0,0,.45); padding: 2px 5px; border-radius: 6px; }
-  .dt-rel-title { font-size: 11px; font-weight: 600; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dt-bottom-actions { display: flex; gap: 10px; margin-top: 22px; }
-  .dt-bottom-actions .save-wide {
-    flex: 1; height: 46px; border: none; border-radius: 14px; cursor: pointer;
-    background: var(--surface-2); color: var(--text); font-weight: 700; font-size: 13px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .dt-bottom-actions .continue {
-    flex: 1.4; height: 46px; border: none; border-radius: 14px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-weight: 800; font-size: 14px;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-
-
-  /* ===== Subscription (member plans) ===== */
-  /* NOTE: container class is .subview — a bare .sub here would collide with
-     the poster's .sub (rating row) and break poster titles. */
-  .subview {
-    position: absolute; inset: 0; z-index: 85;
-    background: var(--bg); display: none; flex-direction: column;
-  }
-  .subview.show { display: flex; animation: subIn .26s cubic-bezier(.2,.8,.2,1); }
-  @keyframes subIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-  .sub-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 4px; }
-  .sub-head .pv-btn { background: var(--surface); color: var(--text); }
-  .sub-head h2 { font-size: 16px; font-weight: 800; }
-  .sub-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 6px 16px 130px; }
-  .sub-body::-webkit-scrollbar { display: none; }
-  .sub-hero { text-align: center; padding: 10px 0 18px; }
-  .sub-crown {
-    width: 66px; height: 66px; border-radius: 22px; margin: 0 auto 12px;
-    display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(150deg, rgba(14,124,102,.28), rgba(14,124,102,.05));
-    border: 1px solid rgba(14,124,102,.35);
-  }
-  .sub-hero h1 { font-size: 23px; font-weight: 900; letter-spacing: -.4px; }
-  .sub-hero p { font-size: 12.5px; color: var(--text-2); margin-top: 7px; line-height: 1.5; }
-  /* current plan banner — account subscription type + days remaining */
-  .sub-status {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 14px; border-radius: 16px; margin: 4px 0 16px;
-    background: var(--card); border: 1.5px solid rgba(0,0,0,.10);
-  }
-  .sub-status.active {
-    background: linear-gradient(135deg, rgba(14,124,102,.10), rgba(201,162,75,.13));
-    border-color: rgba(14,124,102,.30);
-  }
-  .ss-ic {
-    width: 38px; height: 38px; border-radius: 12px; flex: none;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,.05); color: var(--text-3);
-  }
-  .sub-status.active .ss-ic {
-    background: linear-gradient(150deg, rgba(14,124,102,.22), rgba(201,162,75,.22));
-    color: var(--accent-deep);
-  }
-  .ss-txt { flex: 1; min-width: 0; }
-  .ss-kicker { font-size: 9.5px; font-weight: 900; letter-spacing: .7px; color: var(--text-3); }
-  .ss-name { font-size: 14px; font-weight: 800; margin-top: 2px; }
-  .ss-note { font-size: 10.5px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
-  .ss-days { flex: none; text-align: right; }
-  .ss-days b { font-size: 22px; font-weight: 900; letter-spacing: -.6px; color: var(--accent); }
-  .ss-days span { font-size: 9.5px; font-weight: 800; color: var(--text-3); margin-left: 3px; letter-spacing: .2px; }
-  .ss-days.dim b { color: var(--text-3); }
-  .ss-days.soon b { color: var(--hot); }
-  .sub-perks {
-    background: var(--card); border: 1px solid rgba(0,0,0,.08);
-    border-radius: 16px; padding: 14px; margin-bottom: 20px;
-    display: grid; gap: 11px;
-  }
-  .perk { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-2); }
-  .perk .ck {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(14,124,102,.15); color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .sub-sec { font-size: 12px; font-weight: 800; letter-spacing: .4px; color: var(--text-3); margin: 0 2px 10px; }
-  .plan {
-    position: relative; display: flex; align-items: center; gap: 12px;
-    padding: 14px; margin-bottom: 10px; border-radius: 16px; cursor: pointer;
-    background: var(--card); border: 1.5px solid rgba(0,0,0,.12); transition: all .2s;
-  }
-  .plan.on { border-color: var(--accent); background: rgba(14,124,102,.08); }
-  .plan-radio {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid rgba(0,0,0,.22);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .plan.on .plan-radio { border-color: var(--accent); }
-  .plan.on .plan-radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-  .plan-info { flex: 1; min-width: 0; }
-  .plan-name { font-size: 14px; font-weight: 800; }
-  .plan-note { font-size: 10.5px; color: var(--text-3); margin-top: 2px; }
-  .plan-price { text-align: right; flex-shrink: 0; }
-  .plan-price b { font-size: 16px; font-weight: 900; }
-  .plan-price span { display: block; font-size: 10px; color: var(--text-3); margin-top: 1px; }
-  .plan-badge {
-    position: absolute; top: -8px; right: 14px;
-    font-size: 8.5px; font-weight: 900; letter-spacing: .6px;
-    padding: 3px 8px; border-radius: 8px;
-    background: var(--accent); color: #FFFFFF;
-  }
-  .plan-badge.alt { background: linear-gradient(90deg, #ffb020, #ff8a3d); color: #3d2600; }
-  .sub-foot {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
-    padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
-    background: linear-gradient(180deg, rgba(244,242,238,0), rgba(244,242,238,.97) 34%);
-  }
-  .sub-btn {
-    width: 100%; height: 50px; border: none; border-radius: 16px; cursor: pointer;
-    background: var(--accent); color: #FFFFFF; font-size: 15px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .sub-btn:active { background: var(--accent-deep); }
-  .sub-legal { text-align: center; font-size: 10px; color: var(--text-3); margin-top: 9px; line-height: 1.5; }
-  .sub-legal b { color: var(--text-2); font-weight: 700; }
-  .sub-done { display: none; padding: 26px 6px; text-align: center; }
-  .sub-done.show { display: block; animation: subIn .3s ease-out; }
-  .sub-done .tick {
-    width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 18px;
-    background: rgba(14,124,102,.14); color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .sub-done h3 { font-size: 20px; font-weight: 900; }
-  .sub-done p { font-size: 12.5px; color: var(--text-2); margin-top: 8px; line-height: 1.6; }
-  .sub-receipt {
-    margin: 20px 0 22px; background: var(--card);
-    border: 1px solid rgba(0,0,0,.09); border-radius: 16px; padding: 14px; text-align: left;
-  }
-  .rc-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; padding: 7px 0; color: var(--text-2); }
-  .rc-row + .rc-row { border-top: .5px solid rgba(0,0,0,.08); }
-  .rc-row b { color: var(--text); font-weight: 800; }
-  .rc-row.total b { color: var(--accent); }
-  .sub-ghost {
-    width: 100%; height: 46px; border-radius: 16px; cursor: pointer;
-    background: transparent; border: 1px solid rgba(0,0,0,.16);
-    color: var(--text-2); font-size: 13.5px; font-weight: 700;
-  }
-
-  /* ===== Watch history (playback history page) ===== */
-  .histview {
-    position: absolute; inset: 0; z-index: 80;
-    background: var(--bg); display: none; flex-direction: column;
-  }
-  .histview.show { display: flex; animation: subIn .26s cubic-bezier(.2,.8,.2,1); }
-  .hist-head { flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 12px 14px 0; }
-  .hist-head .pv-btn { background: var(--surface); color: var(--text); }
-  .hist-head h2 { flex: 1; font-size: 16px; font-weight: 800; }
-  .hist-search {
-    flex-shrink: 0; margin: 12px 16px 0; height: 38px;
-    background: var(--surface); border-radius: 19px;
-    display: flex; align-items: center; gap: 8px; padding: 0 14px;
-  }
-  .hist-search input {
-    flex: 1; min-width: 0; background: none; border: none; outline: none;
-    color: var(--text); font-size: 13px; font-family: inherit;
-  }
-  .hist-search input::placeholder { color: var(--text-3); }
-  .hist-search .clr { display: none; color: var(--text-3); font-size: 12px; cursor: pointer; }
-  .hist-search .clr.on { display: block; }
-  .hist-tabs { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 16px 0; }
-  .hist-tab {
-    flex: 1; height: 38px; border-radius: 12px; cursor: pointer;
-    background: var(--surface); border: 1px solid transparent;
-    color: var(--text-2); font-size: 12.5px; font-weight: 700; font-family: inherit;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all .2s;
-  }
-  .hist-tab b {
-    font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px;
-    background: var(--surface-2); color: var(--text-2);
-  }
-  .hist-tab.on { background: rgba(14,124,102,.12); border-color: var(--accent); color: var(--accent); }
-  .hist-tab.on b { background: var(--accent); color: #FFFFFF; }
-  .hist-stats { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 16px 0; }
-  .hist-stat {
-    flex: 1; text-align: center; padding: 9px 4px;
-    background: var(--card); border: 1px solid rgba(0,0,0,.08); border-radius: 12px;
-  }
-  .hist-stat b { display: block; font-size: 15px; font-weight: 900; }
-  .hist-stat span { font-size: 9px; letter-spacing: .5px; color: var(--text-3); font-weight: 700; }
-  .hist-body { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 16px 40px; }
-  .hist-body::-webkit-scrollbar { display: none; }
-  .hist-group { font-size: 11px; font-weight: 800; letter-spacing: .5px; color: var(--text-3); margin: 16px 2px 9px; }
-  .hist-row {
-    display: flex; align-items: center; gap: 11px;
-    padding: 10px; margin-bottom: 10px; cursor: pointer;
-    background: var(--card); border: 1px solid rgba(0,0,0,.08); border-radius: 14px;
-  }
-  .hist-poster {
-    width: 52px; aspect-ratio: 2/3; flex-shrink: 0;
-    border-radius: 9px; overflow: hidden; position: relative; background: var(--surface);
-  }
-  .hist-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .hist-poster .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .hist-flag {
-    position: absolute; left: 3px; right: 3px; bottom: 3px;
-    font-size: 8px; font-weight: 800; letter-spacing: .3px; text-align: center;
-    padding: 2px 0; border-radius: 6px; color: #fff;
-    background: rgba(0,0,0,.6); backdrop-filter: blur(2px);
-  }
-  .hist-flag.done { background: rgba(14,124,102,.92); color: #FFFFFF; }
-  .hist-info { flex: 1; min-width: 0; }
-  .hist-name { font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hist-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 10px; color: var(--text-3); }
-  .hist-meta .tagx { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px; background: var(--surface-2); color: var(--text-2); }
-  .hist-meta .rate { color: #C9803B; font-weight: 700; }
-  .hist-bar { height: 4px; border-radius: 2px; background: rgba(0,0,0,.12); margin-top: 7px; overflow: hidden; }
-  .hist-bar i { display: block; height: 100%; background: var(--accent); border-radius: 0 2px 2px 0; }
-  .hist-bar.all i { background: linear-gradient(90deg, rgba(14,124,102,.45), var(--accent)); }
-  .hist-status {
-    display: flex; align-items: center; gap: 5px; margin-top: 6px;
-    font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden;
-  }
-  .hist-status .ep { color: var(--accent); font-weight: 800; }
-  .hist-go {
-    flex-shrink: 0; height: 32px; padding: 0 11px; border: none; border-radius: 16px;
-    font-size: 11px; font-weight: 800; font-family: inherit; cursor: pointer;
-    background: var(--surface-2); color: var(--text);
-    display: flex; align-items: center; gap: 5px;
-  }
-  .hist-go.primary { background: var(--accent); color: #FFFFFF; }
-  .hist-empty { text-align: center; padding: 54px 18px; color: var(--text-3); font-size: 12.5px; line-height: 1.7; }
-  .hist-empty .big { font-size: 34px; margin-bottom: 12px; opacity: .75; }
-  .hist-empty button {
-    margin-top: 16px; height: 38px; padding: 0 18px; border-radius: 19px; cursor: pointer;
-    background: transparent; border: 1px solid rgba(0,0,0,.18); color: var(--text-2);
-    font-size: 12.5px; font-weight: 700; font-family: inherit;
-  }
-
-  /* --- Friends-watching tab --- */
-  .frank { width: 20px; flex-shrink: 0; text-align: center; font-size: 15px; font-weight: 900; font-style: italic; color: var(--text-3); }
-  .frank.top { color: var(--accent); }
-  .hist-friends { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10.5px; color: var(--text-2); }
-  .hist-friends b { color: var(--accent); font-weight: 800; }
-  .live-dot {
-    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-    background: var(--accent); animation: livePulse 1.9s ease-out infinite;
-  }
-  @keyframes livePulse {
-    0%   { box-shadow: 0 0 0 0 rgba(14,124,102,.55); }
-    70%  { box-shadow: 0 0 0 6px rgba(14,124,102,0); }
-    100% { box-shadow: 0 0 0 0 rgba(14,124,102,0); }
-  }
-
-  /* ===== Toast ===== */
+  /* toast */
   .toast {
-    position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(10px);
-    background: rgba(0,0,0,.8); color: #fff; font-size: 13px;
-    padding: 10px 18px; border-radius: 20px; z-index: 60;
-    opacity: 0; pointer-events: none; transition: all .25s; white-space: nowrap;
+    position: absolute; left: 50%; bottom: 108px; transform: translateX(-50%) translateY(8px); z-index: 100;
+    background: rgba(20,20,20,.92); color: #fff; font-size: 13px; font-weight: 700;
+    padding: 10px 18px; border-radius: 22px; opacity: 0; pointer-events: none;
+    transition: all .25s; max-width: 82%; text-align: center;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
 </style>
 </head>
 <body>
+  <div id="statusbar"><span id="sbTime">9:41</span><span>◼ ◼ ⬤</span></div>
 
-<div class="phone">
-  <!-- Status bar -->
-  <div class="statusbar">
-    <span>9:41</span>
-    <div class="icons">
-      <div class="sig"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></div>
-      <svg width="16" height="12" viewBox="0 0 16 12" fill="#1C1B18"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM4.9 7.4a4.4 4.4 0 016.2 0l-1.4 1.4a2.4 2.4 0 00-3.4 0L4.9 7.4zM2 4.5a8.5 8.5 0 0112 0l-1.4 1.4a6.5 6.5 0 00-9.2 0L2 4.5z" transform="translate(0,-1)"/></svg>
-      <div class="battery"></div>
+  <div id="stage">
+    <!-- top overlay bar: feed tabs + mute + search -->
+    <div class="top-bar">
+      <div class="ftabs">
+        <button id="ftFw" onclick="pickFeed('fw')"></button>
+        <button id="ftFy" class="on" onclick="pickFeed('fy')"></button>
+      </div>
+      <button class="tb-ic" id="muteBtn" onclick="toggleMute(event)" aria-label="Sound"></button>
+      <button class="tb-ic" id="srchBtn" onclick="openSearch(event)" aria-label="Search"></button>
     </div>
-  </div>
 
-  <!-- Search header -->
-  <div class="header">
-    <div class="search-row">
-      <div class="search-box" id="searchBox" onclick="focusReelsSearch(event)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6b7d" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input id="reelsQuery" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" spellcheck="false"
-               placeholder="Search dramas, creators, hashtags…" aria-label="Search Reels"
-               oninput="onReelsSearch(this.value)" onfocus="searchFocus(true)" onblur="searchFocus(false)" onkeydown="reelsSearchKey(event)">
-        <span class="clr" id="reelsClear" onclick="clearReelsSearch(event)" aria-label="Clear search">✕</span>
-        <span class="mic" onclick="toast('Voice search')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E7C66" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
-        </span>
-      </div>
-      <div class="history-btn" onclick="openHistory()" aria-label="Watch history">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      </div>
-      <div class="history-btn sub-entry" onclick="openSub()" aria-label="Wahda Premium">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0E7C66" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5l-1.3-9.2 5.1 3.1L12 5.2l4.7 6.2 5.1-3.1-1.3 9.2z"/><path d="M3.5 17.5h17"/><path d="M9.6 17.5l2.4-3 2.4 3"/></svg>
-      </div>
-    </div>
-  </div>
+    <div class="pager" id="pagerFy"></div>
+    <div class="pager hidden" id="pagerFw"></div>
 
-  <!-- Scroll body -->
-  <div class="scroll-body" id="scrollBody">
+    <div class="sw-hint" id="swHint"><span id="swTxt"></span></div>
 
-    <!-- Banner carousel -->
-    <div class="banner-wrap">
-      <div class="banner-track" id="bannerTrack">
-        <div class="banner b1" onclick="toast('Open campaign: Ramadan Special')">
-          <img class="bg" src="assets/banner-ramadan.jpg" alt="" onerror="this.remove()">
-          <span class="tag">🎬 FEATURED</span>
-          <h3>Ramadan Nights<br>Drama Marathon</h3>
-          <p>30 new episodes · Daily 8 PM</p>
-          <span class="banner-cta">Watch Now</span>
+    <!-- search overlay -->
+    <div class="srch" id="srchView">
+      <div class="sr-head">
+        <div class="sr-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+          <input id="srInput" oninput="srRender()" onkeydown="if(event.key==='Enter')srGoFirst()">
+          <button id="srClear" onclick="srClearQ()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
         </div>
-        <div class="banner b2" onclick="toast('Open campaign: Creator Spotlight')">
-          <img class="bg" src="assets/banner-creators.jpg" alt="" onerror="this.remove()">
-          <span class="tag">⭐ TOP CREATORS</span>
-          <h3>Creator Spotlight<br>Win 10,000 WT</h3>
-          <p>Submit your short drama before Sep 30</p>
-          <span class="banner-cta">Join Event</span>
-        </div>
-        <div class="banner b3" onclick="toast('Open campaign: New Season')">
-          <img class="bg" src="assets/banner-desertrose.jpg" alt="" onerror="this.remove()">
-          <span class="tag">🔥 NEW SEASON</span>
-          <h3>Desert Rose<br>Season 2 Premiere</h3>
-          <p>The saga continues · Episodes 1-3 live</p>
-          <span class="banner-cta">Start Watching</span>
-        </div>
+        <button class="sr-cancel" id="srCancel" onclick="closeSearch()"></button>
       </div>
-      <div class="banner-dots" id="bannerDots"><i class="on"></i><i></i><i></i></div>
-    </div>
-
-    <!-- Continue Watching (rendered by JS) -->
-    <div id="cwSection"></div>
-
-    <!-- Category chips -->
-    <div class="chips" id="chips">
-      <div class="chip on" onclick="pick(this,'All')">✨ All</div>
-      <div class="chip" onclick="pick(this,'Ranking')">🏆 Ranking</div>
-      <div class="chip" onclick="pick(this,'Romance')">💕 Romance</div>
-      <div class="chip" onclick="pick(this,'Action')">⚔️ Action</div>
-      <div class="chip" onclick="pick(this,'Comedy')">😂 Comedy</div>
-      <div class="chip" onclick="pick(this,'Thriller')">👻 Thriller</div>
-      <div class="chip" onclick="pick(this,'Family')">👨‍👩‍👧 Family</div>
-      <div class="chip" onclick="pick(this,'Faith')">🕌 Faith & Life</div>
-      <div class="chip" onclick="pick(this,'History')">🏺 History</div>
-    </div>
-
-    <div id="lists"></div>
-
-    <!-- Inline search results (shown while the top search field has a query) -->
-    <div id="searchRes"></div>
-  </div>
-
-  <!-- Bottom nav (Wahda UX merged): Reels tab entry lives in the main shell tabbar (Places replaced by Reels);
-       other tabs bridge back to the main shell via postMessage -->
-  <div class="tabbar">
-    <div class="tab" onclick="postTab('feeds')">
-      <span class="ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="3"/><path d="M7 9h10M7 13h6"/></svg></span>
-      Feeds
-      <span class="dot">3</span>
-    </div>
-    <div class="tab on">
-      <span class="ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 8.5h18M8 3l2.5 5.5M14 3l2.5 5.5"/><circle cx="12" cy="15" r="2.4"/></svg></span>
-      Reels
-    </div>
-    <div class="fab">
-      <button onclick="postTab('create')" aria-label="Create">+</button>
-    </div>
-    <div class="tab" onclick="postTab('messages')">
-      <span class="ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-8 8H4l2-3a8 8 0 1115-5z"/></svg></span>
-      Chats
-      <span class="dot">3</span>
-    </div>
-    <div class="tab" onclick="postTab('hub')">
-      <span class="ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5"/></svg></span>
-      My Hub
-    </div>
-  </div>
-  <div class="home-indicator"></div>
-  <!-- Vertical player overlay -->
-  <div class="player" id="playerView">
-    <div class="pv-media" id="pvMedia">
-      <img id="pvImg" src="" alt="">
-      <div class="pv-shade top"></div>
-      <div class="pv-shade bottom"></div>
-    </div>
-    <div class="pv-tap" onclick="toggleInfo(event)"></div>
-    <button class="pv-playbtn" id="pvPlayBtn" onclick="togglePlay(event)">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-    </button>
-    <div class="pv-sub" id="pvSub" hidden><span id="pvSubText"></span></div>
-    <div class="pv-top">
-      <button class="pv-btn" onclick="closePlayer()" aria-label="Back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-      <div class="pv-title" id="pvTitle"></div>
-      <button class="pv-btn" onclick="openPlaybackSheet(event)" aria-label="Playback settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
-      </button>
-    </div>
-    <div class="pv-rail">
-      <span class="ritem" id="pvLike" onclick="toggleLike(event)">
-        <span id="pvLikeIco"></span>
-        <span id="pvLikeN">128K</span>
-      </span>
-      <span class="ritem" onclick="openComments(event)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-8 8H4l2-3a8 8 0 1115-5z"/></svg>
-        Comments
-      </span>
-      <span class="ritem" onclick="openShare(event)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"/></svg>
-        Share
-      </span>
-      <span class="ritem" id="pvFav" onclick="toggleFavorite(event)">
-        <span id="pvFavIco"></span>
-        <span id="pvFavLbl">Favorite</span>
-      </span>
-    </div>
-    <div class="pv-info" id="pvInfo">
-      <div class="pv-tags">
-        <span class="res" id="pvRes">1080P</span>
-        <span id="pvCat"></span>
-        <span id="pvEps"></span>
+      <div class="sr-body">
+        <div class="sr-sec" id="srTrendLb"></div>
+        <div class="sr-chips" id="srChips"></div>
+        <div id="srRes"></div>
       </div>
-      <div class="pv-name" id="pvName"></div>
-      <div class="pv-syn" id="pvSyn"></div>
-      <span class="pv-more" onclick="openDetail()">More ›</span>
     </div>
-    <div class="pv-progress"><i id="pvProg"></i></div>
-    <div class="pv-epbar" onclick="openEpSheet(event)">
-      <span class="pb-left"><span id="pvEpLabel">EP 1<span class="eps">/EP 50</span></span><span class="pv-speed-chip" id="pvSpeedChip" hidden>1×</span></span>
-      <span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></span>
-    </div>
-    <div class="ep-mask" id="epMask" onclick="closeEpSheet()"></div>
-    <div class="ep-sheet" id="epSheet">
-      <div class="ep-sheet-head">Episodes <span id="epCount"></span></div>
-      <div class="ep-grid" id="epGrid"></div>
-    </div>
-    <div class="ep-mask" id="cmtMask" onclick="closeComments()"></div>
-    <div class="ep-sheet" id="cmtSheet">
-      <div class="ep-sheet-head">Comments <span id="cmtCount"></span></div>
+
+    <!-- comments sheet -->
+    <div class="mask" id="cmtMask" onclick="closeComments()"></div>
+    <div class="sheet" id="cmtSheet">
+      <div class="sh-grab"></div>
+      <div class="sh-head"><b id="cmtCount"></b>
+        <button class="sh-x" onclick="closeComments()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
       <div class="cmt-list" id="cmtList"></div>
       <div class="cmt-input-row">
-        <input id="cmtInput" placeholder="Leave a comment…" onkeydown="if(event.key==='Enter')sendComment()">
-        <button onclick="sendComment()">Post</button>
+        <input id="cmtInput" oninput="cmtInputChanged()" onkeydown="if(event.key==='Enter')sendComment()">
+        <button class="cmt-send" id="cmtSend" onclick="sendComment()" disabled></button>
       </div>
     </div>
-    <div class="ep-mask" id="shrMask" onclick="closeShare()"></div>
-    <div class="ep-sheet" id="shrSheet">
-      <div class="ep-sheet-head">Share <span>via Wahda</span></div>
+
+    <!-- share sheet (real bridge into the shell's Chats / Feeds) -->
+    <div class="mask" id="shrMask" onclick="closeShare()"></div>
+    <div class="sheet" id="shrSheet">
+      <div class="sh-grab"></div>
+      <div class="sh-head"><b id="shrTitle"></b>
+        <button class="sh-x" onclick="closeShare()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
       <div class="share-tabs" id="shareTabs">
-        <button class="on" onclick="renderShare('contacts', this)">Contacts</button>
-        <button onclick="renderShare('groups', this)">Groups</button>
-        <button onclick="renderShare('post', this)">Post</button>
+        <button class="on" id="stContacts" onclick="renderShare('contacts', this)"></button>
+        <button id="stGroups" onclick="renderShare('groups', this)"></button>
+        <button id="stPost" onclick="renderShare('post', this)"></button>
       </div>
       <div class="share-list" id="shareList"></div>
     </div>
-    <div class="ep-mask" id="pbMask" onclick="closePlaybackSheet()"></div>
-    <div class="ep-sheet" id="pbSheet">
-      <div class="ep-sheet-head">Playback settings <span id="pbTitle"></span></div>
-      <div class="ps-body" id="pbBody"></div>
-    </div>
+
+    <div class="toast" id="toast"></div>
   </div>
 
-  <!-- Drama detail overlay -->
-  <div class="detail" id="detailView">
-    <div class="dt-hero">
-      <img id="dtImg" src="" alt="">
-      <button class="pv-btn" onclick="closeDetail()" aria-label="Back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-    </div>
-    <div class="dt-body">
-      <h2 class="dt-title" id="dtTitle"></h2>
-      <div class="dt-meta" id="dtMeta"></div>
-      <div class="dt-tags" id="dtTags"></div>
-      <div class="dt-actions">
-        <button class="play" id="dtCta" onclick="closeDetail()"></button>
-        <button class="save" onclick="toggleFavorite(event)" aria-label="Favorite">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>
-        </button>
-      </div>
-      <p class="dt-syn" id="dtSyn"></p>
-      <div class="dt-sec">Episodes</div>
-      <div class="ep-grid" id="dtEps"></div>
-      <div class="dt-sec">More Like This</div>
-      <div class="dt-rel" id="dtRel"></div>
-      <div class="dt-bottom-actions">
-        <button class="save-wide" id="dtFav" onclick="toggleFavorite(event)"></button>
-        <button class="continue" onclick="closeDetail()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          Continue Playing
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-
-  <!-- Subscription page -->
-  <div class="subview" id="subView">
-    <div class="sub-head">
-      <button class="pv-btn" onclick="closeSub()" aria-label="Back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-      <h2>Wahda Premium</h2>
-    </div>
-    <div class="sub-body" id="subBody">
-      <div id="subStatus"></div>
-      <div class="sub-hero">
-        <div class="sub-crown">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0E7C66" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5l-1.3-9.2 5.1 3.1L12 5.2l4.7 6.2 5.1-3.1-1.3 9.2z"/><path d="M3.5 17.5h17"/><path d="M9.6 17.5l2.4-3 2.4 3"/></svg>
-        </div>
-        <h1>Unlock Wahda Premium</h1>
-        <p>Ad-free binge, early episodes and the full Top 50 library — cancel anytime.</p>
-      </div>
-
-      <div class="sub-perks">
-        <div class="perk"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>Ad-free viewing on every short drama</div>
-        <div class="perk"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>New episodes 24h early access</div>
-        <div class="perk"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>Full Top 50 library & 1080P downloads</div>
-        <div class="perk"><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>2× Wahda Token rewards while watching</div>
-      </div>
-
-      <div class="sub-sec">CHOOSE YOUR PLAN</div>
-      <div id="planList"></div>
-    </div>
-    <div class="sub-foot" id="subFoot">
-      <button class="sub-btn" onclick="subscribe()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        <span id="subBtnLabel">Subscribe · $6.99/month</span>
-      </button>
-      <div class="sub-legal">Auto-renews via <b>Wahda Pay</b> · Cancel anytime in Settings</div>
-    </div>
-  </div>
-
-  <!-- Watch history (playback history) -->
-  <div class="histview" id="histView">
-    <div class="hist-head">
-      <button class="pv-btn" onclick="closeHistory()" aria-label="Back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-      <h2>Watch History</h2>
-      <button class="pv-btn" onclick="clearHistory()" aria-label="Clear history">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.8h6V7M6.5 7l1 13h9l1-13"/><path d="M10.5 10.5v6M13.5 10.5v6"/></svg>
-      </button>
-    </div>
-
-    <div class="hist-search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b6b7d" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="histQuery" placeholder="Search in history…" oninput="histSearch(this.value)">
-      <span class="clr" id="histClearQ" onclick="clearHistQuery()">✕</span>
-    </div>
-
-    <div class="hist-tabs" id="histTabs"></div>
-    <div class="hist-stats" id="histStats"></div>
-    <div class="hist-body" id="histBody"></div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-</div>
+  <div id="homebar"></div>
 
 <script>
-  /* ---------- data ----------
-     Poster images: original AI-generated key art for demo purposes only (no third-party copyright).
-     Theme follows the Wahda app palette: bg #F4F2EE / surface #FFFFFF / accent brand green #0E7C66. */
-  const dramas = [
-    { t:"Desert Rose",        s:"S2 · 12 eps", r:"9.2", p:"2.4M", f:"182K", b:"hot",    g:"g1",  e:"🌹", img:"desert-rose.jpg",    cat:"Romance" },
-    { t:"The Calligrapher",   s:"New · 6 eps", r:"8.8", p:"890K", f:"96K",  b:"new",    g:"g4",  e:"🖋️", img:"calligrapher.jpg",   cat:"Faith" },
-    { t:"Midnight Souq",      s:"18 eps",      r:"8.5", p:"1.7M", f:"141K", b:"hot",    g:"g10", e:"🌙", img:"midnight-souq.jpg",  cat:"Thriller" },
-    { t:"Henna & Honey",      s:"New · 3 eps", r:"9.0", p:"456K", f:"58K",  b:"new",    g:"g5",  e:"🍯", img:"henna-honey.jpg",    cat:"Romance" },
-    { t:"Cairo Nights",       s:"24 eps",      r:"8.1", p:"3.1M", f:"205K", b:null,     g:"g3",  e:"🕌", img:"cairo-nights.jpg",   cat:"Action" },
-    { t:"The Hajj Journey",   s:"10 eps",      r:"9.5", p:"5.2M", f:"390K", b:"hotnew", g:"g6",  e:"🕋", img:"hajj-journey.jpg",   cat:"Faith" },
-    { t:"Souk Stories",       s:"Comedy · 15", r:"7.9", p:"1.2M", f:"88K",  b:null,     g:"g8",  e:"😂", img:"souk-stories.jpg",   cat:"Comedy" },
-    { t:"Guardian of Dunes",  s:"New · 8 eps", r:"8.7", p:"670K", f:"71K",  b:"new",    g:"g7",  e:"🐪", img:"guardian-dunes.jpg", cat:"Action" },
+  /* =====================================================================
+     Wahda Reels — short-video feed (Douyin-style)
+     One vertical snap-paging feed. "Videos" are simulated with still
+     covers + motion, so the page runs fully offline in this prototype.
+     Sharing bridges into the app shell's real Chats / Feeds over
+     postMessage; guests watch freely, only real writes are gated by the
+     shell. Bilingual (en/zh) — the shell pushes its language via ctx.
+     ===================================================================== */
+  const EMBEDDED = (function () { try { return !!(window.parent && window.parent !== window) } catch (e) { return false } })();
+  if (!EMBEDDED) document.body.classList.add('standalone');
+
+  /* ---------- content ---------- */
+  const VIDS = [
+    { id:'v01', img:'videos/v01.jpg', dur:22, handle:'chef.amina', vf:true,
+      name:{en:"Amina's Kitchen",zh:'阿米娜的厨房'}, avaBg:'#C96F4A',
+      t:{en:'30-Second Shawarma',zh:'30秒沙威玛'},
+      cap:{en:'30-second beef shawarma wrap 🌯 full recipe in comments #food #halalfood #streetfood',
+           zh:'30 秒卷好一份牛肉沙威玛 🌯 完整食谱在评论区 #美食 #清真美食 #街头小吃'},
+      music:'Shik Shak Shok — Hossam Ramzy', loc:'Cairo, Egypt',
+      likes:128400, comments:1243, favs:8942, shares:4210, followed:false },
+    { id:'v02', img:'videos/v02.jpg', dur:28, handle:'wanderwithzayd', vf:true,
+      name:{en:'Zayd Travels',zh:'Zayd 旅行日记'}, avaBg:'#3E8E7E',
+      t:{en:'Blue Mosque Sunset',zh:'蓝色清真寺日落'},
+      cap:{en:'Golden hour over the Blue Mosque — no filter needed 🕌 #travel #istanbul #sunset',
+           zh:'蓝色清真寺的黄金时刻，无需滤镜 🕌 #旅行 #伊斯坦布尔 #日落'},
+      music:'Bosphorus Nights — Zülfü Livaneli', loc:'Istanbul, Türkiye',
+      likes:256000, comments:3208, favs:18700, shares:9450, followed:false },
+    { id:'v03', img:'videos/v03.jpg', dur:35, handle:'qari.yusuf', vf:true,
+      name:{en:'Qari Yusuf',zh:'诵经师 Yusuf'}, avaBg:'#0E7C66',
+      t:{en:'Surah Ar-Rahman',zh:'至仁主章诵读'},
+      cap:{en:'Surah Ar-Rahman · verses 1-13 — may it bring peace to your day 🤍 #quran #recitation #peace',
+           zh:'《至仁主》章 1-13 节，愿它为你的一天带来安宁 🤍 #古兰经 #诵读 #宁静'},
+      music:'Original sound — qari.yusuf', loc:'Madinah, Saudi Arabia',
+      likes:892000, comments:12400, favs:45600, shares:28900, followed:true },
+    { id:'v04', img:'videos/v04.jpg', dur:19, handle:'stylebynoor', vf:false,
+      name:{en:'Noor | Modest Style',zh:'Noor 保守风穿搭'}, avaBg:'#B85C8E',
+      t:{en:'Abaya Lookbook',zh:'Abaya 穿搭'},
+      cap:{en:'3 work-friendly abaya looks under $60 each ✨ which one — 1, 2 or 3? #fashion #modestwear #abaya',
+           zh:'3 套通勤风 Abaya，每套不到 $60 ✨ 你选哪套？#穿搭 #保守风 #abaya'},
+      music:'Runaway — AURORA (slowed)', loc:'Dubai, UAE',
+      likes:94300, comments:2140, favs:15600, shares:3120, followed:false },
+    { id:'v05', img:'videos/v05.jpg', dur:24, handle:'coach.bilal', vf:false,
+      name:{en:'Coach Bilal',zh:'Bilal 教练'}, avaBg:'#5262ED',
+      t:{en:'5-Min Home Workout',zh:'5分钟居家训练'},
+      cap:{en:'No equipment? No excuse. 5-minute morning routine on one prayer mat 💪 #fitness #homeworkout',
+           zh:'没有器械？没借口。一张拜垫的 5 分钟晨间训练 💪 #健身 #居家训练'},
+      music:'Eye of the Tiger — Survivor (remix)', loc:'Kuala Lumpur, Malaysia',
+      likes:45200, comments:986, favs:12400, shares:1870, followed:false },
+    { id:'v06', img:'videos/v06.jpg', dur:21, handle:'dalal.brews', vf:false,
+      name:{en:'Dalal Brews',zh:'Dalal 咖啡日常'}, avaBg:'#8A5A18',
+      t:{en:'Arabic Coffee at Home',zh:'在家煮阿拉伯咖啡'},
+      cap:{en:'The right way to brew Arabic coffee at home ☕ save this for the weekend #coffee #arabiccoffee #recipe',
+           zh:'在家煮阿拉伯咖啡的正确方式 ☕ 收藏起来周末试试 #咖啡 #阿拉伯咖啡 #食谱'},
+      music:'Ya Jameel — Cairokee (acoustic)', loc:'Amman, Jordan',
+      likes:67800, comments:1532, favs:11200, shares:2450, followed:true },
+    { id:'v07', img:'videos/v07.jpg', dur:16, handle:'cats.of.madinah', vf:false,
+      name:{en:'Cats of Madinah',zh:'麦地那的猫'}, avaBg:'#C9A24B',
+      t:{en:'Masjid Cat Shift',zh:'清真寺的猫'},
+      cap:{en:'He guards the masjid door every morning and demands payment in pets 🐱 #cats #funny',
+           zh:'他每天早上守着寺门，报酬是摸摸头 🐱 #猫 #搞笑'},
+      music:'Original sound — cats.of.madinah', loc:'Madinah, Saudi Arabia',
+      likes:1200000, comments:18900, favs:92300, shares:45600, followed:false },
+    { id:'v08', img:'videos/v08.jpg', dur:30, handle:'ink.and.light', vf:false,
+      name:{en:'Ink & Light',zh:'墨与光'}, avaBg:'#7f5af0',
+      t:{en:'Gold Calligraphy',zh:'金色书法'},
+      cap:{en:'Gold ink, bamboo qalam, 4 hours of patience — writing His name 🖋️ #calligraphy #art',
+           zh:'金墨、竹笔、四小时的耐心——书写祂之名 🖋️ #书法 #艺术'},
+      music:'Nasheed instrumental — Sami Yusuf', loc:'Fez, Morocco',
+      likes:156000, comments:2870, favs:34100, shares:8900, followed:false },
+    { id:'v09', img:'videos/v09.jpg', dur:26, handle:'techmajlis', vf:true,
+      name:{en:'Tech Majlis',zh:'Tech Majlis'}, avaBg:'#3a48b8',
+      t:{en:'Dubai Metro Hacks',zh:'迪拜地铁技巧'},
+      cap:{en:'3 Dubai Metro hacks nobody tells you 🚇 #2 saved me 20 minutes #dubai #tech #tips',
+           zh:'3 个没人告诉你的迪拜地铁技巧 🚇 第 2 个帮我省了 20 分钟 #迪拜 #科技'},
+      music:'Neon Lights — Adeem', loc:'Dubai, UAE',
+      likes:88900, comments:1760, favs:9800, shares:5400, followed:false },
+    { id:'v10', img:'videos/v10.jpg', dur:18, handle:'the.habibis', vf:true,
+      name:{en:'The Habibis',zh:'Habibi 一家'}, avaBg:'#B85C3D',
+      t:{en:"Mom Calls at 92'",zh:'92分钟妈妈的电话'},
+      cap:{en:"POV: the match is at 92' and mom calls from the kitchen 😭⚽ #comedy #family",
+           zh:'比赛第 92 分钟，妈妈在厨房喊你 😭⚽ #搞笑 #家庭'},
+      music:'Original sound — the.habibis', loc:'Dearborn, USA',
+      likes:423000, comments:15600, favs:28400, shares:61200, followed:false },
+    { id:'v11', img:'videos/v11.jpg', dur:32, handle:'desert.roamer', vf:false,
+      name:{en:'Desert Roamer',zh:'沙漠漫游者'}, avaBg:'#a08032',
+      t:{en:'3AM in Wadi Rum',zh:'凌晨3点的瓦地伦'},
+      cap:{en:'Phone died, sky took over — Wadi Rum at 3AM 🌌 #camping #milkyway #travel',
+           zh:'手机没电，星空接管——凌晨 3 点的瓦地伦 🌌 #露营 #星空 #旅行'},
+      music:'Sahara Nights — Natacha Atlas', loc:'Wadi Rum, Jordan',
+      likes:234000, comments:4300, favs:51200, shares:19800, followed:false },
+    { id:'v12', img:'videos/v12.jpg', dur:25, handle:'homewith.hana', vf:false,
+      name:{en:'Home with Hana',zh:'Hana 的家'}, avaBg:'#3E8E7E',
+      t:{en:'Prayer Corner DIY',zh:'礼拜角改造'},
+      cap:{en:'Turned this dead corner into a prayer space for under $40 🕯️ breakdown in comments #homedecor #diy',
+           zh:'不到 $40 把死角改成礼拜角 🕯️ 清单在评论区 #家居 #改造'},
+      music:'Soft oud — Lumimar', loc:'London, UK',
+      likes:76400, comments:1210, favs:18900, shares:3200, followed:false },
   ];
-  const bonusPool = [
-    { t:"Kasbah Echoes",      s:"History · 14", r:"8.4", p:"980K", f:"66K",  b:null,  g:"g8",  e:"🏺", img:"kasbah-echoes.jpg",   cat:"History" },
-    { t:"The Blue Mosque",    s:"New · 5 eps",  r:"9.1", p:"720K", f:"59K",  b:"new", g:"g9",  e:"🕌", img:"blue-mosque.jpg",     cat:"Faith" },
-    { t:"Castle of Whispers", s:"Thriller · 9", r:"8.3", p:"1.5M", f:"104K", b:"hot", g:"g7",  e:"👻", img:"castle-whispers.jpg", cat:"Thriller" },
-    { t:"Golden Hour",        s:"New · 4 eps",  r:"8.6", p:"540K", f:"47K",  b:"new", g:"g3",  e:"🌅", img:"golden-hour.jpg",     cat:"Romance" },
-  ];
-  const allPool = dramas.concat(bonusPool);
-  const top10 = allPool.slice().sort((a,b)=>parseFloat(b.r)-parseFloat(a.r)).slice(0,10);
-  function playVal(p){ return parseFloat(p) * (p.includes('M') ? 1000 : 1); }
-  const top10Played = allPool.slice().sort((a,b)=>playVal(b.p)-playVal(a.p)).slice(0,10);
-
-  /* Top 50 library for the Ranking chip (12 originals + 38 demo titles) */
-  const extraNames = [
-    ["Whispers of the Oasis","Romance","12 eps"],["Sultan's Secret","History","16 eps"],
-    ["The Ninth Lantern","Thriller","10 eps"],["Star of Samarkand","History","20 eps"],
-    ["Pearl of the Gulf","Romance","8 eps"],["The Last Caravan","Action","14 eps"],
-    ["Moonlit Minarets","Faith","9 eps"],["Silk & Sand","Romance","18 eps"],
-    ["The Falconer","Action","11 eps"],["Amber Nights","Romance","7 eps"],
-    ["Daughter of the Nile","History","22 eps"],["The Copper Bazaar","Comedy","12 eps"],
-    ["Embers of Andalus","History","15 eps"],["The Quiet Minaret","Faith","6 eps"],
-    ["Salt & Sky","Family","8 eps"],["The Weaver's Song","Family","10 eps"],
-    ["Throne of Dust","History","25 eps"],["Mirage","Thriller","9 eps"],
-    ["The Scribe of Baghdad","History","13 eps"],["Jasmine Season","Romance","6 eps"],
-    ["Winds of the Sahara","Action","12 eps"],["The Golden Dune","Action","8 eps"],
-    ["Cedar & Smoke","Family","7 eps"],["The Porter's Dream","Comedy","10 eps"],
-    ["Veil of Stars","Romance","14 eps"],["Oasis Runners","Action","9 eps"],
-    ["The Chess Master","History","11 eps"],["Ripples of the Rift","Thriller","8 eps"],
-    ["Drums of the Desert","Action","16 eps"],["The Honey Judge","Family","9 eps"],
-    ["Letters to Laleh","Romance","7 eps"],["The Spice Route","Comedy","13 eps"],
-    ["Guardians of the Gate","Action","18 eps"],["Sandstorm Squad","Action","10 eps"],
-    ["The Glass Mosque","Faith","8 eps"],["Pomegranate Days","Family","12 eps"],
-    ["The Cartographer","History","9 eps"],["Falcon & Fanous","Thriller","7 eps"]
-  ];
-  const catEmoji = { Romance:"💞", Action:"⚔️", Comedy:"😄", Thriller:"🌑", Faith:"🕌", History:"🏛️", Family:"🏡" };
-  const extraPool = extraNames.map((n,i)=>({
-    t:n[0], cat:n[1], s:n[2],
-    r:(9.4 - i*0.032).toFixed(1),
-    p:((4.8 - i*0.105).toFixed(1))+"M",
-    f:Math.max(298 - i*6, 12)+"K",
-    b:null, g:"g"+((i%10)+1), e:catEmoji[n[1]]||"🎬",
-    img:["desert-rose.jpg","calligrapher.jpg","midnight-souq.jpg","henna-honey.jpg","cairo-nights.jpg","hajj-journey.jpg","souk-stories.jpg","guardian-dunes.jpg","kasbah-echoes.jpg","blue-mosque.jpg","castle-whispers.jpg","golden-hour.jpg"][i%12]
-  }));
-  const rankingPool = allPool.concat(extraPool)
-    .sort((a,b)=>(parseFloat(b.r)-parseFloat(a.r)) || a.t.localeCompare(b.t));
-  const ads = [
-    /* Slot 1 — subscription flash offer (clicking opens the Premium page) */
-    { t:"Go Monthly Premium", d:"Unlock unlimited playback", c:"Subscribe", e:"80",
-      promo:true, tag:"LIMITED TIME", act:"openSub()" },
-    { t:"Wahda Pay — Send Home in 1 Tap", d:"Zero-fee transfers for new users this week. Powered by Wahda Token.", c:"Try It", e:"💸" },
-    { t:"Souq Mondays — Up to 50% OFF",  d:"Local stores near you. Pick up today, pay with Wahda Pay.",           c:"Browse Deals", e:"🛍️" },
-    { t:"Wahda Token — Stake & Earn",    d:"Stake WT to unlock premium drama episodes and creator boosts.",       c:"Learn More", e:"🪙" },
+  const TAG_POOL = ['halalfood','travel','quran','modestwear','cats','dubai','calligraphy','homedecor'];
+  const CMT_POOL = [
+    { h:'recipe.sara',   t:{en:'Made this twice this week already 😍',zh:'这周已经做了两次了 😍'}, likes:842, time:{en:'2h',zh:'2小时'} },
+    { h:'omar.k',        t:{en:'The sound of the grill alone deserves an award',zh:'光是烤架的声音就该获奖'}, likes:311, time:{en:'3h',zh:'3小时'} },
+    { h:'lina_h',        t:{en:'Saving this for the weekend, thank you!',zh:'收藏了周末试，谢谢！'}, likes:156, time:{en:'5h',zh:'5小时'} },
+    { h:'yusuf_92',      t:{en:'Bro really said 30 seconds and delivered 💯',zh:'说 30 秒就真 30 秒，太靠谱了 💯'}, likes:97, time:{en:'6h',zh:'6小时'} },
+    { h:'khadija.b',     t:{en:'This is exactly what my feed needed today 🤍',zh:'今天正好需要这条 🤍'}, likes:428, time:{en:'1h',zh:'1小时'} },
+    { h:'ahmad.travels', t:{en:'Adding this to my bucket list right now',zh:'马上加进我的必去清单'}, likes:203, time:{en:'4h',zh:'4小时'} },
+    { h:'maryam_z',      t:{en:'The quality of this video is insane 🎥',zh:'这视频质感也太好了 🎥'}, likes:118, time:{en:'8h',zh:'8小时'} },
+    { h:'bilaalfits',    t:{en:'Free value as always, appreciated 🙏',zh:'一如既往的干货，感谢 🙏'}, likes:74, time:{en:'9h',zh:'9小时'} },
   ];
 
-  const lists = document.getElementById('lists');
-  let adIndex = 0, currentFilter = 'All';
-
-  /* ---------- Watch history — two categories ----------
-     done:true  → every episode of the drama has been watched
-     done:false → played but not finished; ep = the episode currently in progress */
-  const histSeed = [
-    /* A · fully watched */
-    { t:"The Hajj Journey",   cat:"Faith",    rate:"9.5", img:"hajj-journey.jpg",    total:10, ep:10, pct:100, done:true,  when:"Today",     date:"Finished today" },
-    { t:"Henna & Honey",      cat:"Romance",  rate:"9.0", img:"henna-honey.jpg",     total:3,  ep:3,  pct:100, done:true,  when:"Today",     date:"Finished today" },
-    { t:"Guardian of Dunes",  cat:"Action",   rate:"8.7", img:"guardian-dunes.jpg",  total:8,  ep:8,  pct:100, done:true,  when:"Yesterday", date:"Finished yesterday" },
-    { t:"Golden Hour",        cat:"Romance",  rate:"8.6", img:"golden-hour.jpg",     total:4,  ep:4,  pct:100, done:true,  when:"This week", date:"Finished 3 days ago" },
-    { t:"The Blue Mosque",    cat:"Faith",    rate:"9.1", img:"blue-mosque.jpg",     total:5,  ep:5,  pct:100, done:true,  when:"Earlier",   date:"Finished 2 weeks ago" },
-    /* B · started, not finished */
-    { t:"Desert Rose",        cat:"Romance",  rate:"9.2", img:"desert-rose.jpg",     total:12, ep:5,  pct:62,  when:"Today",     date:"Watched 2h ago",        left:"14 min left" },
-    { t:"The Calligrapher",   cat:"Faith",    rate:"8.8", img:"calligrapher.jpg",    total:6,  ep:2,  pct:74,  when:"Today",     date:"Watched 5h ago",        left:"6 min left" },
-    { t:"Midnight Souq",      cat:"Thriller", rate:"8.5", img:"midnight-souq.jpg",   total:18, ep:7,  pct:38,  when:"Yesterday", date:"Watched yesterday",     left:"21 min left" },
-    { t:"Cairo Nights",       cat:"Action",   rate:"8.1", img:"cairo-nights.jpg",    total:24, ep:11, pct:45,  when:"Yesterday", date:"Watched yesterday",     left:"18 min left" },
-    { t:"Castle of Whispers", cat:"Thriller", rate:"8.3", img:"castle-whispers.jpg", total:9,  ep:4,  pct:92,  when:"This week", date:"Watched 3 days ago",    left:"2 min left" },
-    { t:"Souk Stories",       cat:"Comedy",   rate:"7.9", img:"souk-stories.jpg",    total:15, ep:9,  pct:55,  when:"This week", date:"Watched 4 days ago",    left:"12 min left" },
-    { t:"Kasbah Echoes",      cat:"History",  rate:"8.4", img:"kasbah-echoes.jpg",   total:14, ep:9,  pct:13,  when:"Earlier",   date:"Watched 2 weeks ago",   left:"25 min left" },
-  ];
-  let histRows = histSeed.map(h => Object.assign({}, h));
-
-  /* ---------- Friends watching now: Top 30 titles by how many friends are on them ----------
-     Privacy: only the COUNT of friends is ever surfaced — no names, avatars or handles. */
-  const friendWatch = rankingPool.slice(0, 30)
-    .map((d, i) => ({
-      t:d.t, cat:d.cat, rate:d.r, img:d.img, total:epsOf(d),
-      friends: Math.max(3, Math.round(26 * Math.pow(0.923, i)))
-    }))
-    .sort((a, b) => b.friends - a.friends)
-    .map((f, i) => Object.assign(f, { rank: i + 1 }));
-
-  /* ---------- Continue Watching row is derived from the same history data ---------- */
-  const continueWatching = histRows.filter(h => !h.done)
-    .map(h => ({ t:h.t, img:h.img, ep:'EP ' + h.ep, pct:h.pct, left:h.left }));
-  function renderContinueWatching() {
-    document.getElementById('cwSection').innerHTML =
-      `<div class="section-head"><h2>Continue Watching</h2><span class="more" onclick="openHistory()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
-       <div class="cw-row">${continueWatching.map(c=>`
-        <div class="cw-card" onclick="openPlayer('${c.t}', ${parseInt(c.ep.slice(3))})">
-          <div class="cw-thumb">
-            <img src="assets/${c.img}" alt="${c.t}" onerror="this.remove()">
-            <span class="cw-ep">${c.ep}</span>
-            <span class="cw-play"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
-            <div class="cw-progress"><i style="width:${c.pct}%"></i></div>
-          </div>
-          <div class="cw-title">${c.t}</div>
-          <div class="cw-left">${c.pct}% watched · ${c.left}</div>
-        </div>`).join('')}</div>`;
-  }
-  renderContinueWatching();
-
-  function posterHTML(d) {
-    const badge = d.b ? `<span class="badge ${d.b}">${d.b==='hotnew'?'HOT+NEW':d.b.toUpperCase()}</span>` : '';
-    return `<div class="poster-card" onclick="openPlayer('${jsStr(d.t)}')">
-      <div class="poster ${d.g}">
-        <span class="art">${d.e}</span>
-        ${d.img ? `<img class="pic" src="assets/${d.img}" alt="${d.t}" loading="lazy" onerror="this.remove()">` : ''}
-        ${badge}
-        <span class="plays">▶ ${d.p}</span>
-        <div class="meta">
-          <div class="title">${d.t}</div>
-          <div class="sub"><span class="rating">★ ${d.r}</span><span>${d.s}</span></div>
-        </div>
-      </div>
-    </div>`;
-  }
-  const jsStr = s => s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  function sectionHead(title) {
-    return `<div class="section-head"><h2>${title}</h2><span class="more" onclick="toast('More: ${title}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div>`;
-  }
-  function rowHTML(items) {
-    return `<div class="row">${items.map(d=>posterHTML(d)).join('')}</div>`;
-  }
-  function adHTML() {
-    /* slot 1 = subscription flash offer (fixed); later slots rotate the regular ads */
-    const promo = ads.filter(a => a.promo)[0];
-    const rest  = ads.filter(a => !a.promo);
-    const a = adIndex === 0 ? promo : rest[(adIndex - 1) % rest.length];
-    adIndex++;
-    const act = a.act || `toast('Ad: ${a.t}')`;
-    const art = a.promo ? `${a.e}%<small>OFF</small>` : a.e;
-    return `<div class="ad-card${a.promo ? ' ad-promo' : ''}" onclick="${act}">
-      <div class="ad-art">${art}</div>
-      <div class="ad-body">
-        ${a.tag ? `<span class="ad-tag">${a.tag}</span>` : ''}
-        <div class="ad-title">${a.t}</div>
-        <div class="ad-desc">${a.d}</div>
-      </div>
-      <span class="ad-cta">${a.c}<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-    </div>`;
-  }
-
-  /* ---------- render: front ranking lists + themed lists ---------- */
-  const listTitles = [
-    "Top 10 Played of the day",  // 1 ranked by plays
-    "Most Searched",             // 2 curated
-    "Rankings",                  // 3 ranked by rating
-    "You May Like",              // 4 filterable
-    "Trending Now",
-    "New This Week",
-    "Faith & Life Picks",
-    "Comedy Central",
-    "Based on Your Watch",
-    "Ramadan Specials",
-    "Arabic Originals",
-    "Action Arena",
-    "Family Night",
-    "Historical Epics",
-    "Thriller Zone",
-    "Editor's Choice",
-    "Community Favorites",
-    "Romance Row",
-    "Creator Spotlight",
-    "Weekend Binge",
-    "Award Winners",
-    "Coming Soon",
-  ];
-  const TOTAL_LISTS = listTitles.length; // 22
-  const AD_EVERY = 4; // one ad after every 4 lists
-
-  function renderAll() {
-    const filtered = currentFilter === 'All' ? dramas : allPool.filter(d => d.cat === currentFilter);
-    adIndex = 0; /* keep the subscription promo pinned to the first ad slot */
-    let html = '';
-    for (let i = 0; i < TOTAL_LISTS; i++) {
-      const title = listTitles[i];
-      let items, ranked = false;
-      if (i === 0)      { items = top10Played; ranked = true; }
-      else if (i === 1) { items = allPool.slice(5).concat(allPool).slice(0, 10); }
-      else if (i === 2) { items = top10; ranked = true; }
-      else if (i === 3) { items = filtered; }
-      else {
-        const off = (i * 3) % allPool.length;
-        items = allPool.slice(off).concat(allPool).slice(0, 10);
-      }
-      html += sectionHead(title) +
-        (items.length ? rowHTML(items) : '<div class="loading">No titles in this category yet — try another.</div>');
-      if ((i + 1) % AD_EVERY === 0 && i < TOTAL_LISTS - 1) html += adHTML();
+  /* ---------- i18n ---------- */
+  let rlang = 'en';
+  const L = {
+    en: { fy:'For You', fw:'Following', trend:'Trending now', cancel:'Cancel',
+      srph:'Search videos, creators, tags', nores:'No videos found', comments:'comments',
+      ph:'Leave a comment…', post:'Post', share:'Share', via:'Share via Wahda',
+      contacts:'Contacts', groups:'Groups', mypost:'Post', more:'More', less:'Less',
+      swipe:'Swipe up for more', fwempty:'New videos from creators you follow will appear here',
+      gofy:'Browse For You', posted:'Posted to Feeds & My Hub', cmtok:'Comment posted',
+      sndon:'Sound on', sndoff:'Sound off', fol:'Following @', unfol:'Unfollowed @',
+      shareok:'Shared with ', postcap:'Sharing a Wahda Reels video: ', watch:'Reels' },
+    zh: { fy:'推荐', fw:'关注', trend:'热门话题', cancel:'取消',
+      srph:'搜索视频、创作者、话题', nores:'没有找到相关视频', comments:'条评论',
+      ph:'说点什么…', post:'发送', share:'分享', via:'分享到 Wahda',
+      contacts:'好友', groups:'群聊', mypost:'发帖', more:'展开', less:'收起',
+      swipe:'上滑看更多', fwempty:'关注的创作者更新后，视频会出现在这里',
+      gofy:'去看看推荐', posted:'已发布到 Feeds 与 My Hub', cmtok:'评论已发布',
+      sndon:'已开启声音', sndoff:'已静音', fol:'已关注 @', unfol:'已取消关注 @',
+      shareok:'已分享给 ', postcap:'分享一条 Wahda Reels 视频：', watch:'Reels' },
+  };
+  const T = k => (L[rlang] && L[rlang][k]) || L.en[k] || k;
+  function fmtN(n) {
+    if (rlang === 'zh') {
+      if (n < 10000) return String(n);
+      if (n < 100000000) return (n / 10000).toFixed(n < 1000000 ? 1 : 0).replace(/\.0$/, '') + '万';
+      return (n / 100000000).toFixed(1).replace(/\.0$/, '') + '亿';
     }
-    lists.innerHTML = html;
+    if (n < 1000) return String(n);
+    if (n < 10000) return (n / 1000).toFixed(1) + 'K';
+    if (n < 1000000) return Math.round(n / 1000) + 'K';
+    return (n / 1000000).toFixed(1) + 'M';
   }
 
-  /* ---------- Top search field: type a keyword, results replace the feed ---------- */
-  let srQuery = '';
+  /* ---------- tiny helpers ---------- */
+  const $ = id => document.getElementById(id);
+  function vById(id) { return VIDS.filter(v => v.id === id)[0]; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function linkTags(cap) { return esc(cap).replace(/#[\w\u4e00-\u9fff-]+/g, m => '<span class="tag">' + m + '</span>'); }
+  let toastTimer = 0;
+  function toast(msg) {
+    const el = $('toast'); el.textContent = msg; el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
 
-  /* keep focus on the field when the box itself (not the mic / clear) is tapped */
-  function focusReelsSearch(e) {
-    if (e && e.target && e.target.closest('.mic, .clr')) return;
-    const i = document.getElementById('reelsQuery');
-    if (i) i.focus();
+  /* ---------- card rendering ---------- */
+  const ICONS = {
+    heart: '<svg class="ic-heart" width="31" height="31" viewBox="0 0 24 24" fill="none"><path d="M12 20.6S3.4 15.4 3.4 9.6C3.4 6.8 5.6 4.6 8.3 4.6c1.6 0 3 .8 3.7 2 .7-1.2 2.1-2 3.7-2 2.7 0 4.9 2.2 4.9 5 0 5.8-8.6 11-8.6 11z" fill="currentColor"/></svg>',
+    cmt: '<svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.9 3 3 6.5 3 10.8c0 2.4 1.2 4.5 3.2 5.9-.1 1-.6 2.3-1.7 3.3 1.9-.1 3.5-.8 4.6-1.6.9.2 1.9.4 2.9.4 5.1 0 9-3.5 9-7.9S17.1 3 12 3z"/></svg>',
+    star: '<svg class="ic-star" width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z" fill="currentColor"/></svg>',
+    share: '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5v3.6C7.9 9 4.6 12.5 3.5 18.4c2.3-3.2 5.6-4.8 10-4.8V17l7-6.1-7-5.9z"/></svg>',
+    pin: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 00-7 7c0 4.9 7 13 7 13s7-8.1 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg>',
+    note: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3v10.6A3.5 3.5 0 1011 17V7h7V3H9z"/></svg>',
+    vf: '<svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#20A4F3"/><path d="M7.5 12.4l3 3 6-6.4" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+
+  function cardHTML(v) {
+    return '<section class="vcard" data-id="' + v.id + '">' +
+      '<div class="vmedia" onclick="onMediaTap(event,\'' + v.id + '\')">' +
+        '<img class="vcover" src="assets/' + v.img + '" alt="" draggable="false">' +
+        '<div class="vscrim-t"></div><div class="vscrim-b"></div>' +
+        '<div class="pp-flash" data-pp>' + playSVG() + '</div>' +
+      '</div>' +
+      '<div class="vinfo">' +
+        '<div class="vhandle">@' + v.handle + (v.vf ? ICONS.vf : '') + '</div>' +
+        '<div class="vcap" data-cap>' + linkTags(v.cap[rlang] || v.cap.en) + '</div>' +
+        '<button class="vcap-more" data-capmore onclick="toggleCap(this)"></button>' +
+        '<div class="vmusic">' + ICONS.note + '<span class="mq"><i>' + esc(v.music) + ' · ' + esc(v.music) + '</i></span></div>' +
+        '<div class="vloc">' + ICONS.pin + esc(v.loc) + '</div>' +
+      '</div>' +
+      '<div class="vright">' +
+        '<div class="r-ava"><span class="r-ava-c" style="background:' + v.avaBg + '">' + v.handle.charAt(0).toUpperCase() + '</span>' +
+          '<button class="r-follow" onclick="toggleFollow(event,\'' + v.handle + '\')" aria-label="Follow"><span>+</span></button></div>' +
+        '<button class="r-act lik" onclick="toggleLike(event,\'' + v.id + '\')"><span data-ic>' + ICONS.heart + '</span><b data-lk></b></button>' +
+        '<button class="r-act" onclick="openComments(event,\'' + v.id + '\')">' + ICONS.cmt + '<b data-cm></b></button>' +
+        '<button class="r-act" onclick="toggleFav(event,\'' + v.id + '\')"><span data-ic>' + ICONS.star + '</span><b data-fv></b></button>' +
+        '<button class="r-act" onclick="openShare(event,\'' + v.id + '\')">' + ICONS.share + '<b data-sh></b></button>' +
+        '<div class="r-disc"><img src="assets/' + v.img + '" alt=""></div>' +
+      '</div>' +
+      '<div class="vprog"><i style="animation-duration:' + v.dur + 's"></i></div>' +
+    '</section>';
   }
-  function searchFocus(on) {
-    const b = document.getElementById('searchBox');
-    if (b) b.classList.toggle('focus', !!on);
+  function playSVG() {
+    return '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   }
-  function srEsc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function capMoreNeeded(v) { return (v.cap[rlang] || v.cap.en).length > 56; }
+
+  function buildCards(pager, list) {
+    pager.innerHTML = list.length
+      ? list.map(cardHTML).join('')
+      : '<div class="fw-empty"><div class="fe-ic">' + ICONS.note.replace('13', '26').replace('13', '26') + '</div>' +
+        '<p>' + T('fwempty') + '</p><button onclick="pickFeed(\'fy\')">' + T('gofy') + '</button></div>';
   }
-  /* match on title or category, de-duplicated (rankingPool holds 50 unique titles) */
-  function srMatches(q) {
-    const s = (q || '').trim().toLowerCase();
-    if (!s) return [];
-    const seen = {};
-    return rankingPool.filter(d => {
-      if (seen[d.t]) return false;
-      if (d.t.toLowerCase().includes(s) || (d.cat || '').toLowerCase().includes(s)) { seen[d.t] = 1; return true; }
-      return false;
+  function vidsFY() { return VIDS.slice(); }
+  function vidsFW() { return VIDS.filter(v => v.followed); }
+
+  function paintCounts(v) {
+    document.querySelectorAll('.vcard[data-id="' + v.id + '"]').forEach(card => {
+      card.classList.toggle('liked', !!v.liked);
+      card.classList.toggle('faved', !!v.faved);
+      card.classList.toggle('followed', !!v.followed);
+      const set = (sel, txt) => { const el = card.querySelector(sel); if (el) el.textContent = txt; };
+      set('[data-lk]', fmtN(v.likes)); set('[data-cm]', fmtN(v.comments));
+      set('[data-fv]', fmtN(v.favs)); set('[data-sh]', fmtN(v.shares));
     });
   }
-  function onReelsSearch(v) {
-    srQuery = v;
-    const clr = document.getElementById('reelsClear');
-    if (clr) clr.classList.toggle('on', v.length > 0);
-    const active = v.trim().length > 0;
-    document.body.classList.toggle('searching', active);
-    const box = document.getElementById('searchRes');
-    if (!box) return;
-    if (!active) { box.innerHTML = ''; return; }
-    renderSearchResults();
-    document.getElementById('scrollBody').scrollTop = 0;
-  }
-  function clearReelsSearch(e) {
-    if (e) e.stopPropagation();
-    srQuery = '';
-    const i = document.getElementById('reelsQuery');
-    if (i) { i.value = ''; i.focus(); }
-    onReelsSearch('');
-  }
-  function reelsSearchKey(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const hits = srMatches(srQuery);
-      if (hits.length) { openPlayer(hits[0].t); }
-      else if (srQuery.trim()) toast('No results for “' + srQuery.trim() + '”');
-    } else if (e.key === 'Escape') {
-      clearReelsSearch();
-      document.getElementById('reelsQuery').blur();
-    }
-  }
-  function renderSearchResults() {
-    const q = srQuery.trim();
-    const hits = srMatches(q);
-    const cats = [...new Set(rankingPool.map(d => d.cat))].filter(c => c.toLowerCase().includes(q.toLowerCase()));
-    let html = `<div class="sr-head">${hits.length} result${hits.length === 1 ? '' : 's'} for <b>${srEsc(q)}</b></div>`;
-    if (cats.length) html += `<div class="sr-chips">${cats.map(c => `<span class="sr-chip" onclick="applySrChip('${jsStr(c)}')">${c}</span>`).join('')}</div>`;
-    if (!hits.length) {
-      html += `<div class="sr-empty"><b>No matches for “${srEsc(q)}”</b>
-        <span>Try a title fragment like “Rose” or “Souk”, or a category such as Romance, Faith, Comedy, Thriller, Action, History, Family.</span></div>`;
-    } else {
-      html += `<div class="sr-sec">Titles</div>` + hits.slice(0, 30).map(d => `
-        <div class="sr-row" onclick="openPlayer('${jsStr(d.t)}')">
-          <div class="sr-art ${d.g}"><span>${d.e}</span>${d.img ? `<img src="assets/${d.img}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div>
-          <div class="sr-info">
-            <div class="sr-title">${d.t}</div>
-            <div class="sr-meta"><span class="rate">★ ${d.r}</span><span>${d.s}</span><span class="sr-cat">${d.cat}</span></div>
-          </div>
-        </div>`).join('');
-    }
-    document.getElementById('searchRes').innerHTML = html;
-  }
-  function applySrChip(cat) {
-    const i = document.getElementById('reelsQuery');
-    if (i) { i.value = cat; i.focus(); }
-    onReelsSearch(cat);
+  function paintAll() {
+    VIDS.forEach(paintCounts);
+    $('ftFy').textContent = T('fy'); $('ftFw').textContent = T('fw');
+    $('swTxt').textContent = T('swipe');
+    $('srInput').placeholder = T('srph'); $('srCancel').textContent = T('cancel');
+    $('srTrendLb').textContent = T('trend');
+    $('cmtInput').placeholder = T('ph'); $('cmtSend').textContent = T('post');
+    $('shrTitle').textContent = T('via');
+    $('stContacts').textContent = T('contacts'); $('stGroups').textContent = T('groups'); $('stPost').textContent = T('mypost');
+    document.querySelectorAll('.vcard').forEach(card => {
+      const v = vById(card.dataset.id); if (!v) return;
+      const cap = card.querySelector('[data-cap]');
+      if (cap) { cap.innerHTML = linkTags(v.cap[rlang] || v.cap.en); cap.classList.remove('expanded'); }
+      const more = card.querySelector('[data-capmore]');
+      if (more) { more.textContent = T('more'); more.style.display = capMoreNeeded(v) ? '' : 'none'; }
+    });
+    srRender();
   }
 
-  /* ---------- Ranking chip: vertical Top 50 by rating ---------- */
-  function rankRowHTML(d, i) {
-    const no = i + 1;
-    return `<div class="rank-row" onclick="openPlayer('${jsStr(d.t)}')">
-      <span class="rank-no${no<=3?' top':''}">${no}</span>
-      <div class="rank-poster"><img src="assets/${d.img}" alt="${d.t}" loading="lazy" onerror="this.remove()"></div>
-      <div class="rank-info">
-        <div class="rank-name">${d.t}</div>
-        <div class="rank-tags"><span>${d.cat}</span><span>${d.s}</span></div>
-        <div class="rank-stats"><span>▶ ${d.p} plays</span><span>🔖 ${d.f} saves</span></div>
-      </div>
-      <div class="rank-rating">★ ${d.r}</div>
-    </div>`;
-  }
-  function renderRanking() {
-    lists.innerHTML =
-      sectionHead('Ranking · Top 50') +
-      '<div class="rank-list">' + rankingPool.map(rankRowHTML).join('') + '</div>';
-  }
-  renderAll();
+  /* ---------- feed tabs + paging ---------- */
+  let curTab = 'fy', curIdx = 0, playing = true;
+  const pagers = { fy: null, fw: null };
+  function activePager() { return pagers[curTab]; }
 
-  /* ---------- banner autoplay + dots ---------- */
-  const track = document.getElementById('bannerTrack');
-  const dots = document.querySelectorAll('#bannerDots i');
-  let cur = 0;
-  track.addEventListener('scroll', () => {
-    const i = Math.round(track.scrollLeft / track.clientWidth);
-    if (i !== cur && i >= 0 && i < dots.length) {
-      dots[cur].classList.remove('on'); dots[i].classList.add('on'); cur = i;
-    }
-  });
-  setInterval(() => {
-    if (document.hidden) return;
-    const next = (cur + 1) % dots.length;
-    track.scrollTo({ left: next * track.clientWidth, behavior: 'smooth' });
-  }, 4000);
-
-  /* ---------- chips ---------- */
-  function pick(el, name) {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-    el.classList.add('on');
-    toast(name === 'Ranking' ? 'Ranking · Top 50' : 'Filtered: ' + name);
-    if (name === 'Ranking') { currentFilter = 'Ranking'; renderRanking(); }
-    else { currentFilter = name; renderAll(); }
+  function pickFeed(tab) {
+    curTab = tab;
+    $('ftFy').classList.toggle('on', tab === 'fy');
+    $('ftFw').classList.toggle('on', tab === 'fw');
+    pagers.fy.classList.toggle('hidden', tab !== 'fy');
+    pagers.fw.classList.toggle('hidden', tab !== 'fw');
+    if (tab === 'fw') buildCards(pagers.fw, vidsFW());      /* rebuilt: follows may have changed */
+    const p = activePager();
+    curIdx = Math.min(curIdx, Math.max(0, p.children.length - 1));
+    p.scrollTop = curIdx * p.clientHeight;
+    refreshPlayState();
+    if (tab === 'fw' && !p.children.length) { /* empty state has no video cards */ }
+  }
+  function refreshPlayState() {
+    const p = activePager();
+    Array.from(p.children).forEach((card, i) => card.classList.toggle('playing', playing && i === curIdx && card.classList.contains('vcard')));
   }
 
-  /* ---------- toast ---------- */
-  let toastTimer;
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+  function bindPager(p) {
+    let t = 0;
+    p.addEventListener('scroll', () => {
+      $('swHint').classList.add('gone');
+      if (t) clearTimeout(t);
+      t = setTimeout(() => {
+        curIdx = Math.max(0, Math.round(p.scrollTop / Math.max(1, p.clientHeight)));
+        refreshPlayState();
+      }, 110);
+    }, { passive: true });
   }
 
-  /* ---------- bridge to main shell (Wahda UX Demo) ----------
-     When embedded in the main app (index.html), the Reels tab's sibling
-     tabs hand navigation back to the shell via postMessage. */
-  function postTab(name) {
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ wahdaTab: name }, '*');
-        return;
-      }
-    } catch (e) { /* standalone fallback */ }
-    toast(name === 'create' ? 'Create post / short drama'
-      : name === 'messages' ? 'Chats'
-      : name === 'hub' ? 'My Hub' : 'Feeds');
-  }
-
-  /* ================= Player / Episode sheet / Detail ================= */
-  const dramaMap = {};
-  allPool.concat(extraPool).forEach(d => { dramaMap[d.t] = d; });
-
-  const pv = {
-    root:   document.getElementById('playerView'),
-    media:  document.getElementById('pvMedia'),
-    img:    document.getElementById('pvImg'),
-    title:  document.getElementById('pvTitle'),
-    name:   document.getElementById('pvName'),
-    cat:    document.getElementById('pvCat'),
-    eps:    document.getElementById('pvEps'),
-    syn:    document.getElementById('pvSyn'),
-    epLabel:document.getElementById('pvEpLabel'),
-    res:    document.getElementById('pvRes'),
-    prog:   document.getElementById('pvProg'),
-    info:   document.getElementById('pvInfo'),
-    playBtn:document.getElementById('pvPlayBtn'),
-    sheet:  document.getElementById('epSheet'),
-    mask:   document.getElementById('epMask'),
-    grid:   document.getElementById('epGrid'),
-    epCount:document.getElementById('epCount'),
-  };
-
-  const synBank = {
-    Romance:"When two hearts from different worlds collide, old vows and family honor are put to the test — and every choice demands a price.",
-    Action:"A reluctant fighter is pulled back for one last mission, where every alley hides a blade and trust is the rarest currency of all.",
-    Comedy:"Life in the old quarter is never quiet — one mishap after another turns a small family shop into the loudest stage in town.",
-    Thriller:"A string of unanswered letters leads a young reporter into the city's oldest quarter, where every lantern hides a secret someone killed to keep.",
-    Faith:"A journey of faith begins with a single step — through trials, doubt and grace, one traveler discovers what devotion truly means.",
-    History:"Empires rise and fall around one family's fate — a saga of loyalty, betrayal and legacy written in the sands of time.",
-    Family:"Three generations under one roof, one recipe that binds them — a warm story of quarrels, forgiveness and dinner at eight.",
-    _: "A story of ambition and heart set against a shifting world, where every episode ends one heartbeat from disaster."
-  };
-
-  let curDrama = null, curEp = 1, playing = false, prog = 0, progTimer = null;
-
-  function epsOf(d){ const m = (d.s||'').match(/(\d+)\s*eps?/i); return m ? Math.min(+m[1], 50) : 50; }
-  function synOf(d){ return synBank[d.cat] || synBank._; }
-
-  function openPlayer(title, ep) {
-    if (guestMode) {                                   /* guest: browsing is free, playback needs an account */
-      try { window.parent.postMessage({ wahdaMsg: 'gate', title: title }, '*'); } catch (e) {}
+  /* tap = play/pause · double-tap = like + heart burst */
+  let lastTap = 0, tapTimer = 0;
+  function onMediaTap(e, id) {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      clearTimeout(tapTimer); tapTimer = 0; lastTap = 0;
+      burstAt(e); if (!vById(id).liked) toggleLike(null, id, true);
       return;
     }
-    const d = dramaMap[title]; if (!d) return;
-    curDrama = d;
-    curEp = Math.max(1, Math.min(ep || 1, epsOf(d)));
-    pv.img.src = 'assets/' + d.img;
-    pv.title.textContent = d.t;
-    pv.name.textContent = d.t;
-    pv.cat.textContent = d.cat;
-    pv.eps.textContent = d.s;
-    pv.syn.textContent = synOf(d);
-    updateEpLabel();
-    document.getElementById('detailView').classList.remove('show');
-    closeEpSheet(); closeComments(); closeShare();
-    pbWasPlaying = false; closePlaybackSheet();
-    pv.root.classList.add('show');
-    showInfo(true);
-    prog = 0; pv.prog.style.width = '0%';
-    subIdx = 0; subTicks = 0; applyPlayback();
-    resetLikeUI(); updateFavUI();
-    setPlaying(true);
+    lastTap = now;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapTimer = 0; togglePlay(id); }, 300);
   }
-  function closePlayer(){
-    pbWasPlaying = false; closePlaybackSheet();
-    pv.root.classList.remove('show'); setPlaying(false);
-    if (histReturn) { histReturn = false; openHistory(); }   // came in from Watch History
+  function togglePlay(id) {
+    playing = !playing;
+    flashPP(id, playing);
+    refreshPlayState();
   }
-
-  function showInfo(v){ pv.info.classList.toggle('hide', !v); }
-  function toggleInfo(e){ e.stopPropagation(); showInfo(pv.info.classList.contains('hide')); }
-
-  function setPlaying(v) {
-    playing = v;
-    pv.media.classList.toggle('playing', v);
-    pv.playBtn.classList.toggle('hide', v);
-    if (v) startProg(); else stopProg();
+  function flashPP(id, isPlaying) {
+    const card = document.querySelector('.vcard[data-id="' + id + '"]');
+    if (!card) return;
+    const el = card.querySelector('[data-pp]');
+    if (!el) return;
+    el.innerHTML = isPlaying ? playSVG() : '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h3.4v14H7zM13.6 5H17v14h-3.6z"/></svg>';
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
   }
-  function togglePlay(e){ e.stopPropagation(); setPlaying(!playing); }
-  function startProg() {
-    stopProg();
-    progTimer = setInterval(() => {
-      prog += 0.35 * playback.speed;              // speed setting drives the pace
-      if (playback.sub !== 'off') {               // subtitle lines follow media time (= speed × wall clock)
-        subTicks += playback.speed;
-        if (subTicks >= 12) { subTicks -= 12; subIdx++; renderSubtitle(); }
-      }
-      if (prog >= 100) { prog = 0; nextEp(); }
-      pv.prog.style.width = prog + '%';
-    }, 220);
-  }
-  function stopProg(){ if (progTimer) { clearInterval(progTimer); progTimer = null; } }
-
-  function updateEpLabel() {
-    pv.epLabel.innerHTML = `EP ${curEp}<span class="eps">/EP ${epsOf(curDrama)}</span>`;
-  }
-  function nextEp() {
-    const total = epsOf(curDrama);
-    curEp = curEp >= total ? 1 : curEp + 1;
-    updateEpLabel();
-    prog = 0;
-  }
-  /* swipe up on player -> next episode (same as auto-advance on finish) */
-  let touchY0 = null;
-  pv.root.addEventListener('touchstart', e => { touchY0 = e.touches[0].clientY; }, { passive: true });
-  pv.root.addEventListener('touchend', e => {
-    if (touchY0 === null) return;
-    const dy = e.changedTouches[0].clientY - touchY0;
-    touchY0 = null;
-    if (dy > -60) return;                     // only upward swipes
-    if (pv.sheet.classList.contains('show')) return;  // ignore while episode sheet is open
-    if (document.getElementById('pbSheet').classList.contains('show')) return;  // ...or settings sheet
-    if (document.getElementById('detailView').classList.contains('show')) return;
-    prog = 0;
-    nextEp();
-    showInfo(false);
-    toast('Next: EP ' + curEp);
-  }, { passive: true });
-  function setEp(n) {
-    curEp = Math.max(1, Math.min(n, epsOf(curDrama)));
-    updateEpLabel();
-    closeEpSheet();
-    showInfo(true);
-    prog = 0;
-    subIdx = 0; subTicks = 0; renderSubtitle();
-    setPlaying(true);
-    toast('Now playing: ' + curDrama.t + ' · EP ' + curEp);
-  }
-  function openEpSheet(e) {
-    e.stopPropagation();
-    const total = epsOf(curDrama);
-    pv.epCount.textContent = total + ' episodes';
-    pv.grid.innerHTML = Array.from({ length: total }, (_, i) =>
-      `<button class="ep-item${i + 1 === curEp ? ' cur' : ''}" onclick="event.stopPropagation();setEp(${i + 1})">${i + 1}</button>`
-    ).join('');
-    pv.mask.classList.add('show');
-    pv.sheet.classList.add('show');
-  }
-  function closeEpSheet(){ pv.mask.classList.remove('show'); pv.sheet.classList.remove('show'); }
-
-  /* ---------- playback settings: resolution / subtitles / speed ---------- */
-  const PB_RES = [
-    { k:'auto', l:'Auto',  s:'Adaptive' },
-    { k:'1080', l:'1080P', s:'Full HD' },
-    { k:'720',  l:'720P',  s:'HD' },
-    { k:'480',  l:'480P',  s:'Data saver' },
-  ];
-  const PB_SUB = [
-    { k:'off', l:'Off' },
-    { k:'en',  l:'English' },
-    { k:'ar',  l:'العربية' },
-    { k:'zh',  l:'中文' },
-  ];
-  const PB_SPEED = [0.5, 0.75, 1, 1.25, 1.5, 2];
-
-  const playback = { res:'auto', sub:'off', speed:1 };
-  let pbWasPlaying = false, subIdx = 0, subTicks = 0;
-
-  const SUB_LINES = {
-    en:[ 'You came back… after all these years.',
-         'That letter was never meant for you.',
-         'I kept your promise — now keep mine.',
-         'Some doors, once opened, never close.' ],
-    ar:[ 'لقد عدت… بعد كل هذه السنوات.',
-         'تلك الرسالة لم تكن لك قط.',
-         'أنا أوفيت بوعدك، فاوفِ بوعدي.',
-         'بعض الأبواب لا تُغلق بعد أن تُفتح.' ],
-    zh:[ '你回来了……隔了这么多年。',
-         '那封信，从来就不是给你的。',
-         '我守住了你的承诺，现在轮到你守我的。',
-         '有些门一旦打开，就再也关不上了。' ],
-  };
-
-  function pbResLabel(k){ return k === 'auto' ? 'AUTO' : k + 'P'; }
-  function pbSubLabel(){ const o = PB_SUB.filter(x => x.k === playback.sub)[0]; return o ? o.l : 'Off'; }
-  function pbSubLines(){ return SUB_LINES[playback.sub] || SUB_LINES.en; }
-
-  function renderSubtitle(){
-    const box = document.getElementById('pvSub'), tx = document.getElementById('pvSubText');
-    if (playback.sub === 'off') { box.hidden = true; tx.textContent = ''; return; }
-    const lines = pbSubLines();
-    tx.textContent = lines[subIdx % lines.length];
-    box.hidden = false;
+  function burstAt(e) {
+    const stage = $('stage');
+    const r = stage.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'burst';
+    el.innerHTML = '<svg width="90" height="90" viewBox="0 0 24 24"><path d="M12 20.6S3.4 15.4 3.4 9.6C3.4 6.8 5.6 4.6 8.3 4.6c1.6 0 3 .8 3.7 2 .7-1.2 2.1-2 3.7-2 2.7 0 4.9 2.2 4.9 5 0 5.8-8.6 11-8.6 11z" fill="currentColor"/></svg>';
+    el.style.left = (e.clientX - r.left) + 'px';
+    el.style.top = (e.clientY - r.top) + 'px';
+    stage.appendChild(el);
+    setTimeout(() => el.remove(), 950);
   }
 
-  /* reflect current settings on the player surface (tag, speed chip, subtitles) */
-  function applyPlayback(){
-    pv.res.textContent = pbResLabel(playback.res);
-    const chip = document.getElementById('pvSpeedChip');
-    chip.hidden = playback.speed === 1;
-    chip.textContent = playback.speed + '×';
-    renderSubtitle();
-    const t = document.getElementById('pbTitle');
-    if (t) t.textContent = pbResLabel(playback.res) + ' · ' + playback.speed + '×';
-  }
-
-  function renderPlaybackSheet(){
-    const res = PB_RES.map(o =>
-      `<button class="ps-opt${playback.res === o.k ? ' on' : ''}" onclick="setRes('${o.k}')">${o.l}<small>${o.s}</small></button>`).join('');
-    const sub = PB_SUB.map(o =>
-      `<button class="ps-opt${playback.sub === o.k ? ' on' : ''}" onclick="setSub('${o.k}')">${o.l}</button>`).join('');
-    const spd = PB_SPEED.map(v =>
-      `<button class="ps-opt${playback.speed === v ? ' on' : ''}" onclick="setSpeed(${v})">${v}×<small>${v > 1 ? 'Fast forward' : (v < 1 ? 'Slow motion' : 'Normal')}</small></button>`).join('');
-    const note = [
-      playback.res === 'auto' ? 'Auto adapts quality to your connection.' : 'Streaming in ' + pbResLabel(playback.res) + '.',
-      playback.sub === 'off' ? 'Subtitles are off.' : 'Subtitles: ' + pbSubLabel() + ' — shown over the video.',
-      playback.speed > 1 ? 'Playing at ' + playback.speed + '× — episodes advance faster.'
-        : (playback.speed < 1 ? 'Playing at ' + playback.speed + '× — slow motion.' : 'Playing at normal speed.'),
-    ].join(' ');
-    document.getElementById('pbBody').innerHTML =
-      `<div class="ps-group"><div class="ps-label">Resolution <b>${pbResLabel(playback.res)}</b></div><div class="ps-opts">${res}</div></div>` +
-      `<div class="ps-group"><div class="ps-label">Subtitles <b>${pbSubLabel()}</b></div><div class="ps-opts">${sub}</div></div>` +
-      `<div class="ps-group"><div class="ps-label">Playback speed <b>${playback.speed}×</b></div><div class="ps-opts">${spd}</div></div>` +
-      `<div class="ps-note">${note}</div>`;
-    applyPlayback();
-  }
-
-  function setRes(k){
-    playback.res = k;
-    renderPlaybackSheet();
-    toast('Resolution: ' + pbResLabel(k));
-  }
-  function setSub(k){
-    playback.sub = k; subIdx = 0; subTicks = 0;
-    renderPlaybackSheet();
-    toast(k === 'off' ? 'Subtitles off' : 'Subtitles: ' + pbSubLabel());
-  }
-  function setSpeed(v){
-    playback.speed = v;
-    renderPlaybackSheet();
-    toast('Playback speed: ' + v + '×' + (v > 1 ? ' · fast forward' : ''));
-  }
-
-  function openPlaybackSheet(e){
+  /* ---------- actions ---------- */
+  function toggleLike(e, id, force) {
     if (e) e.stopPropagation();
-    if (!curDrama) return;
-    pbWasPlaying = playing;
-    setPlaying(false);
-    renderPlaybackSheet();
-    document.getElementById('pbMask').classList.add('show');
-    document.getElementById('pbSheet').classList.add('show');
-  }
-  function closePlaybackSheet(){
-    const s = document.getElementById('pbSheet');
-    if (!s.classList.contains('show')) return;
-    document.getElementById('pbMask').classList.remove('show');
-    s.classList.remove('show');
-    if (pbWasPlaying) { pbWasPlaying = false; setPlaying(true); }
-  }
-
-  /* ---------- detail page ---------- */
-  function openDetail(t) {
-    if (typeof t === 'string') {           // opened from a related card: switch drama
-      const d = dramaMap[t]; if (!d) return;
-      curDrama = d;
-      curEp = 1;
-      pv.img.src = 'assets/' + d.img;
-      pv.title.textContent = d.t;
-      pv.name.textContent = d.t;
-      pv.cat.textContent = d.cat;
-      pv.eps.textContent = d.s;
-      pv.syn.textContent = synOf(d);
-      updateEpLabel();
-      prog = 0; pv.prog.style.width = '0%';
-      resetLikeUI(); updateFavUI();
-    }
-    if (!curDrama) return;
-    const d = curDrama, total = epsOf(d);
-    document.getElementById('dtImg').src = 'assets/' + d.img;
-    document.getElementById('dtTitle').textContent = d.t;
-    document.getElementById('dtMeta').innerHTML =
-      `<span class="rating">★ ${d.r}</span><span>·</span><span>${d.cat}</span><span>·</span><span>${total} episodes</span><span>·</span><span>2026</span>`;
-    document.getElementById('dtTags').innerHTML =
-      ['1080P', d.cat, d.s, 'Arabic', 'Subtitle EN/AR'].map(x => `<span>${x}</span>`).join('');
-    document.getElementById('dtSyn').textContent =
-      synOf(d) + ' Shot on location across the region, each episode is a self-contained chapter of a larger journey — press play and stay for the twist.';
-    document.getElementById('dtCta').innerHTML =
-      `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Continue EP ${curEp}`;
-    document.getElementById('dtEps').innerHTML =
-      Array.from({ length: total }, (_, i) =>
-        `<button class="ep-item${i + 1 === curEp ? ' cur' : ''}" onclick="closeDetail();setEp(${i + 1})">${i + 1}</button>`
-      ).join('');
-    /* More Like This: same category first, then top-rated fill, exclude current — 12 items */
-    const related = allPool.concat(extraPool)
-      .filter(x => x.t !== d.t)
-      .sort((a, b) => ((b.cat === d.cat) - (a.cat === d.cat)) || (parseFloat(b.r) - parseFloat(a.r)))
-      .slice(0, 12);
-    document.getElementById('dtRel').innerHTML = related.map(r => `
-      <div class="dt-rel-card" onclick="openDetail('${jsStr(r.t)}')">
-        <div class="dt-rel-poster">
-          <img src="assets/${r.img}" alt="${r.t}" loading="lazy" onerror="this.remove()">
-          <span class="dt-rel-rate">★ ${r.r}</span>
-        </div>
-        <div class="dt-rel-title">${r.t}</div>
-      </div>`).join('');
-    const dv = document.getElementById('detailView');
-    dv.classList.add('show');
-    dv.scrollTop = 0;
-  }
-  function closeDetail(){ document.getElementById('detailView').classList.remove('show'); }
-
-  /* ---------- like / favorite states ---------- */
-  const likeBase = 128000;
-  function fmtN(n){ return n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : ''+n; }
-  const heartOn  = '<svg width="24" height="24" viewBox="0 0 24 24" fill="#ff4d5e"><path d="M12 21s-7.5-4.9-9.5-9.2C1.1 8.6 3 5.5 6.2 5.5c2 0 3.4 1.1 4.3 2.4.3.4.9.4 1.2 0 .9-1.3 2.3-2.4 4.3-2.4 3.2 0 5.1 3.1 3.7 6.3C19.5 16.1 12 21 12 21z"/></svg>';
-  const heartOff = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.9-9.5-9.2C1.1 8.6 3 5.5 6.2 5.5c2 0 3.4 1.1 4.3 2.4.3.4.9.4 1.2 0 .9-1.3 2.3-2.4 4.3-2.4 3.2 0 5.1 3.1 3.7 6.3C19.5 16.1 12 21 12 21z"/></svg>';
-  const bmOn  = '<svg width="24" height="24" viewBox="0 0 24 24" fill="#0E7C66"><path d="M6 4h12v17l-6-4-6 4z"/></svg>';
-  const bmOff = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12v17l-6-4-6 4z"/></svg>';
-  function resetLikeUI() {
-    document.getElementById('pvLikeN').textContent = fmtN(likeBase + (curDrama.liked ? 1 : 0));
-    document.getElementById('pvLikeIco').innerHTML = curDrama.liked ? heartOn : heartOff;
-  }
-  function toggleLike(e) {
-    e.stopPropagation();
-    curDrama.liked = !curDrama.liked;
-    resetLikeUI();
-    toast(curDrama.liked ? 'You liked this drama' : 'Like removed');
-  }
-  function updateFavUI() {
-    document.getElementById('pvFavIco').innerHTML = curDrama.fav ? bmOn : bmOff;
-    document.getElementById('pvFavLbl').textContent = curDrama.fav ? 'Favorited' : 'Favorite';
-    const dt = document.getElementById('dtFav');
-    if (dt) {
-      dt.innerHTML = (curDrama.fav ? bmOn : bmOff).replace('width="24" height="24"','width="17" height="17"') + (curDrama.fav ? 'Favorited' : 'Favorite');
-      dt.classList.toggle('on', curDrama.fav);
+    const v = vById(id); if (!v) return;
+    const on = force === true ? true : !v.liked;
+    if (on === v.liked) return;
+    v.liked = on; v.likes += on ? 1 : -1;
+    paintCounts(v);
+    if (e) {
+      const ic = e.target.closest('.r-act');
+      if (ic) { const s = ic.querySelector('[data-ic]'); if (s) { s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); } }
     }
   }
-  function toggleFavorite(e) {
+  function toggleFav(e, id) {
     if (e) e.stopPropagation();
-    if (!curDrama) return;
-    curDrama.fav = !curDrama.fav;
-    updateFavUI();
-    toast(curDrama.fav ? 'Added to Favorites' : 'Removed from Favorites');
+    const v = vById(id); if (!v) return;
+    v.faved = !v.faved; v.favs += v.faved ? 1 : -1;
+    paintCounts(v);
+    const card = document.querySelector('.pager:not(.hidden) .vcard[data-id="' + id + '"]');
+    if (card) { const s = card.querySelector('.r-act [data-ic]'); if (s) { const f = card.querySelectorAll('.r-act [data-ic]')[1]; if (f) { f.classList.remove('pop'); void f.offsetWidth; f.classList.add('pop'); } } }
   }
+  function toggleFollow(e, handle) {
+    if (e) e.stopPropagation();
+    let to;
+    VIDS.filter(v => v.handle === handle).forEach(v => { to = v.followed = !v.followed; paintCounts(v); });
+    toast((to ? T('fol') : T('unfol')) + handle);
+  }
+  function toggleCap(btn) {
+    const cap = btn.parentElement.querySelector('[data-cap]');
+    const open = cap.classList.toggle('expanded');
+    btn.textContent = open ? T('less') : T('more');
+  }
+  function toggleMute(e) {
+    if (e) e.stopPropagation();
+    muted = !muted;
+    $('muteBtn').innerHTML = muted
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.6a5 5 0 010 6.8M18.4 6.2a8.2 8.2 0 010 11.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+    toast(muted ? T('sndoff') : T('sndon'));
+  }
+  let muted = false;
 
-  /* ---------- comments ---------- */
-  const commentSeeds = [
-    { n:"Amina R.",  c:"#e8a0b4", t:"The plot twist in ep 3 got me 😭",        time:"2h", likes:214 },
-    { n:"Yusuf K.",  c:"#8fb8a8", t:"Binge-watched all night, no regrets.",    time:"5h", likes:96 },
-    { n:"Layla H.",  c:"#c9a86a", t:"The soundtrack deserves an award.",       time:"1d", likes:143 },
-    { n:"Omar S.",   c:"#7f9cc4", t:"When is the next episode dropping?",      time:"1d", likes:38 },
-  ];
-  const cmts = {};
-  function seedCmts(t){ if (!cmts[t]) cmts[t] = commentSeeds.map(c => ({ ...c })); }
-  function cmtRow(c) {
-    return `<div class="cmt-row">
-      <span class="cmt-ava" style="background:${c.c}">${c.n[0]}</span>
-      <div class="cmt-body">
-        <div class="cmt-name">${c.n}</div>
-        <div class="cmt-text">${c.t}</div>
-        <div class="cmt-meta"><span>${c.time} ago</span><span class="clike" onclick="toast('Liked comment')">♥ ${c.likes}</span><span>Reply</span></div>
-      </div>
-    </div>`;
+  /* ---------- comments (local) ---------- */
+  function seedCmts(v) {
+    if (v.cmts) return;
+    const seed = v.id.charCodeAt(2) % CMT_POOL.length;
+    v.cmts = [0, 1, 2, 3].map(i => {
+      const c = CMT_POOL[(seed + i * 3) % CMT_POOL.length];
+      return { h: c.h, t: c.t, likes: Math.max(3, Math.round(c.likes * (0.4 + ((i + 1) / 4)))), time: c.time, liked: false };
+    });
   }
-  function renderCmts() {
-    const list = cmts[curDrama.t];
-    document.getElementById('cmtCount').textContent = list.length + (list.length === 1 ? ' comment' : ' comments');
-    document.getElementById('cmtList').innerHTML = list.map(cmtRow).join('');
-  }
-  function openComments(e) {
-    e.stopPropagation();
-    if (!curDrama) return;
-    seedCmts(curDrama.t);
-    renderCmts();
-    document.getElementById('cmtMask').classList.add('show');
-    document.getElementById('cmtSheet').classList.add('show');
+  let cmtOpenId = null;
+  function openComments(e, id) {
+    if (e) e.stopPropagation();
+    const v = vById(id); if (!v) return;
+    cmtOpenId = id; seedCmts(v); renderCmts(v);
+    $('cmtMask').classList.add('show'); $('cmtSheet').classList.add('show');
   }
   function closeComments() {
-    document.getElementById('cmtMask').classList.remove('show');
-    document.getElementById('cmtSheet').classList.remove('show');
+    $('cmtMask').classList.remove('show'); $('cmtSheet').classList.remove('show'); cmtOpenId = null;
   }
+  function renderCmts(v) {
+    $('cmtCount').textContent = fmtN(v.comments) + ' ' + T('comments');
+    $('cmtList').innerHTML = v.cmts.map((c, i) =>
+      '<div class="cmt-row2">' +
+        '<span class="cmt-ava" style="background:' + avaColor(c.h) + '">' + c.h.charAt(0).toUpperCase() + '</span>' +
+        '<div class="cmt-body"><div class="cmt-name">@' + esc(c.h) + '</div>' +
+          '<div class="cmt-text">' + esc(c.t[rlang] || c.t.en) + '</div>' +
+          '<div class="cmt-meta"><span>' + (c.time[rlang] || c.time.en) + '</span>' +
+            '<span>' + (rlang === 'zh' ? '回复' : 'Reply') + '</span>' +
+            '<span class="clike' + (c.liked ? ' on' : '') + '" onclick="cmtLike(' + i + ')">' +
+              '<svg width="11" height="11" viewBox="0 0 24 24"><path d="M12 20.6S3.4 15.4 3.4 9.6C3.4 6.8 5.6 4.6 8.3 4.6c1.6 0 3 .8 3.7 2 .7-1.2 2.1-2 3.7-2 2.7 0 4.9 2.2 4.9 5 0 5.8-8.6 11-8.6 11z" fill="currentColor"/></svg>' +
+              fmtN(c.likes) + '</span></div></div></div>').join('');
+    cmtInputChanged();
+  }
+  function cmtLike(i) {
+    const v = vById(cmtOpenId); if (!v || !v.cmts[i]) return;
+    const c = v.cmts[i]; c.liked = !c.liked; c.likes += c.liked ? 1 : -1;
+    renderCmts(v);
+  }
+  function avaColor(h) {
+    let n = 0; for (let i = 0; i < h.length; i++) n = (n * 31 + h.charCodeAt(i)) >>> 0;
+    return ['#e8a0b4', '#8fb8a8', '#c9a86a', '#7f9cc4', '#b48fad', '#8fc4b8', '#c96f4a'][n % 7];
+  }
+  function cmtInputChanged() { $('cmtSend').disabled = !$('cmtInput').value.trim(); }
   function sendComment() {
-    const inp = document.getElementById('cmtInput');
-    const v = inp.value.trim();
-    if (!v) return;
-    cmts[curDrama.t].unshift({ n:"You", c:"#0E7C66", t:v, time:"Just now", likes:0 });
-    inp.value = '';
-    renderCmts();
-    toast('Comment posted');
+    const v = vById(cmtOpenId); if (!v) return;
+    const inp = $('cmtInput'); const txt = inp.value.trim(); if (!txt) return;
+    v.cmts.unshift({ h: 'you', t: { en: txt, zh: txt }, likes: 0, time: { en: 'Just now', zh: '刚刚' }, liked: false, mine: true });
+    v.comments += 1; inp.value = '';
+    renderCmts(v); paintCounts(v); toast(T('cmtok'));
   }
 
-  /* ---------- share: contacts & groups come from the real Chats list ----------
-     The shell (index.html) owns chats and feed posts. While embedded we ask it
-     for the live friend / group list and hand the send back to it, so "Send"
-     really writes into that conversation and "Post" really creates a feed post.
-     Opened standalone the sheet says so instead of faking a send. */
-  const EMBEDDED = (function () { try { return !!(window.parent && window.parent !== window) } catch (e) { return false } })();
-  /* guest mode is pushed by the host shell: guests may browse Reels,
-     but any play action is handed back to the shell's sign-up gate */
-  let guestMode = false;
-  let shareContacts = [];
-  let shareGroups = [];
+  /* ---------- share: the shell owns Chats & Feeds; the sheet asks it live ---------- */
+  let shareContacts = [], shareGroups = [];
   let shareLoaded = false, shareLoading = false, shareFailed = false, shareTabCur = 'contacts';
-  let shareReqId = 0;
-  let shareQueue = [];
+  let shareReqId = 0, shareQueue = [];
   const sharePending = {};
-  const avaColors = ["#e8a0b4","#8fb8a8","#c9a86a","#7f9cc4","#b48fad","#8fc4b8"];
+  const avaColors = ['#e8a0b4', '#8fb8a8', '#c9a86a', '#7f9cc4', '#b48fad', '#8fc4b8'];
+  let shareOpenId = null;
 
   function shellRequest(msg, cb) {
     if (!EMBEDDED) { cb(null); return; }
@@ -2016,485 +795,218 @@
     msg.rid = rid;
     try { window.parent.postMessage(msg, '*'); }
     catch (e) { delete sharePending[rid]; cb(null); return; }
-    setTimeout(function () {                       /* never leave a button hanging */
-      if (sharePending[rid]) { delete sharePending[rid]; cb(null); }
-    }, 3000);
+    setTimeout(() => { if (sharePending[rid]) { delete sharePending[rid]; cb(null); } }, 3000);
   }
-  function shellPerson(p) {
-    return { idx:p.idx, n:p.n, ini:p.ini || (p.n || '?').charAt(0), s:p.sub || '', kind:p.kind };
+  function shellPerson(p) { return { idx: p.idx, n: p.n, ini: p.ini || (p.n || '?').charAt(0), s: p.sub || '' }; }
+  /* the shell renders shared cards from these fields (drama-shaped on purpose) */
+  function videoPayload(v) {
+    return { t: v.t[rlang] || v.t.en, s: '@' + v.handle, r: '', p: '', cat: (v.cap[rlang] || v.cap.en).match(/#(\w+)/) ? '' : '',
+             e: '🎬', img: v.img, g: '' };
   }
-  function sharePayload() {
-    const d = curDrama || {};
-    return { t:d.t, s:d.s, r:d.r, p:d.p, cat:d.cat, e:d.e, img:d.img, g:d.g };
-  }
-  /* one in-flight request at a time; extra callers are queued, never re-entered
-     synchronously — a synchronous re-render here would recurse forever */
   function loadShareData(done) {
     if (shareLoaded || !EMBEDDED) { done && done(); return; }
     if (done) shareQueue.push(done);
     if (shareLoading) return;
     shareLoading = true;
-    shellRequest({ wahdaMsg:'friends' }, function (d) {
+    shellRequest({ wahdaMsg: 'friends' }, function (d) {
       shareLoading = false;
       if (d) { shareLoaded = true; shareFailed = false; } else { shareFailed = true; }
       const q = shareQueue; shareQueue = [];
-      q.forEach(function (fn) { try { fn() } catch (err) {} });
+      q.forEach(fn => { try { fn() } catch (err) {} });
     });
   }
-  window.addEventListener('message', function (e) {
-    const d = e.data || {};
-    if (d.wahdaMsg === 'ctx') { guestMode = !!d.guest; setSubState(d.guest ? null : d.sub); return; }
-    if (d.wahdaMsg === 'friends') {
-      shareContacts = (d.contacts || []).map(shellPerson);
-      shareGroups = (d.groups || []).map(shellPerson);
-    } else if (d.wahdaMsg === 'play' && d.title) {
-      const hit = rankingPool.filter(function (x) { return x.t === d.title })[0];
-      if (hit) openPlayer(hit.t);
-      return;
-    } else if (d.wahdaMsg === 'subpay-done') {
-      /* the shell's Wahda Pay gateway charged the wallet — show the receipt */
-      const p = planOf((d.plan && d.plan.id) || curPlan) || planOf(curPlan);
-      if (d.sub) setSubState(d.sub);           /* the shell owns the account record */
-      if (p) renderPremiumActive(p);
-      return;
-    } else if (d.wahdaMsg === 'resumeShare') {
-      /* the shell sent the guest through sign-up; pick the share up where it stopped */
-      if (curDrama) openShare({ stopPropagation: function () {} });
-      return;
-    } else if (d.wahdaMsg !== 'share-ack' && d.wahdaMsg !== 'post-ack') {
-      return;
-    }
-    const cb = sharePending[d.rid];
-    if (cb) { delete sharePending[d.rid]; cb(d); }
-    if (d.wahdaMsg === 'friends' && document.getElementById('shrSheet').classList.contains('show')) {
-      renderShare(shareTabCur, null, true);
-    }
-  });
-  /* tell the shell Reels is up so it can replay a title picked in a chat */
-  function tellShellReady() {
-    if (!EMBEDDED) return;
-    try { window.parent.postMessage({ wahdaMsg:'ready' }, '*'); } catch (e) {}
+  function openShare(e, id) {
+    if (e) e.stopPropagation();
+    const v = vById(id); if (!v) return;
+    shareOpenId = id;
+    $('shrMask').classList.add('show'); $('shrSheet').classList.add('show');
+    renderShare('contacts');
+    loadShareData(() => { if (shareOpenId === id && shareTabCur === 'contacts') renderShare('contacts', null, true); });
   }
-  tellShellReady();
+  function closeShare() { $('shrMask').classList.remove('show'); $('shrSheet').classList.remove('show'); shareOpenId = null; }
   function renderShare(tab, btn, silent) {
     shareTabCur = tab;
     if (btn) {
       document.querySelectorAll('#shareTabs button').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
     } else if (!silent) {
-      const order = { contacts:0, groups:1, post:2 };
+      const order = { contacts: 0, groups: 1, post: 2 };
       document.querySelectorAll('#shareTabs button').forEach((b, i) => b.classList.toggle('on', i === order[tab]));
     }
-    const box = document.getElementById('shareList');
+    const box = $('shareList');
+    const v = vById(shareOpenId) || VIDS[0];
     if (tab === 'post') {
-      const d = curDrama;
-      box.innerHTML = `<div class="share-post-box">
-        <textarea id="postCaption" placeholder="Say something about this drama…">Watching "${d ? d.t : ''}" on Wahda Reels 🎬</textarea>
-        <button class="post-btn" onclick="sendToMyPost()">Send to my post</button>
-        <div class="share-hint">Publishes a post to <b>Feeds</b> and <b>My Hub · Posts</b></div>
-      </div>`;
+      box.innerHTML = '<div class="share-post-box">' +
+        '<textarea id="postCaption">' + esc(T('postcap') + '"' + (v.t[rlang] || v.t.en) + '" — @' + v.handle + ' 🎬') + '</textarea>' +
+        '<button class="post-btn" onclick="sendToMyPost()">' + T('mypost') + '</button>' +
+        '<div class="share-hint">' + (rlang === 'zh' ? '将作为帖子发布到 <b>Feeds</b> 和 <b>My Hub · Posts</b>' : 'Publishes a post to <b>Feeds</b> and <b>My Hub · Posts</b>') + '</div></div>';
       return;
     }
     if (!EMBEDDED) {
-      box.innerHTML = `<div class="share-hint">Open this Reels page inside the Wahda app to share with your chats.</div>`;
+      box.innerHTML = '<div class="share-hint">' + (rlang === 'zh' ? '在 Wahda App 内打开 Reels 即可分享给聊天。' : 'Open this Reels page inside the Wahda app to share with your chats.') + '</div>';
       return;
     }
     const data = tab === 'contacts' ? shareContacts : shareGroups;
     if (!data.length) {
-      const what = tab === 'contacts' ? 'contacts' : 'groups';
-      const hint = shareLoaded ? `No ${what} available yet.`
-        : shareFailed ? 'Could not load your chats — open Reels inside the Wahda app.'
-        : `Loading your ${what}…`;
-      box.innerHTML = `<div class="share-hint">${hint}</div>`;
-      if (!shareLoaded && !shareFailed) {
-        loadShareData(function () { if (shareTabCur === tab) renderShare(tab, null, true); });
-      }
+      const what = tab === 'contacts' ? (rlang === 'zh' ? '好友' : 'contacts') : (rlang === 'zh' ? '群聊' : 'groups');
+      const hint = shareLoaded ? (rlang === 'zh' ? '暂无可分享的' + what + '。' : 'No ' + what + ' available yet.')
+        : shareFailed ? (rlang === 'zh' ? '无法加载聊天 — 请在 App 内打开 Reels。' : 'Could not load your chats — open Reels inside the Wahda app.')
+        : (rlang === 'zh' ? '正在加载' + what + '…' : 'Loading your ' + what + '…');
+      box.innerHTML = '<div class="share-hint">' + hint + '</div>';
+      if (!shareLoaded && !shareFailed) loadShareData(() => { if (shareTabCur === tab) renderShare(tab, null, true); });
       return;
     }
-    box.innerHTML = data.map((p, i) => `
-      <div class="share-row">
-        <span class="cmt-ava" style="background:${avaColors[i % avaColors.length]}">${p.ini}</span>
-        <div class="share-name">${p.n}<small>${p.s}</small></div>
-        <button class="share-send" id="shr${tab}${i}" onclick="shareTo('${tab}', ${i})">Send</button>
-      </div>`).join('');
+    box.innerHTML = data.map((p, i) =>
+      '<div class="share-row">' +
+        '<span class="cmt-ava" style="background:' + avaColors[i % avaColors.length] + '">' + esc(p.ini) + '</span>' +
+        '<div class="share-name">' + esc(p.n) + '<small>' + esc(p.s) + '</small></div>' +
+        '<button class="share-send" id="shr' + tab + i + '" onclick="shareTo(\'' + tab + '\',' + i + ')">' + (rlang === 'zh' ? '发送' : 'Send') + '</button></div>').join('');
   }
   function shareTo(tab, i) {
-    const btn = document.getElementById(`shr${tab}${i}`);
+    const btn = $('shr' + tab + i);
     const person = (tab === 'contacts' ? shareContacts : shareGroups)[i];
     if (!person || (btn && btn.classList.contains('sent'))) return;
-    if (!EMBEDDED) { toast('Open inside the Wahda app to share to chats'); return; }
-    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-    shellRequest({ wahdaMsg:'share', idx:person.idx, peerName:person.n, drama:sharePayload() }, function (ack) {
+    if (!EMBEDDED) { toast(rlang === 'zh' ? '请在 App 内分享到聊天' : 'Open inside the Wahda app to share to chats'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = rlang === 'zh' ? '发送中…' : 'Sending…'; }
+    const v = vById(shareOpenId);
+    shellRequest({ wahdaMsg: 'share', idx: person.idx, peerName: person.n, drama: videoPayload(v) }, function (ack) {
       if (!btn) return;
       btn.disabled = false;
-      if (ack && ack.ok) {
-        btn.classList.add('sent');
-        btn.textContent = 'Sent ✓';
-        toast('Shared with ' + person.n);
-      } else {
-        btn.textContent = 'Retry';
-        toast('Could not share — try again');
-      }
+      if (ack && ack.ok) { btn.classList.add('sent'); btn.textContent = '✓'; toast(T('shareok') + person.n); }
+      else { btn.textContent = rlang === 'zh' ? '重试' : 'Retry'; toast(rlang === 'zh' ? '分享失败，请重试' : 'Could not share — try again'); }
     });
   }
   function sendToMyPost() {
-    const box = document.getElementById('shareList');
-    const caption = (document.getElementById('postCaption') || {}).value || '';
-    const d = curDrama;
-    if (!d) return;
-    if (!EMBEDDED) { toast('Open inside the Wahda app to publish a post'); return; }
-    shellRequest({ wahdaMsg:'post', drama:sharePayload(), caption:caption }, function (ack) {
-      if (!ack || !ack.ok) { toast('Could not post — try again'); return; }
-      box.innerHTML = `<div class="my-post posted">
-        <div class="mp-head">
-          <span class="cmt-ava" style="background:#0E7C66">Y</span>
-          <div class="mp-who">You<small>Just now · posted to Feeds</small></div>
-        </div>
-        <div class="mp-text">${caption.replace(/</g,'&lt;')}</div>
-        <div class="mp-card">
-          <div class="mp-thumb"><img src="assets/${d.img}" alt="${d.t}" onerror="this.remove()"></div>
-          <div class="mp-info">
-            <div class="mp-title">${d.t}</div>
-            <div class="mp-syn">${synOf(d)}</div>
-            <div class="mp-tags"><span>#${d.cat}</span><span>#${d.s}</span><span>#WahdaReels</span></div>
-          </div>
-        </div>
-        <div class="mp-stats">
-          <span>♥ 0</span><span>💬 0</span><span>↗ 0</span>
-        </div>
-        <button class="mp-view" onclick="closeShare();postTab('feeds')">View it in Feeds →</button>
-      </div>`;
-      toast('Posted to Feeds & My Hub');
+    const box = $('shareList');
+    const caption = ($('postCaption') || {}).value || '';
+    const v = vById(shareOpenId); if (!v) return;
+    if (!EMBEDDED) { toast(rlang === 'zh' ? '请在 App 内发布帖子' : 'Open inside the Wahda app to publish a post'); return; }
+    shellRequest({ wahdaMsg: 'post', drama: videoPayload(v), caption: caption }, function (ack) {
+      if (!ack || !ack.ok) { toast(rlang === 'zh' ? '发布失败，请重试' : 'Could not post — try again'); return; }
+      box.innerHTML = '<div class="my-post posted">' +
+        '<div class="mp-head"><span class="cmt-ava" style="background:#0E7C66">Y</span>' +
+          '<div class="mp-who">' + (rlang === 'zh' ? '你' : 'You') + '<small>' + (rlang === 'zh' ? '刚刚 · 已发布到 Feeds' : 'Just now · posted to Feeds') + '</small></div></div>' +
+        '<div class="mp-text">' + esc(caption) + '</div>' +
+        '<div class="mp-card"><div class="mp-thumb"><img src="assets/' + v.img + '" alt="" onerror="this.remove()"></div>' +
+          '<div><div class="mp-title">' + esc(v.t[rlang] || v.t.en) + '</div>' +
+          '<div class="mp-tags"><span>@' + esc(v.handle) + '</span><span>#' + TAG_POOL[v.id.charCodeAt(2) % TAG_POOL.length] + '</span><span>#WahdaReels</span></div></div></div>' +
+        '<button class="mp-view" onclick="closeShare();pickFeed(\'fy\')">' + (rlang === 'zh' ? '去 Feeds 查看 →' : 'View it in Feeds →') + '</button></div>';
+      toast(T('posted'));
     });
   }
-  /* guest: hand an account-only action (play / share) to the shell's sign-up gate */
-  function guestGateAction(action) {
-    if (!guestMode) return false;
-    try { window.parent.postMessage({ wahdaMsg:'gate', action:action, title:(curDrama || {}).t || '' }, '*'); } catch (e) {}
-    return true;
-  }
-  function openShare(e) {
-    e.stopPropagation();
-    if (!curDrama) return;
-    if (guestGateAction('share')) return;              /* sharing writes to Chats / Feeds — needs an account */
-    document.getElementById('shrMask').classList.add('show');
-    document.getElementById('shrSheet').classList.add('show');
-    renderShare('contacts');
-    loadShareData(function () {
-      if (document.getElementById('shrSheet').classList.contains('show') && shareTabCur === 'contacts') {
-        renderShare('contacts', null, true);
-      }
-    });
-  }
-  function closeShare() {
-    document.getElementById('shrMask').classList.remove('show');
-    document.getElementById('shrSheet').classList.remove('show');
-  }
 
-  /* ---------- subscription (Wahda Premium) ---------- */
-  const PLANS = [
-    { id:'weekly',    name:'Weekly',    price:'1.99',  per:'/week',     note:'Billed weekly · cancel anytime' },
-    { id:'monthly',   name:'Monthly',   price:'6.99',  per:'/month',    note:'Billed monthly · most flexible', badge:'POPULAR' },
-    { id:'quarterly', name:'Quarterly', price:'19.99', per:'/3 months', note:'Billed every 3 months · save 5%' },
-    { id:'yearly',    name:'Yearly',    price:'69.99', per:'/year',     note:'Billed yearly · save 67%', badge:'BEST VALUE', badgeAlt:true },
-  ];
-  let curPlan = 'monthly';
-  const subBodyInit = document.getElementById('subBody').innerHTML;
-
-  function planOf(id){ return PLANS.filter(p => p.id === id)[0]; }
-
-  /* ---------- current subscription banner (top of the Premium page) ----------
-     The app shell owns the account record and pushes it over postMessage
-     (ctx / subpay-done); when this page is opened on its own we fall back to
-     the shared localStorage record written by the shell. */
-  const SUB_DAYS = { weekly:7, monthly:30, quarterly:90, yearly:365 };
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const SS_CROWN = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5l-1.3-9.2 5.1 3.1L12 5.2l4.7 6.2 5.1-3.1-1.3 9.2z"/><path d="M3.5 17.5h17"/></svg>';
-  const SS_USER = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.6"/><path d="M4.8 20c.6-3.7 3.6-5.6 7.2-5.6s6.6 1.9 7.2 5.6"/></svg>';
-  let subState = null;                                  /* { plan, name, expiresAt } | null */
-
-  function subDaysLeft(exp) { return exp ? Math.max(0, Math.ceil((exp - Date.now()) / 86400000)) : 0; }
-  function subEndLabel(exp) {
-    const d = new Date(exp);
-    return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  /* ---------- search ---------- */
+  function openSearch(e) {
+    if (e) e.stopPropagation();
+    srClearQ();
+    $('srchView').classList.add('show');
+    setTimeout(() => $('srInput').focus(), 240);
   }
-  function saveSubLocal() { try { localStorage.setItem('wahda_sub_v1', JSON.stringify(subState)); } catch (e) {} }
-  function setSubState(s) { subState = (s && s.plan) ? s : null; renderSubStatus(); }
-
-  function subStatusHTML() {
-    const kicker = '<div class="ss-kicker">CURRENT PLAN</div>';
-    if (!subState) {
-      return `<div class="sub-status free">
-        <span class="ss-ic">${SS_USER}</span>
-        <div class="ss-txt">${kicker}
-          <div class="ss-name">Free</div>
-          <div class="ss-note">${guestMode ? 'Sign up to unlock Wahda Premium' : 'No active subscription'}</div>
-        </div>
-        <div class="ss-days dim"><b>—</b><span>days left</span></div>
-      </div>`;
-    }
-    const days = subDaysLeft(subState.expiresAt);
-    return `<div class="sub-status active">
-      <span class="ss-ic">${SS_CROWN}</span>
-      <div class="ss-txt">${kicker}
-        <div class="ss-name">Wahda Premium · ${subState.name || ''}</div>
-        <div class="ss-note">${days > 0
-          ? 'Renews ' + subEndLabel(subState.expiresAt) + ' · auto-renew on'
-          : 'Expired — renew to keep ad-free viewing'}</div>
-      </div>
-      <div class="ss-days${days <= 3 ? ' soon' : ''}"><b>${days}</b><span>days left</span></div>
-    </div>`;
+  function closeSearch() { $('srchView').classList.remove('show'); $('srInput').blur(); }
+  function srClearQ() { $('srInput').value = ''; srRender(); }
+  function srChipsHTML() {
+    return TAG_POOL.map(t => '<button onclick="srChip(\'' + t + '\')">#' + t + '</button>').join('');
   }
-  function renderSubStatus() {
-    const box = document.getElementById('subStatus');
-    if (box) box.innerHTML = subStatusHTML();
+  function srChip(t) { $('srInput').value = '#' + t; srRender(); }
+  function srMatches() {
+    const q = $('srInput').value.trim().toLowerCase().replace(/^#/, '');
+    if (!q) return null;
+    return VIDS.filter(v =>
+      v.t.en.toLowerCase().includes(q) || v.t.zh.includes(q) ||
+      v.cap.en.toLowerCase().includes(q) || v.cap.zh.includes(q) ||
+      v.handle.toLowerCase().includes(q) || (v.name.en + v.name.zh).toLowerCase().includes(q));
+  }
+  function srRender() {
+    const res = srMatches();
+    $('srClear').classList.toggle('show', !!($srInput().value.trim()));
+    const box = $('srRes');
+    if (!res) { box.innerHTML = ''; return; }
+    if (!res.length) { box.innerHTML = '<div class="sr-empty">' + T('nores') + '</div>'; return; }
+    box.innerHTML = '<div class="sr-grid">' + res.map(v =>
+      '<div class="sr-cell" onclick="srGo(\'' + v.id + '\')">' +
+        '<img src="assets/' + v.img + '" alt="">' +
+        '<div class="sc-play">▶ ' + fmtN(v.likes) + '</div>' +
+        '<div class="sc-cap">' + esc(v.t[rlang] || v.t.en) + ' · @' + esc(v.handle) + '</div></div>').join('') + '</div>';
+  }
+  function $srInput() { return $('srInput'); }
+  function srGo(id) {
+    closeSearch();
+    if (curTab !== 'fy') pickFeed('fy');
+    jumpTo('fy', id, true);
+  }
+  function srGoFirst() {
+    const res = srMatches();
+    if (res && res.length) srGo(res[0].id);
   }
 
-  function renderPlans() {
-    const list = document.getElementById('planList');
-    if (!list) return;
-    list.innerHTML = PLANS.map(p => `
-      <div class="plan${p.id === curPlan ? ' on' : ''}" onclick="selectPlan('${p.id}')">
-        ${p.badge ? `<span class="plan-badge${p.badgeAlt ? ' alt' : ''}">${p.badge}</span>` : ''}
-        <span class="plan-radio"></span>
-        <div class="plan-info">
-          <div class="plan-name">${p.name}</div>
-          <div class="plan-note">${p.note}</div>
-        </div>
-        <div class="plan-price"><b>$${p.price}</b><span>USD${p.per}</span></div>
-      </div>`).join('');
-    const lb = document.getElementById('subBtnLabel');
-    if (lb) { const p = planOf(curPlan); lb.textContent = `Subscribe · $${p.price}${p.per}`; }
+  /* ---------- jump to a video (chat share / search / gate resume) ---------- */
+  function jumpTo(tab, idOrTitle, autoplay) {
+    if (tab === 'fw' && curTab !== 'fw') pickFeed('fw');
+    if (tab === 'fy' && curTab !== 'fy') pickFeed('fy');
+    const v = VIDS.filter(x => x.id === idOrTitle || x.t.en === idOrTitle || x.t.zh === idOrTitle)[0];
+    if (!v) return;
+    const p = activePager();
+    const idx = Array.from(p.children).findIndex(c => c.dataset && c.dataset.id === v.id);
+    if (idx < 0) return;                                   /* not in this tab's list */
+    curIdx = idx;
+    p.scrollTop = idx * p.clientHeight;
+    if (autoplay !== false) playing = true;
+    refreshPlayState();
   }
 
-  function selectPlan(id) {
-    curPlan = id;
-    renderPlans();
-  }
+  /* ---------- keyboard (standalone review / focused iframe) ---------- */
+  window.addEventListener('keydown', e => {
+    if ($('srchView').classList.contains('show')) return;
+    const p = activePager();
+    if (e.key === 'ArrowDown') { curIdx = Math.min(p.children.length - 1, curIdx + 1); p.scrollTop = curIdx * p.clientHeight; e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { curIdx = Math.max(0, curIdx - 1); p.scrollTop = curIdx * p.clientHeight; e.preventDefault(); }
+    else if (e.key === ' ') { const c = activePager().children[curIdx]; if (c && c.dataset && c.dataset.id) { togglePlay(c.dataset.id); e.preventDefault(); } }
+  });
 
-  function openSub() {
-    curPlan = 'monthly';
-    const body = document.getElementById('subBody');
-    if (body.querySelector('.sub-done')) body.innerHTML = subBodyInit;   // restore after a previous success
-    document.getElementById('subFoot').style.display = '';
-    renderSubStatus();
-    renderPlans();
-    document.getElementById('subView').classList.add('show');
-  }
-
-  function closeSub() {
-    document.getElementById('subView').classList.remove('show');
-  }
-
-  /* Subscribe → the host shell's Wahda Pay gateway (identical flow to paid events
-     and mini-app purchases: amount due in Wahda Coin → method → PIN → success).
-     The receipt is rendered once the shell confirms the payment went through. */
-  function subscribe() {
-    const p = planOf(curPlan);
-    if (EMBEDDED) {
-      try {
-        window.parent.postMessage({ wahdaMsg:'subpay',
-          plan:{ id:p.id, name:p.name, price:Number(p.price), per:p.per, note:p.note } }, '*');
-      } catch (e) {}
+  /* ---------- bridge with the app shell ---------- */
+  window.addEventListener('message', function (e) {
+    const d = e.data || {};
+    if (d.wahdaMsg === 'ctx') {
+      guestMode = !!d.guest;
+      if (d.lang && d.lang !== rlang) { rlang = d.lang; paintAll(); }
       return;
     }
-    renderPremiumActive(p);            /* opened outside the app: no wallet to charge */
-  }
-
-  function renderPremiumActive(p) {
-    /* refresh the banner; the shell's record wins when it sent one over */
-    if (!subState || subState.plan !== p.id || subState.expiresAt <= Date.now()) {
-      subState = { plan:p.id, name:p.name, expiresAt:Date.now() + (SUB_DAYS[p.id] || 30) * 86400000 };
-      saveSubLocal();
-    }
-    document.getElementById('subBody').innerHTML = `
-      <div id="subStatus">${subStatusHTML()}</div>
-      <div class="sub-done show">
-        <div class="tick">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-        </div>
-        <h3>You're Premium</h3>
-        <p>Your ${p.name} plan is active. Enjoy ad-free binge and early episodes, Colin.</p>
-        <div class="sub-receipt">
-          <div class="rc-row"><span>Plan</span><b>Wahda Premium · ${p.name}</b></div>
-          <div class="rc-row"><span>Billing cycle</span><b>${p.per.replace('/', '')}</b></div>
-          <div class="rc-row"><span>Payment method</span><b>Wahda Pay · Wahda Coin</b></div>
-          <div class="rc-row total"><span>Total today</span><b>$${p.price} USD</b></div>
-        </div>
-        <button class="sub-ghost" onclick="closeSub()">Back to Reels</button>
-      </div>`;
-    document.getElementById('subFoot').style.display = 'none';
-    toast('Subscription active · ' + p.name + ' · $' + p.price);
-  }
-
-  /* standalone (no app shell around us): read the shared subscription record directly */
-  if (!EMBEDDED) {
-    try {
-      const s = JSON.parse(localStorage.getItem('wahda_sub_v1') || 'null');
-      if (s && s.plan) setSubState(s);
-    } catch (e) {}
-  }
-
-  /* ================= Watch history page ================= */
-  const HIST_ORDER = ['Today', 'Yesterday', 'This week', 'Earlier'];
-  let histTabCur = 'watching', histQuery = '', histReturn = false;
-
-  function openHistory() {
-    document.getElementById('histView').classList.add('show');
-    renderHistory();
-  }
-  function closeHistory() { document.getElementById('histView').classList.remove('show'); }
-
-  function pickHist(tab) {
-    histTabCur = tab;
-    renderHistory();
-    document.getElementById('histBody').scrollTop = 0;
-  }
-
-  function histSearch(v) {
-    histQuery = v;
-    document.getElementById('histClearQ').classList.toggle('on', !!v);
-    renderHistory();
-  }
-  function clearHistQuery() {
-    histQuery = '';
-    const i = document.getElementById('histQuery');
-    if (i) i.value = '';
-    document.getElementById('histClearQ').classList.remove('on');
-    renderHistory();
-  }
-  function clearHistory() {
-    histRows = [];
-    renderHistory();
-    toast('Watch history cleared');
-  }
-  function resetHistory() {
-    histRows = histSeed.map(h => Object.assign({}, h));
-    renderHistory();
-    toast('Demo history restored');
-  }
-
-  /* one row: poster + flag, title/meta, progress bar, status line, action pill */
-  function histRowHTML(h) {
-    const flag = h.done
-      ? '<span class="hist-flag done">✓ DONE</span>'
-      : `<span class="hist-flag">EP ${h.ep}</span>`;
-    const status = h.done
-      ? `<span class="ep">✓ All ${h.total} episodes</span><span>·</span><span>${h.date}</span>`
-      : `<span class="ep">EP ${h.ep} of ${h.total}</span><span>·</span><span>${h.pct}%</span><span>·</span><span>${h.left || h.date}</span>`;
-    const bar = h.done
-      ? '<div class="hist-bar all"><i style="width:100%"></i></div>'
-      : `<div class="hist-bar"><i style="width:${h.pct}%"></i></div>`;
-    const go = h.done ? 1 : h.ep;
-    return `<div class="hist-row" onclick="histOpen('${jsStr(h.t)}', ${go})">
-      <div class="hist-poster">
-        <img src="assets/${h.img}" alt="${h.t}" loading="lazy" onerror="this.remove()">
-        ${flag}
-      </div>
-      <div class="hist-info">
-        <div class="hist-name">${h.t}</div>
-        <div class="hist-meta"><span class="tagx">${h.cat}</span><span class="rate">★ ${h.rate}</span><span>${h.total} eps</span></div>
-        ${bar}
-        <div class="hist-status">${status}</div>
-      </div>
-      <button class="hist-go${h.done ? '' : ' primary'}" onclick="event.stopPropagation();histOpen('${jsStr(h.t)}', ${go})">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${h.done ? 'Replay' : 'Continue'}
-      </button>
-    </div>`;
-  }
-
-  /* one row of the friends chart: rank + poster, title/meta, live friend count, Watch */
-  function friendRowHTML(f) {
-    return `<div class="hist-row" onclick="histOpen('${jsStr(f.t)}', 1)">
-      <span class="frank${f.rank <= 3 ? ' top' : ''}">${f.rank}</span>
-      <div class="hist-poster">
-        <img src="assets/${f.img}" alt="${f.t}" loading="lazy" onerror="this.remove()">
-      </div>
-      <div class="hist-info">
-        <div class="hist-name">${f.t}</div>
-        <div class="hist-meta"><span class="tagx">${f.cat}</span><span class="rate">★ ${f.rate}</span><span>${f.total} eps</span></div>
-        <div class="hist-friends"><span class="live-dot"></span><b>${f.friends}</b> friends watching now</div>
-      </div>
-      <button class="hist-go" onclick="event.stopPropagation();histOpen('${jsStr(f.t)}', 1)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Watch
-      </button>
-    </div>`;
-  }
-
-  function renderHistory() {
-    const watching = histRows.filter(h => !h.done).length;
-    const doneN = histRows.filter(h => h.done).length;
-    const q = histQuery.trim().toLowerCase();
-    const matchQ = t => !q || t.toLowerCase().indexOf(q) > -1;
-
-    document.getElementById('histTabs').innerHTML =
-      `<button class="hist-tab${histTabCur === 'watching' ? ' on' : ''}" onclick="pickHist('watching')">Watching <b>${watching}</b></button>
-       <button class="hist-tab${histTabCur === 'done' ? ' on' : ''}" onclick="pickHist('done')">Completed <b>${doneN}</b></button>
-       <button class="hist-tab${histTabCur === 'friends' ? ' on' : ''}" onclick="pickHist('friends')">Friends <b>${friendWatch.length}</b></button>`;
-
-    const body = document.getElementById('histBody');
-    const stats = document.getElementById('histStats');
-
-    /* ---- tab C: Top 30 most watched by friends right now (counts only, no identities) ---- */
-    if (histTabCur === 'friends') {
-      const tot = friendWatch.reduce((n, f) => n + f.friends, 0);
-      stats.innerHTML =
-        `<div class="hist-stat"><b>${friendWatch.length}</b><span>TITLES</span></div>
-         <div class="hist-stat"><b>${tot}</b><span>FRIENDS WATCHING</span></div>
-         <div class="hist-stat"><b>${friendWatch[0].friends}</b><span>ON THE TOP PICK</span></div>`;
-      const list = friendWatch.filter(f => matchQ(f.t));
-      if (!list.length) {
-        body.innerHTML = `<div class="hist-empty"><div class="big">👥</div>
-          No drama in your friends' watch lists matches “${histQuery.replace(/</g, '&lt;')}”.</div>`;
-        return;
-      }
-      body.innerHTML =
-        `<div class="hist-group">TOP 30 · MOST WATCHED BY FRIENDS</div>` +
-        list.map(friendRowHTML).join('');
+    if (d.wahdaMsg === 'friends') {
+      shareContacts = (d.contacts || []).map(shellPerson);
+      shareGroups = (d.groups || []).map(shellPerson);
+    } else if (d.wahdaMsg === 'play' && d.title) {
+      jumpTo('fy', d.title, true); return;
+    } else if (d.wahdaMsg === 'resumeShare') {
+      const v = vById(shareOpenId) || VIDS[curIdx % VIDS.length];
+      openShare(null, v.id);
+      return;
+    } else if (d.wahdaMsg !== 'share-ack' && d.wahdaMsg !== 'post-ack') {
       return;
     }
-
-    /* ---- tabs A + B: my own playback history ---- */
-    /* summary: finished episodes + fraction of the episode in progress (≈9 min per episode) */
-    const finEps = histRows.reduce((n, h) => n + (h.done ? h.total : Math.max(h.ep - 1, 0)), 0);
-    const partial = histRows.reduce((n, h) => n + (h.done ? 0 : h.pct / 100), 0);
-    const hours = ((finEps + partial) * 9) / 60;
-    stats.innerHTML =
-      `<div class="hist-stat"><b>${histRows.length}</b><span>DRAMAS</span></div>
-       <div class="hist-stat"><b>${finEps}</b><span>EPISODES</span></div>
-       <div class="hist-stat"><b>${hours.toFixed(1)}h</b><span>WATCH TIME</span></div>`;
-
-    const rows = histRows
-      .filter(h => (histTabCur === 'done' ? h.done : !h.done))
-      .filter(h => matchQ(h.t));
-
-    if (!rows.length) {
-      const icon = q ? '🔍' : (histTabCur === 'done' ? '✅' : '▶️');
-      const msg = q
-        ? `No drama in your history matches “${histQuery.replace(/</g, '&lt;')}”.`
-        : (histTabCur === 'done'
-            ? 'No drama finished yet — every episode of a series must be watched to land here.'
-            : 'Nothing in progress. Open any drama and press play.');
-      body.innerHTML = `<div class="hist-empty">
-        <div class="big">${icon}</div>${msg}
-        ${histRows.length ? '' : '<br><button onclick="resetHistory()">Reload demo history</button>'}
-      </div>`;
-      return;
+    const cb = sharePending[d.rid];
+    if (cb) { delete sharePending[d.rid]; cb(d); }
+    if (d.wahdaMsg === 'friends' && $('shrSheet').classList.contains('show') && shareTabCur !== 'post') {
+      renderShare(shareTabCur, null, true);
     }
-    body.innerHTML = HIST_ORDER
-      .filter(k => rows.some(r => r.when === k))
-      .map(k => `<div class="hist-group">${k}</div>` +
-                rows.filter(r => r.when === k).map(histRowHTML).join(''))
-      .join('');
+  });
+  function tellShellReady() {
+    if (!EMBEDDED) return;
+    try { window.parent.postMessage({ wahdaMsg: 'ready' }, '*'); } catch (e) {}
   }
+  let guestMode = false;
 
-  function histOpen(t, ep) {
-    histReturn = true;          // so that closing the player comes back to this page
-    closeHistory();
-    openPlayer(t, ep);
-  }
-  renderHistory();
-
+  /* ---------- boot ---------- */
+  pagers.fy = $('pagerFy'); pagers.fw = $('pagerFw');
+  buildCards(pagers.fy, vidsFY());
+  buildCards(pagers.fw, vidsFW());
+  bindPager(pagers.fy); bindPager(pagers.fw);
+  $('muteBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.6a5 5 0 010 6.8M18.4 6.2a8.2 8.2 0 010 11.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+  $('srchBtn').innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>';
+  $('srChips').innerHTML = srChipsHTML();
+  paintAll();
+  window.addEventListener('resize', () => { const p = activePager(); p.scrollTop = curIdx * p.clientHeight; });
+  setTimeout(() => { refreshPlayState(); setTimeout(() => $('swHint').classList.add('gone'), 4200); }, 500);
+  tellShellReady();
 </script>
 </body>
 </html>

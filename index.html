@@ -1495,15 +1495,6 @@
       <div class="scroll" id="mapayBody" style="padding:0 20px 8px"></div>
     </section>
 
-    <!-- Wahda Pay gateway (Wahda Premium subscription, opened from Reels) -->
-    <section class="page" id="pg-subpay" style="z-index:15">
-      <div class="nav">
-        <button class="back-btn" onclick="closeSubPay()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="nav-title" data-i18n="evpay_t">Wahda Pay</div>
-      </div>
-      <div class="scroll" id="subpayBody" style="padding:0 20px 8px"></div>
-    </section>
-
     <!-- Events & Community Nearby (from Place detail) -->
     <section class="page" id="pg-pnear" style="z-index:13">
       <div class="nav">
@@ -3082,7 +3073,6 @@ en:{
  wl_ps_coin_s:"Coin Balance", wl_ps_credit_s:"Credit",
  aev_paid:"Paid Event", aev_paid_sw:"Charge for attendance", aev_paid_sub:"Attendees pay via Wahda Pay", aev_price_hint:"Ticket price", ev_qr_t:"Entry Pass", ev_qr_paid:"Paid · {0} Wahda Coin", ev_qr_sub:"Show this QR code at the door — the organizer will scan it to check you in.",
  ev_pay_note:"Payment is processed via Wahda Pay", evpay_t:"Wahda Pay", evpay_amt:"Amount Due", evpay_to:"Pay to", evpay_confirm:"Confirm & Pay", evpay_ok_t:"Payment Successful", evpay_back:"Returning to event in {0}s", evpay_pin_t:"Wahda Pay \u00b7 Confirm Payment", evpay_pin_sub:"Enter your 6-digit payment PIN to complete this payment",
- subpay_to:"Wahda Premium", subpay_back:"Returning to Reels in {0}s",
  bt_title:"BUS", bt_tag:"LOCAL SERVICE PARTNER", bt_sub:"City-to-city bus tickets \u00b7 Pay with Wahda Coin", bt_trip:"Select Trip", bt_from:"From", bt_to:"To", bt_ca:"City A", bt_cb:"City B", bt_cc:"City C", bt_cd:"City D", bt_dep_v:"Today \u00b7 18:30", bt_fare:"Fare", bt_order_t:"Booking Confirmed", bt_tno:"Ticket No.", bt_seat:"Seat", bt_bus:"Bus", bt_show:"Show this e-ticket to the driver when boarding", bt_again:"Book Another", bt_back:"Returning to ticket in {0}s", bt_slot:"Departure", bt_today:"Today",
  pnb_t:"Events & Community Nearby", pnb_sub:"Events and communities around this place", pnb_hint:"Sorted by distance from {0}", pnb_ev:"Events", pnb_cm:"Community",
  wl_topup:"Top Up", wl_withdraw:"Withdraw", wl_p2p:"P2P Transfer", wl_cards:"My Card",
@@ -3317,7 +3307,6 @@ zh:{
  wl_ps_coin_s:"Coin 余额", wl_ps_credit_s:"信用",
  aev_paid:"是否付费", aev_paid_sw:"向参与者收取费用", aev_paid_sub:"参与者通过 Wahda Pay 支付", aev_price_hint:"票价", ev_qr_t:"入场凭证", ev_qr_paid:"已支付 · {0} Wahda Coin", ev_qr_sub:"入场时向主办方出示此二维码，扫码核销。",
  ev_pay_note:"通过 Wahda Pay 网关完成支付", evpay_t:"Wahda Pay", evpay_amt:"应付金额", evpay_to:"收款方", evpay_confirm:"确认支付", evpay_ok_t:"支付成功", evpay_back:"{0} 秒后返回活动页", evpay_pin_t:"Wahda Pay · 确认支付", evpay_pin_sub:"输入 6 位支付密码完成本次支付",
- subpay_to:"Wahda Premium", subpay_back:"{0} 秒后返回 Reels",
  bt_title:"BUS", bt_tag:"本地服务商家", bt_sub:"城际巴士车票 · 支持 Wahda Coin 支付", bt_trip:"选择行程", bt_from:"出发城市", bt_to:"到达城市", bt_ca:"A 城", bt_cb:"B 城", bt_cc:"C 城", bt_cd:"D 城", bt_dep_v:"今天 18:30", bt_fare:"票价", bt_order_t:"订票成功", bt_tno:"票号", bt_seat:"座位", bt_bus:"班次", bt_show:"上车时请向司机出示此电子车票", bt_again:"再次购票", bt_back:"{0} 秒后返回车票", bt_slot:"出发班次", bt_today:"今天",
  pnb_t:"周边活动与社群", pnb_sub:"该地点附近的活动与社群", pnb_hint:"按与{0}的距离由近及远排序", pnb_ev:"活动", pnb_cm:"社群",
  wl_topup:"充值", wl_withdraw:"提现", wl_p2p:"P2P 转账", wl_cards:"我的卡片",
@@ -3511,7 +3500,7 @@ function applyLang(){
  if(document.getElementById("itPanel").classList.contains("open"))renderQp(document.getElementById("qpSearch").value);
  npTick();
 }
-function toggleLang(){lang=lang==="en"?"zh":"en";applyLang()}
+function toggleLang(){lang=lang==="en"?"zh":"en";applyLang();bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang})}
 
 /* ---------- log in (welcome -> login) ---------- */
 var liMode="phone",liAuth="pwd";
@@ -5146,123 +5135,6 @@ function mapaySuccess(){
  WTXS.unshift({ic:"🚌",g:"linear-gradient(135deg,#185FA5,#0E7C66)",n:{en:"BUS · Bus Ticket",zh:"BUS · 巴士车票"},tm:{en:"Just now",zh:"刚刚"},v:-20});
  btCd=true;
  mapayRender();
-}
-/* ---------- Wahda Premium subscription record (owned by the shell) ----------
-   Single source of truth for the account's current plan + expiry. Persisted so
-   the "days remaining" shown at the top of the Reels Premium page keeps
-   counting down between visits. Pushed to the Reels iframe by the ctx and
-   subpay-done bridge messages. */
-var SUB_DAYS={weekly:7,monthly:30,quarterly:90,yearly:365};
-var subState=(function(){
- try{
-  var s=JSON.parse(localStorage.getItem("wahda_sub_v1")||"null");
-  if(s&&s.plan&&s.expiresAt>Date.now())return s;
- }catch(e){}
- /* demo account sits mid-cycle on Monthly (18 days left) */
- var st={plan:"monthly",name:"Monthly",expiresAt:Date.now()+18*864e5};
- try{localStorage.setItem("wahda_sub_v1",JSON.stringify(st))}catch(e){}
- return st;
-})();
-function subPersist(){try{localStorage.setItem("wahda_sub_v1",JSON.stringify(subState))}catch(e){}}
-function subSet(plan){
- if(!plan)return null;
- subState={plan:plan.id,name:plan.name,expiresAt:Date.now()+(SUB_DAYS[plan.id]||30)*864e5};
- subPersist();
- return subState;
-}
-function subPayload(){
- if(isGuest||!subState)return null;          /* guests have no subscription */
- return {plan:subState.plan,name:subState.name,expiresAt:subState.expiresAt};
-}
-
-/* ---------- Wahda Pay gateway (Wahda Premium subscription, from Reels) ----------
-   same flow as paid events and mini-app purchases: amount due in Wahda Coin →
-   payment method → PIN/fingerprint confirm → success + return */
-var subPayMethod=0,subPayTimer=0,subPayDone=false,subPayPlan=null,subPayPending=null;
-function openSubPay(plan){
- if(!plan)return;
- if(isGuest){                        /* guests may browse plans; the charge needs an account */
-  subPayPending=plan;
-  guestGate(function(){openSubPay(subPayPending)});
-  return;
- }
- subPayPlan=plan;
- subPayMethod=defPayMethod;subPayDone=false;subPayPending=null;
- subPayRender();
- raisePage("pg-subpay");
- document.getElementById("pg-subpay").classList.add("active");
-}
-function closeSubPay(){
- if(subPayTimer){clearInterval(subPayTimer);subPayTimer=0}
- document.getElementById("pg-subpay").classList.remove("active");
-}
-function subPayPick(i){subPayMethod=i;subPayRender()}
-function subPayRender(){
- var p=subPayPlan;if(!p)return;
- var el=document.getElementById("subpayBody");if(!el)return;
- var h="";
- if(subPayDone){
-  h='<div class="p2p-okwrap">'
-   +'<span style="width:64px;height:64px;border-radius:50%;background:var(--brand-soft,#E3F2EE);color:var(--brand,#0E7C66);display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
-   +'<div style="font-size:19px;font-weight:800;color:var(--ink,#1C1B18);margin-top:16px">'+t("evpay_ok_t")+'</div>'
-   +'<div style="font-size:24px;font-weight:800;color:var(--gold,#C9A24B);margin-top:8px">'+p.price+' <span style="font-size:13px">Wahda Coin</span></div>'
-   +'<div style="font-size:13px;color:var(--ink-3,#9B9993);margin-top:8px">'+t(subPayMethod===0?"wl_pq_coin":"wl_pq_credit")+'</div>'
-   +'<div id="subpayCd" style="font-size:12.5px;color:var(--ink-3,#9B9993);margin-top:18px"></div>'
-   +'<button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="subPayGoBack()">'+t("p2p_done")+'</button></div>';
-  el.innerHTML=h;el.scrollTop=0;
-  subPayCdTick(3);
-  return;
- }
- var opts=[
-  {ic:"W",cls:"",k:"wl_pq_coin",v:t("wl_credit_avail",wlMoney(WAL_USD))},
-  {ic:"C",cls:"cr",k:"wl_pq_credit",v:t("wl_credit_avail",wlCrAvail())}];
- h='<div class="pq-card" style="margin-top:14px">'
-  +'<div class="pq-m-lb">'+t("evpay_amt")+'</div>'
-  +'<div style="font-size:30px;font-weight:800;color:var(--gold,#C9A24B);margin-top:4px">'+p.price+' <span style="font-size:13px">Wahda Coin</span></div>'
-  +'<div class="pq-m-sub">≈ $'+wlFmt(p.price)+' · 1 Wahda Coin = $1.00</div>'
-  +'<div style="display:flex;align-items:center;gap:11px;border-top:1px solid var(--line,#E5E2DC);margin-top:14px;padding:13px 2px 2px">'
-  +'<div class="feed-avatar" style="width:34px;height:34px;font-size:15px;flex:none;background:#FBEFE0;color:#8A5A18">W</div>'
-  +'<div style="flex:1;min-width:0"><div class="pq-m-sub" style="margin:0">'+t("evpay_to")+'</div><div style="font-size:13.5px;font-weight:700">'+t("subpay_to")+'</div></div>'
-  +'<div style="flex:none;text-align:right;max-width:160px"><div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div class="pq-m-sub" style="margin-top:2px">'+p.per+'</div></div></div>'
-  +'<div class="pq-opts"><div class="pq-m-lb">'+t("wl_pq_method")+'</div>'
-  +opts.map(function(o,i){
-   return '<button class="pq-mrow'+(subPayMethod===i?" sel":"")+'" onclick="subPayPick('+i+')">'
-    +'<span class="pq-coin '+o.cls+'">'+o.ic+'</span>'
-    +'<span style="flex:1;min-width:0"><span class="pq-m-nm">'+t(o.k)+'</span><span class="pq-m-sub">'+o.v+'</span></span>'
-    +'<span class="pq-tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>';
-  }).join("")
-  +'<p class="pq-note">'+t(subPayMethod===0?"p2p_rate":"wl_pq_note_cr")+'</p></div></div>'
-  +'<button class="btn btn-primary" style="width:100%;margin:14px 0 12px" onclick="subPayConfirm()">'+t("evpay_confirm")+'</button>';
- el.innerHTML=h;el.scrollTop=0;
-}
-function subPayConfirm(){cardVerify("subpay")}
-function subPayCdTick(n){
- var cd=document.getElementById("subpayCd");
- if(cd)cd.textContent=t("subpay_back",n);
- if(subPayTimer){clearInterval(subPayTimer);subPayTimer=0}
- if(n<=0){subPayGoBack();return}
- subPayTimer=setInterval(function(){
-  if(subPayTimer){clearInterval(subPayTimer);subPayTimer=0}
-  subPayCdTick(n-1);
- },1000);
-}
-function subPayGoBack(){
- if(subPayTimer){clearInterval(subPayTimer);subPayTimer=0}
- closeSubPay();
-}
-function subPaySuccess(){
- var p=subPayPlan;if(!p)return;
- var amt=+p.price||0;
- if(subPayMethod===0){
-  WAL_USD=Math.max(0,+(WAL_USD-amt).toFixed(2));
-  renderWallet();
- }
- WTXS.unshift({ic:"👑",g:"linear-gradient(135deg,#C9A24B,#a08032)",
-  n:{en:"Wahda Premium · "+p.name,zh:"Wahda Premium · "+p.name},tm:{en:"Just now",zh:"刚刚"},v:-amt});
- subPayDone=true;
- subSet(p);
- subPayRender();
- bxReply({wahdaMsg:"subpay-done",plan:{id:p.id,name:p.name},sub:subPayload()});
 }
 function setEvStars(k){
  var e=EVENTS[evOpenIdx];if(!e)return;
@@ -8541,7 +8413,6 @@ function cardVerified(){
  if(cvCtx==="p2p"){p2pSuccess();return}
  if(cvCtx==="evpay"){evPaySuccess();return}
  if(cvCtx==="mapay"){mapaySuccess();return}
- if(cvCtx==="subpay"){subPaySuccess();return}
  if(cvCtx==="scanpay"){scanPaySuccess();return}
  if(cvCtx==="pinset"){toast(t("wl_ps_pin_ok"));return}
  cardRevealed=true;renderWcard();
@@ -8552,8 +8423,8 @@ function renderCardVerify(){
  var dots="";for(var i=0;i<6;i++)dots+='<span class="cv-dot'+(i<cardCode.length?" on":"")+'"></span>';
  document.getElementById("cvDots").innerHTML=dots;
  document.getElementById("cvFp").innerHTML='<button class="cv-fp'+(cvScanning?" scanning":"")+'" onclick="cardFp()">'+CV_FP_SVG+'<span>'+(cvScanning?t("wl_ver_scan"):t("wl_ver_fp"))+'</span></button>';
-  document.getElementById("cvTitle").textContent=(cvCtx==="evpay"||cvCtx==="mapay"||cvCtx==="scanpay"||cvCtx==="subpay")?t("evpay_pin_t"):(cvCtx==="pinset"?t("wl_ps_pin_t"):t("wl_ver_t"));
-  document.getElementById("cvSub").textContent=cvCtx==="p2p"?t("p2p_ver_sub"):(cvCtx==="pinset"?t("wl_ps_pin_sub"):((cvCtx==="evpay"||cvCtx==="mapay"||cvCtx==="scanpay"||cvCtx==="subpay")?t("evpay_pin_sub"):t("wl_ver_sub")));
+  document.getElementById("cvTitle").textContent=(cvCtx==="evpay"||cvCtx==="mapay"||cvCtx==="scanpay")?t("evpay_pin_t"):(cvCtx==="pinset"?t("wl_ps_pin_t"):t("wl_ver_t"));
+  document.getElementById("cvSub").textContent=cvCtx==="p2p"?t("p2p_ver_sub"):(cvCtx==="pinset"?t("wl_ps_pin_sub"):((cvCtx==="evpay"||cvCtx==="mapay"||cvCtx==="scanpay")?t("evpay_pin_sub"):t("wl_ver_sub")));
  var keys=["1","2","3","4","5","6","7","8","9","del","0",""];
  document.getElementById("cvPad").innerHTML=keys.map(function(k){
   if(k==="")return '<span></span>';
@@ -8840,7 +8711,7 @@ function switchTab(name){
  closePlusMenu();
  var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isRe=name==="reels",isFeed=!isMsg&&!isPl&&!isHub&&!isNf&&!isRe;
  document.getElementById("reelsHost").style.display=isRe?"block":"none";
- if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html";if(rf)bxReply({wahdaMsg:"ctx",guest:isGuest,sub:subPayload()})}
+ if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html";if(rf)bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang})}
  document.getElementById("homeHead").style.display=isFeed?"flex":"none";
  document.getElementById("feedTabsRow").style.display=isFeed?"flex":"none";
  document.getElementById("itHintFeeds").style.display=isFeed?"flex":"none";
@@ -8886,12 +8757,6 @@ function bxDrama(d){
  d=d||{};
  return {t:String(d.t||""),s:String(d.s||""),r:String(d.r||""),p:String(d.p||""),
   cat:String(d.cat||""),e:String(d.e||"🎬"),img:String(d.img||""),g:String(d.g||"")};
-}
-/* read the subscription plan coming from the Reels iframe, keeping only known fields */
-function bxPlan(p){
- p=p||{};
- var price=Math.max(0,parseFloat(p.price)||0);
- return {id:String(p.id||"monthly"),name:String(p.name||"Monthly"),price:price,per:String(p.per||"/month"),note:String(p.note||"")};
 }
 function bxShareToChat(idx,drama,caption){
  var m=MSGS[idx];
@@ -8984,7 +8849,7 @@ window.addEventListener("message",function(e){
  if(!d.wahdaMsg)return;
  switch(d.wahdaMsg){
   case "ready":
-   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest,sub:subPayload()});bxFlushDrama();break;
+   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang});bxFlushDrama();break;
   case "gate":
    /* guest tapped a poster (play) or Share in Reels: bounce to sign-up, then resume */
    bxGateReels(d.action||"play",d.title);
@@ -8998,9 +8863,6 @@ window.addEventListener("message",function(e){
   case "post":
    if(isGuest){bxGateReels("share",d.drama&&d.drama.t);bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:false});break}
    bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:bxCreateDramaPost(bxDrama(d.drama),d.caption)});break;
-  case "subpay":
-   /* Wahda Premium checkout runs in the shell so it shares the event / mini-app gateway */
-   openSubPay(bxPlan(d.plan));break;
  }
 });
 
