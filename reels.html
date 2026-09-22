@@ -38,14 +38,15 @@
   /* ---------- top bar ---------- */
   .top-bar {
     position: absolute; top: 0; left: 0; right: 0; z-index: 30;
-    display: flex; align-items: center; justify-content: center;
-    padding: 10px 12px 16px; pointer-events: none;
+    display: flex; align-items: center; justify-content: flex-start;
+    padding: 10px 12px 16px 14px; pointer-events: none;
     background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
   }
-  .ftabs { display: flex; align-items: center; gap: 22px; pointer-events: auto; }
+  .ftabs { display: flex; align-items: center; gap: 17px; pointer-events: auto; }
   .ftabs button {
-    color: rgba(255,255,255,.72); font-size: 16px; font-weight: 700;
+    color: rgba(255,255,255,.72); font-size: 14.5px; font-weight: 700;
     padding: 3px 1px 7px; position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.4);
+    white-space: nowrap;
   }
   .ftabs button.on { color: #fff; font-weight: 900; }
   .ftabs button.on::after {
@@ -304,6 +305,53 @@
     transition: all .25s; max-width: 82%; text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  /* chips in the location row (near distance / trending rank) */
+  .vloc .chip {
+    display: inline-flex; align-items: center; margin-left: 4px;
+    background: rgba(255,255,255,.18); border-radius: 9px; padding: 2px 7px;
+    font-size: 10px; font-weight: 800; color: #fff; text-shadow: none;
+  }
+  .vloc .chip.hot { background: rgba(226,75,74,.92); }
+
+  /* avatar / handle are tappable -> creator profile */
+  .r-ava { cursor: pointer; }
+  .vhandle { cursor: pointer; }
+
+  /* ---------- creator profile (full-screen light panel) ---------- */
+  .prof {
+    position: absolute; inset: 0; z-index: 60; background: var(--bg);
+    transform: translateX(6%); opacity: 0; pointer-events: none; transition: all .26s;
+    display: flex; flex-direction: column;
+  }
+  .prof.show { transform: none; opacity: 1; pointer-events: auto; }
+  .prof-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; border-bottom: 1px solid rgba(0,0,0,.06); background: var(--bg); flex: none; }
+  .prof-back { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; flex: none; }
+  .prof-top .prof-h { flex: 1; min-width: 0; text-align: center; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .prof-more { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-weight: 900; flex: none; }
+  .prof-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .prof-hero { padding: 20px 16px 4px; text-align: center; }
+  .prof-ava {
+    width: 84px; height: 84px; border-radius: 50%; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 34px; font-weight: 800;
+    border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+  .prof-name { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 11px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .prof-bio { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin: 7px auto 0; max-width: 300px; }
+  .prof-stats { display: flex; justify-content: center; gap: 30px; margin-top: 16px; }
+  .prof-stats div { text-align: center; min-width: 58px; }
+  .prof-stats b { display: block; font-size: 16.5px; font-weight: 900; color: var(--text); }
+  .prof-stats span { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+  .prof-acts { display: flex; justify-content: center; gap: 9px; margin: 16px 0 6px; }
+  .prof-fol { min-width: 122px; height: 40px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 800; padding: 0 22px; }
+  .prof-fol.on { background: var(--surface); color: var(--text-2); border: 1px solid rgba(0,0,0,.1); }
+  .prof-msg { height: 40px; padding: 0 20px; border-radius: 20px; background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 800; border: 1px solid rgba(0,0,0,.1); }
+  .prof-sec { font-size: 11.5px; font-weight: 800; letter-spacing: .4px; color: var(--text-3); padding: 16px 16px 10px; }
+  .prof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 10px 26px; }
+  .pcell { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 9/14; background: var(--surface-2); cursor: pointer; }
+  .pcell img { width: 100%; height: 100%; object-fit: cover; }
+  .pcell .pc-play { position: absolute; left: 6px; bottom: 5px; color: #fff; font-size: 10px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.6); display: flex; align-items: center; gap: 3px; }
 </style>
 </head>
 <body>
@@ -315,6 +363,8 @@
       <div class="ftabs">
         <button id="ftFw" onclick="pickFeed('fw')"></button>
         <button id="ftFy" class="on" onclick="pickFeed('fy')"></button>
+        <button id="ftHot" onclick="pickFeed('hot')"></button>
+        <button id="ftNear" onclick="pickFeed('near')"></button>
       </div>
       <button class="tb-ic" id="muteBtn" onclick="toggleMute(event)" aria-label="Sound"></button>
       <button class="tb-ic" id="srchBtn" onclick="openSearch(event)" aria-label="Search"></button>
@@ -322,6 +372,8 @@
 
     <div class="pager" id="pagerFy"></div>
     <div class="pager hidden" id="pagerFw"></div>
+    <div class="pager hidden" id="pagerHot"></div>
+    <div class="pager hidden" id="pagerNear"></div>
 
     <div class="sw-hint" id="swHint"><span id="swTxt"></span></div>
 
@@ -342,6 +394,18 @@
         <div class="sr-chips" id="srChips"></div>
         <div id="srRes"></div>
       </div>
+    </div>
+
+    <!-- creator profile (opened from the avatar or the @handle) -->
+    <div class="prof" id="profView">
+      <div class="prof-top">
+        <button class="prof-back" onclick="closeProfile(event)" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <div class="prof-h" id="profHandle"></div>
+        <button class="prof-more" onclick="profMore(event)" aria-label="More">⋯</button>
+      </div>
+      <div class="prof-body" id="profBody"></div>
     </div>
 
     <!-- comments sheet -->
@@ -398,21 +462,21 @@
       cap:{en:'30-second beef shawarma wrap 🌯 full recipe in comments #food #halalfood #streetfood',
            zh:'30 秒卷好一份牛肉沙威玛 🌯 完整食谱在评论区 #美食 #清真美食 #街头小吃'},
       music:'Shik Shak Shok — Hossam Ramzy', loc:'Cairo, Egypt',
-      likes:128400, comments:1243, favs:8942, shares:4210, followed:false },
+      likes:128400, comments:1243, favs:8942, shares:4210, followed:false, near:true, dist:1.2 },
     { id:'v02', img:'videos/v02.jpg', dur:28, handle:'wanderwithzayd', vf:true,
       name:{en:'Zayd Travels',zh:'Zayd 旅行日记'}, avaBg:'#3E8E7E',
       t:{en:'Blue Mosque Sunset',zh:'蓝色清真寺日落'},
       cap:{en:'Golden hour over the Blue Mosque — no filter needed 🕌 #travel #istanbul #sunset',
            zh:'蓝色清真寺的黄金时刻，无需滤镜 🕌 #旅行 #伊斯坦布尔 #日落'},
       music:'Bosphorus Nights — Zülfü Livaneli', loc:'Istanbul, Türkiye',
-      likes:256000, comments:3208, favs:18700, shares:9450, followed:false },
+      likes:256000, comments:3208, favs:18700, shares:9450, followed:false, hot:true },
     { id:'v03', img:'videos/v03.jpg', dur:35, handle:'qari.yusuf', vf:true,
       name:{en:'Qari Yusuf',zh:'诵经师 Yusuf'}, avaBg:'#0E7C66',
       t:{en:'Surah Ar-Rahman',zh:'至仁主章诵读'},
       cap:{en:'Surah Ar-Rahman · verses 1-13 — may it bring peace to your day 🤍 #quran #recitation #peace',
            zh:'《至仁主》章 1-13 节，愿它为你的一天带来安宁 🤍 #古兰经 #诵读 #宁静'},
       music:'Original sound — qari.yusuf', loc:'Madinah, Saudi Arabia',
-      likes:892000, comments:12400, favs:45600, shares:28900, followed:true },
+      likes:892000, comments:12400, favs:45600, shares:28900, followed:true, hot:true },
     { id:'v04', img:'videos/v04.jpg', dur:19, handle:'stylebynoor', vf:false,
       name:{en:'Noor | Modest Style',zh:'Noor 保守风穿搭'}, avaBg:'#B85C8E',
       t:{en:'Abaya Lookbook',zh:'Abaya 穿搭'},
@@ -440,7 +504,7 @@
       cap:{en:'He guards the masjid door every morning and demands payment in pets 🐱 #cats #funny',
            zh:'他每天早上守着寺门，报酬是摸摸头 🐱 #猫 #搞笑'},
       music:'Original sound — cats.of.madinah', loc:'Madinah, Saudi Arabia',
-      likes:1200000, comments:18900, favs:92300, shares:45600, followed:false },
+      likes:1200000, comments:18900, favs:92300, shares:45600, followed:false, hot:true },
     { id:'v08', img:'videos/v08.jpg', dur:30, handle:'ink.and.light', vf:false,
       name:{en:'Ink & Light',zh:'墨与光'}, avaBg:'#7f5af0',
       t:{en:'Gold Calligraphy',zh:'金色书法'},
@@ -461,14 +525,14 @@
       cap:{en:"POV: the match is at 92' and mom calls from the kitchen 😭⚽ #comedy #family",
            zh:'比赛第 92 分钟，妈妈在厨房喊你 😭⚽ #搞笑 #家庭'},
       music:'Original sound — the.habibis', loc:'Dearborn, USA',
-      likes:423000, comments:15600, favs:28400, shares:61200, followed:false },
+      likes:423000, comments:15600, favs:28400, shares:61200, followed:false, hot:true },
     { id:'v11', img:'videos/v11.jpg', dur:32, handle:'desert.roamer', vf:false,
       name:{en:'Desert Roamer',zh:'沙漠漫游者'}, avaBg:'#a08032',
       t:{en:'3AM in Wadi Rum',zh:'凌晨3点的瓦地伦'},
       cap:{en:'Phone died, sky took over — Wadi Rum at 3AM 🌌 #camping #milkyway #travel',
            zh:'手机没电，星空接管——凌晨 3 点的瓦地伦 🌌 #露营 #星空 #旅行'},
       music:'Sahara Nights — Natacha Atlas', loc:'Wadi Rum, Jordan',
-      likes:234000, comments:4300, favs:51200, shares:19800, followed:false },
+      likes:234000, comments:4300, favs:51200, shares:19800, followed:false, hot:true },
     { id:'v12', img:'videos/v12.jpg', dur:25, handle:'homewith.hana', vf:false,
       name:{en:'Home with Hana',zh:'Hana 的家'}, avaBg:'#3E8E7E',
       t:{en:'Prayer Corner DIY',zh:'礼拜角改造'},
@@ -476,6 +540,96 @@
            zh:'不到 $40 把死角改成礼拜角 🕯️ 清单在评论区 #家居 #改造'},
       music:'Soft oud — Lumimar', loc:'London, UK',
       likes:76400, comments:1210, favs:18900, shares:3200, followed:false },
+
+    /* ---- Near You: local to the demo account's city (Cairo) ---- */
+    { id:'v13', img:'videos/v13.jpg', dur:27, handle:'khan.walks', vf:false,
+      name:{en:'Khan Walks',zh:'老城漫步'}, avaBg:'#B07C2E',
+      t:{en:'Lantern Alley at Night',zh:'夜晚的灯巷'},
+      cap:{en:'Khan el-Khalili after dark — the lantern alley never gets old 🏮 #cairo #nightmarket #lanterns',
+           zh:'夜幕后的汗·哈利利 —— 灯巷永远看不腻 🏮 #开罗 #夜市 #灯笼'},
+      music:'Ya Msafer Wahdak — Mohamed Abdel Wahab', loc:'Cairo, Egypt',
+      likes:324000, comments:4120, favs:28700, shares:15600, followed:false, near:true, dist:1.1 },
+    { id:'v14', img:'videos/v14.jpg', dur:19, handle:'street.cairo', vf:false,
+      name:{en:'Cairo Street Eats',zh:'开罗街头味道'}, avaBg:'#C96F4A',
+      t:{en:'Feteer for Under $3',zh:'不到 $3 的 Feteer'},
+      cap:{en:'This stall has sold feteer meshaltet for 40 years — honey drizzle is mandatory 🍯 #cairo #streetfood',
+           zh:'这家摊位卖了 40 年 Feteer —— 蜂蜜必须淋满 🍯 #开罗 #街头美食'},
+      music:'Eshta Ya Amar — Ahmed Adaweyah', loc:'Cairo, Egypt',
+      likes:187400, comments:2860, favs:15400, shares:7300, followed:false, near:true, dist:0.9 },
+    { id:'v15', img:'videos/v15.jpg', dur:31, handle:'nile.diaries', vf:true,
+      name:{en:'Nile Diaries',zh:'尼罗河日记'}, avaBg:'#3E8E7E',
+      t:{en:'Felucca Sunset, Cairo',zh:'开罗三桅帆船日落'},
+      cap:{en:'Friday prayer done, so we chased the sunset on a felucca ⛵ #nile #cairo #sunset',
+           zh:'主麻拜结束，帆船追日落 ⛵ #尼罗河 #开罗 #日落'},
+      music:'El Leila — Amr Diab (slowed)', loc:'Cairo, Egypt',
+      likes:231800, comments:3410, favs:19800, shares:8840, followed:false, near:true, dist:2.3 },
+    { id:'v16', img:'videos/v16.jpg', dur:22, handle:'zamalek.brunch', vf:false,
+      name:{en:'Zamalek Brunch',zh:'Zamalek 早午餐'}, avaBg:'#8fb8a8',
+      t:{en:'New Halal Brunch Spot',zh:'新开的清真早午餐'},
+      cap:{en:'Shakshuka + fresh flatbread + mint tea for 180 EGP — full menu in comments ☕ #cairo #brunch #halalfood',
+           zh:'北非蛋 + 现烤面饼 + 薄荷茶，一共 180 埃镑 ☕ #开罗 #早午餐 #清真美食'},
+      music:'Balak — Sherine (acoustic)', loc:'Cairo, Egypt',
+      likes:98600, comments:1470, favs:11200, shares:3980, followed:false, near:true, dist:1.6 },
+
+    /* ---- Hot: trending sounds & challenges ---- */
+    { id:'v17', img:'videos/v17.jpg', dur:18, handle:'lantern.nour', vf:true,
+      name:{en:'Nour | Trends',zh:'Nour 潮流日记'}, avaBg:'#B85C8E',
+      t:{en:'Fanous Dance Trend 🔥',zh:'Fanous 灯笼舞 🔥'},
+      cap:{en:'The Ramadan lantern trend but I gave it my own spin ✨ sound on #trending #ramadan #dance',
+           zh:'斋月灯笼舞，加了一点我自己的风格 ✨ 记得开声音 #热门 #斋月 #舞蹈'},
+      music:'Ya Taba Tab — Assala (sped up)', loc:'Riyadh, Saudi Arabia',
+      likes:198300, comments:5120, favs:16700, shares:9240, followed:false, hot:true },
+    { id:'v18', img:'videos/v18.jpg', dur:25, handle:'kunafa.king', vf:true,
+      name:{en:'Kunafa King',zh:'Kunafa 国王'}, avaBg:'#C9803B',
+      t:{en:'1 KG Kunafa Challenge',zh:'1公斤Kunafa挑战'},
+      cap:{en:'One kilo of kunafa, one cheese pull, zero regrets 🍯 could you finish it? #challenge #kunafa #food',
+           zh:'一公斤 Kunafa，一次拉丝，绝不后悔 🍯 你能吃完吗？#挑战 #甜品 #美食'},
+      music:'Original sound — kunafa.king', loc:'Amman, Jordan',
+      likes:612000, comments:9840, favs:42300, shares:23100, followed:false, hot:true },
+    { id:'v19', img:'videos/v19.jpg', dur:16, handle:'habibi.grandpa', vf:false,
+      name:{en:'Habibi Grandpa',zh:'Habibi 爷爷'}, avaBg:'#5262ED',
+      t:{en:'Grandpa Tries VR 😂',zh:'爷爷第一次玩VR 😂'},
+      cap:{en:'82 years old and he screamed louder than the kids 💀 wait for the ending #funny #family #vr',
+           zh:'82 岁了，叫声比小孩还大 💀 一定要看到结尾 #搞笑 #家庭 #VR'},
+      music:'Original sound — habibi.grandpa', loc:'Amman, Jordan',
+      likes:445700, comments:12400, favs:32800, shares:51200, followed:false, hot:true },
+    { id:'v20', img:'videos/v20.jpg', dur:21, handle:'rooftop.fc', vf:false,
+      name:{en:'Rooftop FC',zh:'天台FC'}, avaBg:'#0E7C66',
+      t:{en:'Rooftop Freestyle',zh:'天台花式足球'},
+      cap:{en:'Cairo rooftops hit different at golden hour ⚽ attempt #47 for this combo #freestyle #football',
+           zh:'黄金时刻的开罗天台就是不一样 ⚽ 这套动作练到第 47 次 #花式足球 #足球'},
+      music:'Wayak — Sherine', loc:'Cairo, Egypt',
+      likes:276400, comments:3880, favs:21500, shares:12300, followed:false, hot:true },
+
+    /* ---- fresh drops from creators we follow ---- */
+    { id:'v21', img:'videos/v21.jpg', dur:24, handle:'chef.amina', vf:true,
+      name:{en:"Amina's Kitchen",zh:'阿米娜的厨房'}, avaBg:'#C96F4A',
+      t:{en:'Msemen Breakfast',zh:'Msemen 早餐'},
+      cap:{en:'Sunday breakfast: msemen folded three ways — honey, amlou, or plain 🍯 which team? #breakfast #moroccan',
+           zh:'周日早餐：三种折法的 Msemen —— 蜂蜜、Amlou 或原味 🍯 你选哪种？#早餐 #摩洛哥'},
+      music:'3 Daqat — Abu (slowed)', loc:'Casablanca, Morocco',
+      likes:167900, comments:2240, favs:13500, shares:5210, followed:true },
+    { id:'v22', img:'videos/v22.jpg', dur:33, handle:'wanderwithzayd', vf:true,
+      name:{en:'Zayd Travels',zh:'Zayd 旅行日记'}, avaBg:'#3E8E7E',
+      t:{en:'Cappadocia Sunrise',zh:'卡帕多奇亚日出'},
+      cap:{en:'100 balloons before breakfast — Cappadocia at 5:40AM 🎈 #cappadocia #sunrise #travel',
+           zh:'早餐前的 100 只热气球 —— 早晨 5:40 的卡帕多奇亚 🎈 #卡帕多奇亚 #日出 #旅行'},
+      music:'Gel — Sezen Aksu (lofi)', loc:'Nevşehir, Türkiye',
+      likes:389200, comments:5620, favs:34900, shares:14100, followed:true },
+    { id:'v23', img:'videos/v23.jpg', dur:38, handle:'qari.yusuf', vf:true,
+      name:{en:'Qari Yusuf',zh:'诵经师 Yusuf'}, avaBg:'#0E7C66',
+      t:{en:'Surah Ad-Duha at Night',zh:'夜诵上午章'},
+      cap:{en:'Surah Ad-Duha — "Your Lord has not forsaken you" 🤍 recited after Isha #quran #recitation',
+           zh:'《上午》章 —— 「你的主没有舍弃你」 🤍 宵礼后诵读 #古兰经 #诵读'},
+      music:'Original sound — qari.yusuf', loc:'Madinah, Saudi Arabia',
+      likes:512400, comments:8730, favs:38400, shares:21600, followed:true },
+    { id:'v24', img:'videos/v24.jpg', dur:20, handle:'techmajlis', vf:true,
+      name:{en:'Tech Majlis',zh:'Tech Majlis'}, avaBg:'#3a48b8',
+      t:{en:'5 Apps for Travellers',zh:'旅行者必备5个App'},
+      cap:{en:'5 apps I install before every trip — #3 works fully offline ✈️ #tech #travel #tips',
+           zh:'每次出行前必装的 5 个 App —— 第 3 个完全离线可用 ✈️ #科技 #旅行'},
+      music:'Neon Lights — Adeem', loc:'Dubai, UAE',
+      likes:74300, comments:1180, favs:8900, shares:4120, followed:true },
   ];
   const TAG_POOL = ['halalfood','travel','quran','modestwear','cats','dubai','calligraphy','homedecor'];
   const CMT_POOL = [
@@ -492,22 +646,28 @@
   /* ---------- i18n ---------- */
   let rlang = 'en';
   const L = {
-    en: { fy:'For You', fw:'Following', trend:'Trending now', cancel:'Cancel',
+    en: { fy:'For You', fw:'Following', hot:'Hot', near:'Near You', trend:'Trending now', cancel:'Cancel',
       srph:'Search videos, creators, tags', nores:'No videos found', comments:'comments',
       ph:'Leave a comment…', post:'Post', share:'Share', via:'Share via Wahda',
       contacts:'Contacts', groups:'Groups', mypost:'Post', more:'More', less:'Less',
       swipe:'Swipe up for more', fwempty:'New videos from creators you follow will appear here',
       gofy:'Browse For You', posted:'Posted to Feeds & My Hub', cmtok:'Comment posted',
       sndon:'Sound on', sndoff:'Sound off', fol:'Following @', unfol:'Unfollowed @',
-      shareok:'Shared with ', postcap:'Sharing a Wahda Reels video: ', watch:'Reels' },
-    zh: { fy:'推荐', fw:'关注', trend:'热门话题', cancel:'取消',
+      shareok:'Shared with ', postcap:'Sharing a Wahda Reels video: ', watch:'Reels',
+      videos:'Videos', followers:'Followers', following:'Following', likes:'Likes',
+      fwb:'Follow', fwing:'Following', message:'Message', vids:'Videos', km:'km',
+      msgdemo:'Demo: messaging lives in Chats' },
+    zh: { fy:'推荐', fw:'关注', hot:'热门', near:'附近', trend:'热门话题', cancel:'取消',
       srph:'搜索视频、创作者、话题', nores:'没有找到相关视频', comments:'条评论',
       ph:'说点什么…', post:'发送', share:'分享', via:'分享到 Wahda',
       contacts:'好友', groups:'群聊', mypost:'发帖', more:'展开', less:'收起',
       swipe:'上滑看更多', fwempty:'关注的创作者更新后，视频会出现在这里',
       gofy:'去看看推荐', posted:'已发布到 Feeds 与 My Hub', cmtok:'评论已发布',
       sndon:'已开启声音', sndoff:'已静音', fol:'已关注 @', unfol:'已取消关注 @',
-      shareok:'已分享给 ', postcap:'分享一条 Wahda Reels 视频：', watch:'Reels' },
+      shareok:'已分享给 ', postcap:'分享一条 Wahda Reels 视频：', watch:'Reels',
+      videos:'视频', followers:'粉丝', following:'关注', likes:'获赞',
+      fwb:'关注', fwing:'已关注', message:'发消息', vids:'作品', km:'公里',
+      msgdemo:'演示版：消息入口在 Chats' },
   };
   const T = k => (L[rlang] && L[rlang][k]) || L.en[k] || k;
   function fmtN(n) {
@@ -545,7 +705,10 @@
     vf: '<svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#20A4F3"/><path d="M7.5 12.4l3 3 6-6.4" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   };
 
-  function cardHTML(v) {
+  function cardHTML(v, rank) {
+    const chips =
+      (v.dist ? '<span class="chip">' + v.dist + ' ' + T('km') + '</span>' : '') +
+      (rank ? '<span class="chip hot">#' + rank + '</span>' : '');
     return '<section class="vcard" data-id="' + v.id + '">' +
       '<div class="vmedia" onclick="onMediaTap(event,\'' + v.id + '\')">' +
         '<img class="vcover" src="assets/' + v.img + '" alt="" draggable="false">' +
@@ -553,14 +716,14 @@
         '<div class="pp-flash" data-pp>' + playSVG() + '</div>' +
       '</div>' +
       '<div class="vinfo">' +
-        '<div class="vhandle">@' + v.handle + (v.vf ? ICONS.vf : '') + '</div>' +
+        '<div class="vhandle" onclick="openProfile(event,\'' + v.handle + '\')">@' + v.handle + (v.vf ? ICONS.vf : '') + '</div>' +
         '<div class="vcap" data-cap>' + linkTags(v.cap[rlang] || v.cap.en) + '</div>' +
         '<button class="vcap-more" data-capmore onclick="toggleCap(this)"></button>' +
         '<div class="vmusic">' + ICONS.note + '<span class="mq"><i>' + esc(v.music) + ' · ' + esc(v.music) + '</i></span></div>' +
-        '<div class="vloc">' + ICONS.pin + esc(v.loc) + '</div>' +
+        '<div class="vloc">' + ICONS.pin + esc(v.loc) + chips + '</div>' +
       '</div>' +
       '<div class="vright">' +
-        '<div class="r-ava"><span class="r-ava-c" style="background:' + v.avaBg + '">' + v.handle.charAt(0).toUpperCase() + '</span>' +
+        '<div class="r-ava" onclick="openProfile(event,\'' + v.handle + '\')"><span class="r-ava-c" style="background:' + v.avaBg + '">' + v.handle.charAt(0).toUpperCase() + '</span>' +
           '<button class="r-follow" onclick="toggleFollow(event,\'' + v.handle + '\')" aria-label="Follow"><span>+</span></button></div>' +
         '<button class="r-act lik" onclick="toggleLike(event,\'' + v.id + '\')"><span data-ic>' + ICONS.heart + '</span><b data-lk></b></button>' +
         '<button class="r-act" onclick="openComments(event,\'' + v.id + '\')">' + ICONS.cmt + '<b data-cm></b></button>' +
@@ -576,14 +739,16 @@
   }
   function capMoreNeeded(v) { return (v.cap[rlang] || v.cap.en).length > 56; }
 
-  function buildCards(pager, list) {
+  function buildCards(pager, list, ranked) {
     pager.innerHTML = list.length
-      ? list.map(cardHTML).join('')
+      ? list.map((v, i) => cardHTML(v, ranked ? i + 1 : 0)).join('')
       : '<div class="fw-empty"><div class="fe-ic">' + ICONS.note.replace('13', '26').replace('13', '26') + '</div>' +
         '<p>' + T('fwempty') + '</p><button onclick="pickFeed(\'fy\')">' + T('gofy') + '</button></div>';
   }
   function vidsFY() { return VIDS.slice(); }
   function vidsFW() { return VIDS.filter(v => v.followed); }
+  function vidsHot() { return VIDS.filter(v => v.hot).sort((a, b) => b.likes - a.likes); }
+  function vidsNear() { return VIDS.filter(v => v.near).sort((a, b) => (a.dist || 99) - (b.dist || 99)); }
 
   function paintCounts(v) {
     document.querySelectorAll('.vcard[data-id="' + v.id + '"]').forEach(card => {
@@ -598,6 +763,7 @@
   function paintAll() {
     VIDS.forEach(paintCounts);
     $('ftFy').textContent = T('fy'); $('ftFw').textContent = T('fw');
+    $('ftHot').textContent = T('hot'); $('ftNear').textContent = T('near');
     $('swTxt').textContent = T('swipe');
     $('srInput').placeholder = T('srph'); $('srCancel').textContent = T('cancel');
     $('srTrendLb').textContent = T('trend');
@@ -616,16 +782,20 @@
 
   /* ---------- feed tabs + paging ---------- */
   let curTab = 'fy', curIdx = 0, playing = true;
-  const pagers = { fy: null, fw: null };
+  const pagers = { fy: null, fw: null, hot: null, near: null };
+  const FEED_TABS = ['fw', 'fy', 'hot', 'near'];
+  const TAB_BTN = { fw: 'ftFw', fy: 'ftFy', hot: 'ftHot', near: 'ftNear' };
   function activePager() { return pagers[curTab]; }
 
   function pickFeed(tab) {
     curTab = tab;
-    $('ftFy').classList.toggle('on', tab === 'fy');
-    $('ftFw').classList.toggle('on', tab === 'fw');
-    pagers.fy.classList.toggle('hidden', tab !== 'fy');
-    pagers.fw.classList.toggle('hidden', tab !== 'fw');
-    if (tab === 'fw') buildCards(pagers.fw, vidsFW());      /* rebuilt: follows may have changed */
+    FEED_TABS.forEach(t => {
+      $(TAB_BTN[t]).classList.toggle('on', t === tab);
+      pagers[t].classList.toggle('hidden', t !== tab);
+    });
+    if (tab === 'fw') buildCards(pagers.fw, vidsFW());       /* rebuilt: follows may have changed */
+    if (tab === 'hot') buildCards(pagers.hot, vidsHot(), true);
+    if (tab === 'near') buildCards(pagers.near, vidsNear());
     const p = activePager();
     curIdx = Math.min(curIdx, Math.max(0, p.children.length - 1));
     p.scrollTop = curIdx * p.clientHeight;
@@ -710,8 +880,9 @@
   }
   function toggleFollow(e, handle) {
     if (e) e.stopPropagation();
-    let to;
-    VIDS.filter(v => v.handle === handle).forEach(v => { to = v.followed = !v.followed; paintCounts(v); });
+    const mine = VIDS.filter(v => v.handle === handle); if (!mine.length) return;
+    const to = !mine.some(v => v.followed);          /* creator-level: any followed = followed */
+    mine.forEach(v => { v.followed = to; paintCounts(v); });
     toast((to ? T('fol') : T('unfol')) + handle);
   }
   function toggleCap(btn) {
@@ -895,14 +1066,94 @@
     });
   }
 
+  /* ---------- creator profile (avatar / @handle -> full-screen panel) ---------- */
+  const CREATORS = {
+    'chef.amina':      { followers: 2140000, following: 312, bio:{en:"Home cook · Egyptian & Levantine recipes, every Sunday 🍲", zh:'家庭厨房 · 埃及与黎凡特食谱，每周日更新 🍲'} },
+    'wanderwithzayd':  { followers: 1830000, following: 486, bio:{en:'Slow travel across 31 countries · honest routes & costs 🧭', zh:'31 国慢旅行 · 路线与真实开销 🧭'} },
+    'qari.yusuf':      { followers: 3620000, following: 128, bio:{en:'Quran recitation & tajwid lessons · Madinah 🤍', zh:'古兰经诵读与泰吉韦德课程 · 麦地那 🤍'} },
+    'stylebynoor':     { followers: 874000,  following: 823, bio:{en:'Modest fashion · daily looks & capsule guides ✨', zh:'保守风穿搭 · 每日造型与极简衣橱 ✨'} },
+    'coach.bilal':     { followers: 512000,  following: 194, bio:{en:'Home workouts · no excuses, 15 minutes a day 💪', zh:'居家训练 · 每天 15 分钟，不找借口 💪'} },
+    'dalal.brews':     { followers: 736000,  following: 355, bio:{en:'Coffee rituals of the Arab world ☕', zh:'阿拉伯世界的咖啡日常 ☕'} },
+    'cats.of.madinah': { followers: 4210000, following: 12,  bio:{en:'The masjid cats of Madinah 🐱', zh:'麦地那的清真寺猫 🐱'} },
+    'ink.and.light':   { followers: 962000,  following: 167, bio:{en:'Arabic calligraphy in gold · commissions open 🖋️', zh:'金色阿拉伯书法 · 可接定制 🖋️'} },
+    'techmajlis':      { followers: 645000,  following: 421, bio:{en:"Tech that fits a traveller's pocket 🚀", zh:'旅行者口袋里的科技 🚀'} },
+    'the.habibis':     { followers: 2870000, following: 89,  bio:{en:'Family skits every Friday 😭⚽', zh:'每周五家庭短剧 😭⚽'} },
+    'desert.roamer':   { followers: 1210000, following: 233, bio:{en:'Desert nights & star maps 🌌', zh:'沙漠之夜与星图 🌌'} },
+    'homewith.hana':   { followers: 458000,  following: 512, bio:{en:'Small-space makeovers on a budget 🕯️', zh:'小空间预算改造 🕯️'} },
+    'khan.walks':      { followers: 342000,  following: 178, bio:{en:'Walking Cairo, one alley at a time 🏮', zh:'用脚步丈量开罗的每条小巷 🏮'} },
+    'street.cairo':    { followers: 289000,  following: 145, bio:{en:'Cairo street food, honest prices 🌯', zh:'开罗街头美食，实在价格 🌯'} },
+    'nile.diaries':    { followers: 475000,  following: 201, bio:{en:'Life along the Nile 🛶', zh:'尼罗河畔的生活 🛶'} },
+    'zamalek.brunch':  { followers: 156000,  following: 344, bio:{en:"Hunting Cairo's best brunch ☕", zh:'寻找开罗最好的早午餐 ☕'} },
+    'lantern.nour':    { followers: 1530000, following: 267, bio:{en:'Trends & traditions ✨ Ramadan vibes all year', zh:'潮流与传统 ✨ 整年的斋月氛围'} },
+    'kunafa.king':     { followers: 2050000, following: 96,  bio:{en:'Dessert challenges too big for one plate 🍯', zh:'一盘装不下的甜品挑战 🍯'} },
+    'habibi.grandpa':  { followers: 3140000, following: 8,   bio:{en:'82 years young, trying everything once 😂', zh:'82 岁的年轻心态，什么都试一次 😂'} },
+    'rooftop.fc':      { followers: 894000,  following: 156, bio:{en:'Street football · Cairo rooftops ⚽', zh:'街头足球 · 开罗天台 ⚽'} },
+  };
+  let profHandle = null;
+  function openProfile(e, handle) {
+    if (e) e.stopPropagation();
+    if (!CREATORS[handle]) return;
+    profHandle = handle;
+    renderProfile();
+    $('profView').classList.add('show');
+  }
+  function closeProfile(e) {
+    if (e) e.stopPropagation();
+    $('profView').classList.remove('show');
+    profHandle = null;
+  }
+  function profMore(e) { if (e) e.stopPropagation(); toast(rlang === 'zh' ? '演示版：更多操作' : 'Demo: more actions'); }
+  function profMsg(e) {
+    if (e) e.stopPropagation();
+    toast(T('msgdemo'));
+  }
+  function creatorsVideos(h) { return VIDS.filter(v => v.handle === h); }
+  function renderProfile() {
+    const vids = creatorsVideos(profHandle);
+    const v0 = vids[0] || VIDS[0];
+    const c = CREATORS[profHandle] || {};
+    const fol = vids.some(x => x.followed);
+    const totalLikes = vids.reduce((s, x) => s + x.likes, 0);
+    $('profHandle').innerHTML = '@' + esc(profHandle) + (v0.vf ? ICONS.vf : '');
+    $('profBody').innerHTML =
+      '<div class="prof-hero">' +
+        '<div class="prof-ava" style="background:' + v0.avaBg + '">' + profHandle.charAt(0).toUpperCase() + '</div>' +
+        '<div class="prof-name">' + esc(v0.name[rlang] || v0.name.en) + (v0.vf ? ICONS.vf : '') + '</div>' +
+        '<div class="prof-bio">' + esc((c.bio && (c.bio[rlang] || c.bio.en)) || '') + '</div>' +
+        '<div class="prof-stats">' +
+          '<div><b>' + fmtN(vids.length) + '</b><span>' + T('videos') + '</span></div>' +
+          '<div><b>' + fmtN(c.followers || 0) + '</b><span>' + T('followers') + '</span></div>' +
+          '<div><b>' + fmtN(c.following || 0) + '</b><span>' + T('following') + '</span></div>' +
+          '<div><b>' + fmtN(totalLikes) + '</b><span>' + T('likes') + '</span></div>' +
+        '</div>' +
+        '<div class="prof-acts">' +
+          '<button class="prof-fol' + (fol ? ' on' : '') + '" onclick="profFollow(event)">' + (fol ? T('fwing') : T('fwb')) + '</button>' +
+          '<button class="prof-msg" onclick="profMsg(event)">' + T('message') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="prof-sec">' + T('vids') + ' · ' + vids.length + '</div>' +
+      '<div class="prof-grid">' + vids.map(v =>
+        '<div class="pcell" onclick="profGo(\'' + v.id + '\')">' +
+          '<img src="assets/' + v.img + '" alt="" loading="lazy">' +
+          '<div class="pc-play">▶ ' + fmtN(v.likes) + '</div></div>').join('') + '</div>';
+  }
+  function profFollow(e) {
+    toggleFollow(e, profHandle);
+    renderProfile();
+  }
+  function profGo(id) {
+    closeProfile();
+    if (curTab !== 'fy') pickFeed('fy');
+    jumpTo('fy', id, true);
+  }
+
   /* ---------- search ---------- */
   function openSearch(e) {
     if (e) e.stopPropagation();
     srClearQ();
     $('srchView').classList.add('show');
     setTimeout(() => $('srInput').focus(), 240);
-  }
-  function closeSearch() { $('srchView').classList.remove('show'); $('srInput').blur(); }
+  }  function closeSearch() { $('srchView').classList.remove('show'); $('srInput').blur(); }
   function srClearQ() { $('srInput').value = ''; srRender(); }
   function srChipsHTML() {
     return TAG_POOL.map(t => '<button onclick="srChip(\'' + t + '\')">#' + t + '</button>').join('');
@@ -968,7 +1219,10 @@
     const d = e.data || {};
     if (d.wahdaMsg === 'ctx') {
       guestMode = !!d.guest;
-      if (d.lang && d.lang !== rlang) { rlang = d.lang; paintAll(); }
+      if (d.lang && d.lang !== rlang) {
+        rlang = d.lang; paintAll();
+        if (profHandle && $('profView').classList.contains('show')) renderProfile();
+      }
       return;
     }
     if (d.wahdaMsg === 'friends') {
@@ -997,9 +1251,10 @@
 
   /* ---------- boot ---------- */
   pagers.fy = $('pagerFy'); pagers.fw = $('pagerFw');
+  pagers.hot = $('pagerHot'); pagers.near = $('pagerNear');
   buildCards(pagers.fy, vidsFY());
   buildCards(pagers.fw, vidsFW());
-  bindPager(pagers.fy); bindPager(pagers.fw);
+  bindPager(pagers.fy); bindPager(pagers.fw); bindPager(pagers.hot); bindPager(pagers.near);
   $('muteBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.6a5 5 0 010 6.8M18.4 6.2a8.2 8.2 0 010 11.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
   $('srchBtn').innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>';
   $('srChips').innerHTML = srChipsHTML();
