@@ -2022,6 +2022,10 @@
       const hit = rankingPool.filter(function (x) { return x.t === d.title })[0];
       if (hit) openPlayer(hit.t);
       return;
+    } else if (d.wahdaMsg === 'resumeShare') {
+      /* the shell sent the guest through sign-up; pick the share up where it stopped */
+      if (curDrama) openShare({ stopPropagation: function () {} });
+      return;
     } else if (d.wahdaMsg !== 'share-ack' && d.wahdaMsg !== 'post-ack') {
       return;
     }
@@ -2128,9 +2132,16 @@
       toast('Posted to Feeds & My Hub');
     });
   }
+  /* guest: hand an account-only action (play / share) to the shell's sign-up gate */
+  function guestGateAction(action) {
+    if (!guestMode) return false;
+    try { window.parent.postMessage({ wahdaMsg:'gate', action:action, title:(curDrama || {}).t || '' }, '*'); } catch (e) {}
+    return true;
+  }
   function openShare(e) {
     e.stopPropagation();
     if (!curDrama) return;
+    if (guestGateAction('share')) return;              /* sharing writes to Chats / Feeds — needs an account */
     document.getElementById('shrMask').classList.add('show');
     document.getElementById('shrSheet').classList.add('show');
     renderShare('contacts');

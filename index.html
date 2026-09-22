@@ -8831,6 +8831,15 @@ function bxReply(obj){
  var rf=document.getElementById("reelsFrame");
  if(rf&&rf.contentWindow){try{rf.contentWindow.postMessage(obj,"*")}catch(e){}}
 }
+/* guest tried an account-only Reels action (play / share): sign-up gate, then come back to it */
+function bxGateReels(action,title){
+ guestGate(function(){
+  pendingDrama=title||"";
+  switchTab("reels");
+  bxFlushDrama();
+  if(action==="share")setTimeout(function(){bxReply({wahdaMsg:"resumeShare"})},900);
+ });
+}
 window.addEventListener("message",function(e){
  var d=e.data||{};
  /* legacy: Reels tab bar hands navigation back to the shell */
@@ -8842,14 +8851,17 @@ window.addEventListener("message",function(e){
   case "ready":
    reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest});bxFlushDrama();break;
   case "gate":
-   /* guest tapped a poster in Reels: bounce to sign-up, then come back and play */
-   guestGate(function(){pendingDrama=d.title||"";switchTab("reels");bxFlushDrama()});
+   /* guest tapped a poster (play) or Share in Reels: bounce to sign-up, then resume */
+   bxGateReels(d.action||"play",d.title);
    break;
   case "friends":
    bxReply({wahdaMsg:"friends",rid:d.rid,contacts:bxContacts(),groups:bxGroups()});break;
   case "share":
+   /* guests never write into Chats — the gate owns the flow */
+   if(isGuest){bxGateReels("share",d.drama&&d.drama.t);bxReply({wahdaMsg:"share-ack",rid:d.rid,ok:false});break}
    bxReply({wahdaMsg:"share-ack",rid:d.rid,ok:bxShareToChat(d.idx,bxDrama(d.drama),d.caption)});break;
   case "post":
+   if(isGuest){bxGateReels("share",d.drama&&d.drama.t);bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:false});break}
    bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:bxCreateDramaPost(bxDrama(d.drama),d.caption)});break;
  }
 });
