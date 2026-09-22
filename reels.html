@@ -42,7 +42,7 @@
     padding: 10px 12px 16px 14px; pointer-events: none;
     background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
   }
-  .ftabs { display: flex; align-items: center; gap: 17px; pointer-events: auto; }
+  .ftabs { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
   .ftabs button {
     color: rgba(255,255,255,.72); font-size: 14.5px; font-weight: 700;
     padding: 3px 1px 7px; position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.4);
@@ -54,14 +54,15 @@
     width: 26px; height: 3px; border-radius: 2px; background: #fff;
   }
   .tb-ic {
-    position: absolute; top: 8px; pointer-events: auto;
-    width: 36px; height: 36px; border-radius: 50%;
+    position: absolute; top: 10px; pointer-events: auto;
+    width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; color: #fff;
     background: rgba(0,0,0,.22);
   }
   .tb-ic:active { background: rgba(0,0,0,.4); }
-  #muteBtn { right: 56px; }
-  #srchBtn { right: 12px; }
+  #muteBtn { right: 46px; }
+  #cmpBtn { right: 82px; }
+  #srchBtn { right: 10px; }
 
   /* ---------- video pager ---------- */
   .pager {
@@ -317,6 +318,45 @@
   /* avatar / handle are tappable -> creator profile */
   .r-ava { cursor: pointer; }
   .vhandle { cursor: pointer; }
+
+  /* ---------- composer overlay (unified publish entry, light full-screen) ---------- */
+  .cmp {
+    position: absolute; inset: 0; z-index: 75; background: var(--bg);
+    transform: translateY(4%); opacity: 0; pointer-events: none; transition: all .24s;
+    display: flex; flex-direction: column;
+  }
+  .cmp.show { transform: none; opacity: 1; pointer-events: auto; }
+  .cmp-head { display: flex; align-items: center; justify-content: center; position: relative; padding: 14px 16px 10px; border-bottom: 1px solid rgba(0,0,0,.06); flex: none; }
+  .cmp-head b { font-size: 14px; font-weight: 800; color: var(--text); }
+  .cmp-body { flex: 1; overflow-y: auto; padding: 14px 16px 12px; }
+  .cmp-sec { font-size: 11.5px; font-weight: 800; letter-spacing: .4px; color: var(--text-3); margin: 2px 0 9px; }
+  .cmp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .cmp-cell { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 9/14; background: var(--surface-2); cursor: pointer; padding: 0; }
+  .cmp-cell img { width: 100%; height: 100%; object-fit: cover; }
+  .cmp-cell .ck {
+    position: absolute; right: 5px; top: 5px; width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(0,0,0,.35); border: 1.5px solid rgba(255,255,255,.85);
+    display: flex; align-items: center; justify-content: center; color: transparent;
+  }
+  .cmp-cell.on .ck { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .cmp-cell.on { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .cmp-cap {
+    width: 100%; height: 74px; border: none; outline: none; resize: none; border-radius: 14px;
+    background: var(--surface); padding: 12px 14px; font-size: 13.5px; color: var(--text);
+    font-family: inherit; line-height: 1.5; margin-bottom: 14px; border: 1px solid rgba(0,0,0,.08);
+  }
+  .cmp-cap::placeholder { color: var(--text-3); }
+  .cmp-topics { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .cmp-topics button { height: 32px; padding: 0 14px; border-radius: 16px; background: var(--surface); border: 1px solid rgba(0,0,0,.08); font-size: 12.5px; font-weight: 700; color: var(--text-2); }
+  .cmp-topics button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-deep); }
+  .cmp-sync { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); border-radius: 14px; padding: 12px 14px; cursor: pointer; border: 1px solid rgba(0,0,0,.08); }
+  .cmp-sync b { font-size: 13px; font-weight: 800; color: var(--text); display: block; }
+  .cmp-sync small { font-size: 11.5px; color: var(--text-3); font-weight: 600; line-height: 1.4; display: block; margin-top: 2px; }
+  .cmp-sync .ckbox { flex: none; margin-top: 1px; width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; color: transparent; }
+  .cmp-sync.on .ckbox { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .cmp-foot { flex: none; padding: 10px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(0,0,0,.06); background: var(--bg); }
+  .cmp-foot .post-btn { width: 100%; }
+  .cmp-foot .post-btn:disabled { opacity: .45; }
 </style>
 </head>
 <body>
@@ -331,6 +371,7 @@
         <button id="ftHot" onclick="pickFeed('hot')"></button>
         <button id="ftNear" onclick="pickFeed('near')"></button>
       </div>
+      <button class="tb-ic" id="cmpBtn" onclick="openComposer(event)" aria-label="Create Reel"></button>
       <button class="tb-ic" id="muteBtn" onclick="toggleMute(event)" aria-label="Sound"></button>
       <button class="tb-ic" id="srchBtn" onclick="openSearch(event)" aria-label="Search"></button>
     </div>
@@ -388,6 +429,26 @@
         <button id="stPost" onclick="renderShare('post', this)"></button>
       </div>
       <div class="share-list" id="shareList"></div>
+    </div>
+
+    <!-- composer overlay (unified publish entry: clip -> caption -> publish) -->
+    <div class="cmp" id="cmpView">
+      <div class="cmp-head"><b id="cmpTitle"></b>
+        <button class="sh-x" onclick="closeComposer()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="cmp-body">
+        <div class="cmp-sec" id="cmpClipLb"></div>
+        <div class="cmp-grid" id="cmpGrid"></div>
+        <div class="cmp-sec" style="margin-top:14px" id="cmpCapLb"></div>
+        <textarea class="cmp-cap" id="cmpCap" oninput="cmpValidate()"></textarea>
+        <div class="cmp-sec" id="cmpTopicLb"></div>
+        <div class="cmp-topics" id="cmpTopics"></div>
+        <div class="cmp-sync" id="cmpSyncRow" onclick="cmpSync()">
+          <span class="ckbox" id="cmpSyncBox"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="flex:1;min-width:0"><b id="cmpSyncT"></b><small id="cmpSyncD"></small></span>
+        </div>
+      </div>
+      <div class="cmp-foot"><button class="post-btn" id="cmpGo" onclick="publishReel()" disabled></button></div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -607,7 +668,11 @@
       gofy:'Browse For You', posted:'Posted to Feeds & My Hub', cmtok:'Comment posted',
       sndon:'Sound on', sndoff:'Sound off', fol:'Following @', unfol:'Unfollowed @',
       shareok:'Shared with ', postcap:'Sharing a Wahda Reels video: ', watch:'Reels',
-      km:'km', noapp:'Open this page inside the Wahda app to see user profiles' },
+      km:'km', noapp:'Open this page inside the Wahda app to see user profiles',
+      cmp:'New Reel', clips:'Select a clip', capph:'Describe your reel… use #hashtags', caplb:'Caption',
+      topics:'Topics', syncT:'Also share to Feeds', syncD:'Your reel appears as a card at the top of your feed',
+      publish:'Publish', pickclip:'Pick a clip first', capreq:'Add a caption first',
+      pubok:'Reel published', pubsync:'also in Feeds', cmrok:'Synced to Feeds', cmsyncfail:'Reel published — Feeds sync failed' },
     zh: { fy:'推荐', fw:'关注', hot:'热门', near:'附近', trend:'热门话题', cancel:'取消',
       srph:'搜索视频、创作者、话题', nores:'没有找到相关视频', comments:'条评论',
       ph:'说点什么…', post:'发送', share:'分享', via:'分享到 Wahda',
@@ -616,7 +681,11 @@
       gofy:'去看看推荐', posted:'已发布到 Feeds 与 My Hub', cmtok:'评论已发布',
       sndon:'已开启声音', sndoff:'已静音', fol:'已关注 @', unfol:'已取消关注 @',
       shareok:'已分享给 ', postcap:'分享一条 Wahda Reels 视频：', watch:'Reels',
-      km:'公里', noapp:'在 Wahda App 内打开以查看用户主页' },
+      km:'公里', noapp:'在 Wahda App 内打开以查看用户主页',
+      cmp:'发布 Reel', clips:'选择一个片段', capph:'写点介绍… 可用 #话题', caplb:'文案',
+      topics:'话题', syncT:'同步分享到 Feeds', syncD:'你的 Reel 会以卡片形式出现在动态顶部',
+      publish:'发布', pickclip:'请先选择一个片段', capreq:'请先写点文案',
+      pubok:'Reel 已发布', pubsync:'已同步到 Feeds', cmrok:'已同步到 Feeds', cmsyncfail:'Reel 已发布——同步 Feeds 失败' },
   };
   const T = k => (L[rlang] && L[rlang][k]) || L.en[k] || k;
   function fmtN(n) {
@@ -725,6 +794,11 @@
     $('cmtInput').placeholder = T('ph'); $('cmtSend').textContent = T('post');
     $('shrTitle').textContent = T('via');
     $('stContacts').textContent = T('contacts'); $('stGroups').textContent = T('groups'); $('stPost').textContent = T('mypost');
+    $('cmpTitle').textContent = T('cmp');
+    $('cmpClipLb').textContent = T('clips'); $('cmpCapLb').textContent = T('caplb');
+    $('cmpCap').placeholder = T('capph'); $('cmpTopicLb').textContent = T('topics');
+    $('cmpSyncT').textContent = T('syncT'); $('cmpSyncD').textContent = T('syncD');
+    $('cmpGo').textContent = T('publish');
     document.querySelectorAll('.vcard').forEach(card => {
       const v = vById(card.dataset.id); if (!v) return;
       const cap = card.querySelector('[data-cap]');
@@ -1023,6 +1097,77 @@
     });
   }
 
+  /* ---------- composer (unified publish entry) ----------
+     The shell's Creation Hub "＋" and the in-page top-bar "+" both land here:
+     pick a clip, write a caption, optionally sync a card into Feeds. */
+  let cmpClip = null, cmpSyncOn = true, myReelSeq = 0, cmpTopicsSel = [];
+
+  function openComposer(e) {
+    if (e) e.stopPropagation();
+    if (EMBEDDED && guestMode) {          /* publishing is a real write: guests go through the sign-up gate */
+      try { window.parent.postMessage({ wahdaMsg: 'gate', action: 'compose' }, '*') } catch (err) {}
+      return;
+    }
+    cmpClip = null; cmpSyncOn = true; cmpTopicsSel = [];
+    $('cmpCap').value = '';
+    $('cmpSyncRow').classList.add('on');
+    renderCmpGrid(); renderCmpTopics(); cmpValidate();
+    $('cmpView').classList.add('show');
+  }
+  function closeComposer() { $('cmpView').classList.remove('show'); }
+  function cmpPick(id) {
+    const v = vById(id); if (!v) return;
+    cmpClip = (cmpClip && cmpClip.src === id) ? null : { src: id, img: v.img, dur: v.dur };
+    renderCmpGrid(); cmpValidate();
+  }
+  function renderCmpGrid() {
+    $('cmpGrid').innerHTML = VIDS.filter(v => !v.mine).map(v =>
+      '<button class="cmp-cell' + (cmpClip && cmpClip.src === v.id ? ' on' : '') + '" onclick="cmpPick(\'' + v.id + '\')">' +
+        '<img src="assets/' + v.img + '" alt="">' +
+        '<span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+      '</button>').join('');
+  }
+  function renderCmpTopics() {
+    $('cmpTopics').innerHTML = TAG_POOL.map((t, i) =>
+      '<button class="' + (cmpTopicsSel.indexOf(i) > -1 ? 'on' : '') + '" onclick="cmpTopic(' + i + ')">#' + t + '</button>').join('');
+  }
+  function cmpTopic(i) {
+    const k = cmpTopicsSel.indexOf(i);
+    if (k > -1) cmpTopicsSel.splice(k, 1); else cmpTopicsSel.push(i);
+    renderCmpTopics();
+  }
+  function cmpSync() {
+    cmpSyncOn = !cmpSyncOn;
+    $('cmpSyncRow').classList.toggle('on', cmpSyncOn);
+  }
+  function cmpValidate() { $('cmpGo').disabled = !(cmpClip && $('cmpCap').value.trim()); }
+  function publishReel() {
+    const cap = $('cmpCap').value.trim();
+    if (!cmpClip) { toast(T('pickclip')); return; }
+    if (!cap) { toast(T('capreq')); return; }
+    const sync = cmpSyncOn && EMBEDDED;
+    const topics = cmpTopicsSel.map(i => '#' + TAG_POOL[i]).join(' ');
+    const full = cap + (topics ? ' ' + topics : '');
+    myReelSeq++;
+    const nv = {
+      id: 'mv' + myReelSeq, img: cmpClip.img, dur: cmpClip.dur || 24, handle: 'you', vf: false,
+      name: { en: 'You', zh: '你' }, avaBg: '#0E7C66',
+      t: { en: cap.length > 42 ? cap.slice(0, 42) + '…' : cap, zh: cap },
+      cap: { en: full, zh: full },
+      music: 'Original sound — you', loc: 'Cairo, Egypt',
+      likes: 0, comments: 0, favs: 0, shares: 0, followed: false, mine: true, cmts: [],
+    };
+    VIDS.unshift(nv);                     /* own reels sit on top of For You */
+    buildCards(pagers.fy, vidsFY());
+    closeComposer();
+    const goHome = () => { if (curTab !== 'fy') pickFeed('fy'); jumpTo('fy', nv.id, true); };
+    if (!sync) { toast(T('pubok')); goHome(); return; }
+    shellRequest({ wahdaMsg: 'reel-feed', reel: { vid: nv.id, img: nv.img, t: nv.t[rlang] || nv.t.en }, caption: full }, ack => {
+      toast(ack && ack.ok ? T('pubok') + ' · ' + T('cmrok') : T('cmsyncfail'));
+      goHome();
+    });
+  }
+
   /* ---------- creator profile (avatar / @handle -> full-screen panel) ---------- */
   const CREATORS = {
     'chef.amina':      { followers: 2140000, following: 312, bio:{en:"Home cook · Egyptian & Levantine recipes, every Sunday 🍲", zh:'家庭厨房 · 埃及与黎凡特食谱，每周日更新 🍲'} },
@@ -1159,7 +1304,12 @@
       const v = vById(shareOpenId) || VIDS[curIdx % VIDS.length];
       openShare(null, v.id);
       return;
-    } else if (d.wahdaMsg !== 'share-ack' && d.wahdaMsg !== 'post-ack') {
+    } else if (d.wahdaMsg === 'compose') {
+      openComposer(); return;
+    } else if (d.wahdaMsg === 'open-reel' && d.vid) {
+      if (curTab !== 'fy') pickFeed('fy');
+      jumpTo('fy', d.vid, true); return;
+    } else if (d.wahdaMsg !== 'share-ack' && d.wahdaMsg !== 'post-ack' && d.wahdaMsg !== 'reel-feed-ack') {
       return;
     }
     const cb = sharePending[d.rid];
@@ -1181,6 +1331,7 @@
   buildCards(pagers.fw, vidsFW());
   bindPager(pagers.fy); bindPager(pagers.fw); bindPager(pagers.hot); bindPager(pagers.near);
   $('muteBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.6a5 5 0 010 6.8M18.4 6.2a8.2 8.2 0 010 11.6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+  $('cmpBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
   $('srchBtn').innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>';
   $('srChips').innerHTML = srChipsHTML();
   paintAll();

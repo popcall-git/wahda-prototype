@@ -466,6 +466,11 @@
   .feed-media{margin-top:10px;height:120px;border-radius:12px;background:linear-gradient(135deg,#DDEDE7,#C9E2D8);display:flex;align-items:center;justify-content:center;color:#0A5D4E;font-size:12px;font-weight:600}
   /* poster of a title shared from Wahda Reels */
   .feed-media-real{height:auto;padding:0;overflow:hidden;background:var(--surface-2,#EFECE5);display:block}
+  /* a Reel synced into Feeds renders as a tappable vertical video card */
+  .feed-reel{position:relative;margin-top:10px;width:min(64%,300px);aspect-ratio:9/14;border-radius:14px;overflow:hidden;background:#101014;display:block;padding:0;cursor:pointer}
+  .feed-reel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .feed-reel .freel-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;color:#fff;pointer-events:none}
+  .feed-reel .freel-tag{position:absolute;left:9px;bottom:9px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:800;letter-spacing:.4px;padding:3px 9px;border-radius:9px;display:flex;align-items:center;gap:4px;pointer-events:none}
   .feed-media-real img{display:block;width:100%;height:190px;object-fit:cover}
   /* messages page */
   .msg-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between}
@@ -2828,6 +2833,7 @@
       <div class="sheet-handle"></div>
       <div style="font-weight:600;font-size:15px;padding:2px 8px" data-i18n="ch_t">Create</div>
       <button class="ch-item" onclick="chAction('post')"><div class="ch-ic" style="background:var(--brand,#0E7C66)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 6.5l3 3" stroke="currentColor" stroke-width="1.8"/></svg></div><div><div class="ch-tt" data-i18n="ch_post">Add New Post</div><div class="ch-dd" data-i18n="ch_post_d">Share a moment with your followers</div></div></button>
+      <button class="ch-item" onclick="chAction('reel')"><div class="ch-ic" style="background:#534AB7"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg></div><div><div class="ch-tt" data-i18n="ch_reel">Create Reel</div><div class="ch-dd" data-i18n="ch_reel_d">Post a vertical video to Reels</div></div></button>
       <button class="ch-item" onclick="chAction('comm')"><div class="ch-ic" style="background:#6B5CA5"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="9" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19.5c.9-3 3.1-4.5 5.5-4.5s4.6 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.5 6.2a3.2 3.2 0 011 6M17 15.2c1.8.5 3 1.9 3.5 4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><div class="ch-tt" data-i18n="ch_comm">Create Community</div><div class="ch-dd" data-i18n="ch_comm_d">Gather people around a shared interest</div></div></button>
       <button class="ch-item" onclick="chAction('event')"><div class="ch-ic" style="background:#C9803B"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/></svg></div><div><div class="ch-tt" data-i18n="ch_event">Create Event</div><div class="ch-dd" data-i18n="ch_event_d">Invite the community to a gathering</div></div></button>
       <button class="ch-item" onclick="chAction('story')"><div class="ch-ic" style="background:var(--gold,#C9A24B)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 3"/><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.8"/></svg></div><div><div class="ch-tt" data-i18n="ch_story">Create Mystory</div><div class="ch-dd" data-i18n="ch_story_d">Post a 24h story for your followers</div></div></button>
@@ -3049,6 +3055,7 @@ en:{
  pl_add:"Add a place", pl_near:"Recommended near you · approximate location only",
  pl_ftitle:"Filter by place type", pl_all:"All", pl_fclear:"Show all types",
  ch_t:"Create", ch_post:"Add New Post", ch_post_d:"Share a moment with your followers",
+ ch_reel:"Create Reel", ch_reel_d:"Post a vertical video to Reels",
  ch_comm:"Create Community", ch_comm_d:"Gather people around a shared interest", ch_comm_toast:"Create community flow — next iteration.", acm_title:"Create Community", acm_cover:"Cover Image", acm_cover_ph:"Add a cover image", acm_cover_change:"Cover selected · tap to change", acm_cover_d:"Recommended 16:9 · JPG or PNG", acm_cover_pick:"Choose a cover", acm_cover_up:"Upload from gallery", acm_cover_up_toast:"Upload from gallery — next iteration.", acm_name:"Community Name", acm_name_ph:"e.g. Ummah KC", acm_desc:"Community Description", acm_desc_ph:"What is this community about?", acm_topic:"Add a Topic", acm_topic_ph:"Type a topic, e.g. hifz", acm_detail:"Community Detail", acm_vis:"Visibility", acm_vis_choose:"Choose who can see this community", acm_joinreq:"Join request", acm_joinreq_sw:"Require approval to join", acm_joinreq_sub:"New members join only after you approve", acm_part:"Participants", acm_loc:"Location", acm_select:"Select", acm_nearby:"Nearby locations", acm_loc_cur:"Current location", acm_note:"The community will be added to My Hub → Communities.", acm_cta:"Create Community", acm_need_name:"Please enter a community name", acm_done:"Community created — added to Communities", acm_mem1:"1 member", acm_memcap:"1 / {0} members", acm_appr_tag:"Approval required", cm_row_toast:"Community page — next iteration.",
  ch_event:"Create Event", ch_event_d:"Invite the community to a gathering",
  ch_story:"Create Mystory", ch_story_d:"Post a 24h story for your followers", ch_story_toast:"Mystory camera — next iteration.",
@@ -3283,6 +3290,7 @@ zh:{
  pl_add:"发布地点", pl_near:"推荐你周边的地点 · 仅使用模糊位置",
  pl_ftitle:"按地点类型筛选", pl_all:"全部", pl_fclear:"显示全部类型",
  ch_t:"创建", ch_post:"发布新帖", ch_post_d:"与关注你的人分享此刻",
+ ch_reel:"发布 Reel", ch_reel_d:"发布竖版短视频到 Reels",
  ch_comm:"创建社群", ch_comm_d:"把有共同兴趣的人聚在一起", ch_comm_toast:"创建社群流程——下一轮迭代补充。", acm_title:"创建社群", acm_cover:"封面图片", acm_cover_ph:"添加封面图片", acm_cover_change:"已选封面 · 点击更换", acm_cover_d:"建议 16:9 · JPG 或 PNG", acm_cover_pick:"选择封面", acm_cover_up:"从相册上传", acm_cover_up_toast:"从相册上传——下一轮迭代补充。", acm_name:"社群名称", acm_name_ph:"例如：Ummah KC", acm_desc:"社群简介", acm_desc_ph:"介绍一下这个社群的主题...", acm_topic:"添加话题", acm_topic_ph:"输入话题，例如：背诵", acm_detail:"社群详情", acm_vis:"可见性", acm_vis_choose:"选择谁可以看到这个社群", acm_joinreq:"加入申请", acm_joinreq_sw:"加入需创建人确认", acm_joinreq_sub:"用户申请加入后需你确认才能加入", acm_part:"参与人数", acm_loc:"位置", acm_select:"选择", acm_nearby:"附近位置", acm_loc_cur:"当前位置", acm_note:"社群将添加到 My Hub → Communities。", acm_cta:"创建社群", acm_need_name:"请填写社群名称", acm_done:"社群已创建——已加入 Communities", acm_mem1:"1 位成员", acm_memcap:"1 / {0} 位成员", acm_appr_tag:"需创建人确认", cm_row_toast:"社群主页——下一轮迭代补充。",
  ch_event:"创建活动", ch_event_d:"邀请社区参加一次聚会",
  ch_story:"创建 Mystory", ch_story_d:"发布 24 小时限时动态", ch_story_toast:"Mystory 相机——下一轮迭代补充。",
@@ -7119,6 +7127,16 @@ function setFeedTab(tab){
  renderHome();
 }
 function feedMediaBlock(type,f){
+ /* a Reel published from the unified composer appears as a tappable card:
+    tapping it jumps to the Reels tab and plays that exact video */
+ if(f&&f.type==="reel"&&f.reel){
+  var vid=String(f.reel.vid||"");
+  var tap=vid?' onclick="event.stopPropagation();openReelCard(\''+vid+'\')"':"";
+  return '<div class="feed-media feed-reel"'+tap+'>'
+   +(f.img?'<img src="assets/'+f.img+'" alt="" loading="lazy" onerror="this.remove()">':'')
+   +'<span class="freel-play"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'
+   +'<span class="freel-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Reels</span></div>';
+ }
  /* a post created from a Wahda Reels title carries a real poster */
  if(f&&f.img)return '<div class="feed-media feed-media-real'+(type==="video"?" video":"")+'"><img src="assets/'+f.img+'" alt="" loading="lazy" onerror="this.closest(\'.feed-media\').style.display=\'none\'"></div>';
  if(type==="text")return "";
@@ -7639,9 +7657,41 @@ function goLiveTap(){if(isGuest&&!guestGate(null))return;toast(t("st_next",t("lv
 function chAction(kind){
  closeSheets();
  if(kind==="post"){openNewPost();return}
+ if(kind==="reel"){chOpenReel();return}
  if(kind==="event"){openAddEvent();return}
  if(kind==="comm"){openAddCommunity();return}
  toast(t("ch_"+kind+"_toast"));
+}
+/* ---------- unified publish entry: Create Reel routes into the Reels composer ----------
+   One "＋" entry in the Creation Hub; the content form decides the destination.
+   Posts stay in the shell's composer, Reels hands off to the Reels page. */
+var pendingCompose=false;
+function chOpenReel(){
+ if(isGuest&&!guestGate(function(){chOpenReel()}))return;
+ pendingCompose=true;
+ switchTab("reels");
+ bxFlushCompose();
+}
+function bxFlushCompose(){
+ if(!pendingCompose||!reelsReady)return;
+ /* ctx first: after a guest registers, the iframe must learn it is an account
+    before the composer opens, or it would bounce straight back to the gate */
+ bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang});
+ bxReply({wahdaMsg:"compose"});
+ pendingCompose=false;
+}
+/* a Reel card in Feeds: tap -> Reels tab, jump straight to that video */
+var pendingReelVid="";
+function openReelCard(vid){
+ pendingReelVid=String(vid||"");
+ if(!pendingReelVid)return;
+ switchTab("reels");
+ bxFlushReel();
+}
+function bxFlushReel(){
+ if(!pendingReelVid||!reelsReady)return;
+ bxReply({wahdaMsg:"open-reel",vid:pendingReelVid});
+ pendingReelVid="";
 }
 /* ---------- islamic tools pull-down panel ---------- */
 var curTab="feeds";
@@ -8814,6 +8864,21 @@ function bxCreateDramaPost(drama,caption){
  if(home&&document.getElementById("homeHead").style.display==="flex")renderHome();
  return true;
 }
+/* unified publish: a Reel synced to Feeds becomes a tappable card on top of Feeds */
+function bxCreateReelCard(reel,cap){
+ reel=reel||{};
+ cap=(cap&&cap.trim())?cap.trim():(lang==="zh"?"我发布了一条新 Reel 🎬":"I just posted a new Reel 🎬");
+ var f={n:txt(ACCOUNTS[curAcct].n),cm:"",min:0,type:"reel",mine:true,showInFeed:true,
+  img:String(reel.img||""),reel:{vid:String(reel.vid||""),t:String(reel.t||""),handle:"you"},
+  loc:t("hb_loc"),tx:{en:cap,zh:cap}};
+ f.like=0;f.cmt=0;f.rp=0;f.lk=[];f.rby=null;f.likedByMe=false;f.repostedByMe=false;f.savedByMe=false;f.userCmts=[];
+ FEEDS.unshift(f);                       /* the reel card sits on top of Feeds */
+ hubTab="posts";
+ if(document.getElementById("hubHead").style.display==="flex")renderHub();
+ var home=document.getElementById("homeBody");
+ if(home&&document.getElementById("homeHead").style.display==="flex")renderHome();
+ return true;
+}
 /* tapping a shared title in Chats jumps to the Reels tab and plays it there */
 function openDramaFromChat(idx){
  var msg=chatList&&chatList[idx];
@@ -8835,9 +8900,10 @@ function bxReply(obj){
  var rf=document.getElementById("reelsFrame");
  if(rf&&rf.contentWindow){try{rf.contentWindow.postMessage(obj,"*")}catch(e){}}
 }
-/* guest tried an account-only Reels action (play / share): sign-up gate, then come back to it */
+/* guest tried an account-only Reels action (play / share / compose): sign-up gate, then come back to it */
 function bxGateReels(action,title){
  guestGate(function(){
+  if(action==="compose"){pendingCompose=true;switchTab("reels");bxFlushCompose();return}
   pendingDrama=title||"";
   switchTab("reels");
   bxFlushDrama();
@@ -8853,7 +8919,7 @@ window.addEventListener("message",function(e){
  if(!d.wahdaMsg)return;
  switch(d.wahdaMsg){
   case "ready":
-   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang});bxFlushDrama();break;
+   reelsReady=true;bxReply({wahdaMsg:"ctx",guest:isGuest,lang:lang});bxFlushDrama();bxFlushCompose();bxFlushReel();break;
   case "gate":
    /* guest tapped a poster (play) or Share in Reels: bounce to sign-up, then resume */
    bxGateReels(d.action||"play",d.title);
@@ -8867,6 +8933,11 @@ window.addEventListener("message",function(e){
   case "post":
    if(isGuest){bxGateReels("share",d.drama&&d.drama.t);bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:false});break}
    bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:bxCreateDramaPost(bxDrama(d.drama),d.caption)});break;
+  case "reel-feed":
+   /* the unified composer published a Reel with "also share to Feeds" on:
+      the shell writes the real card into FEEDS (same content, second surface) */
+   if(isGuest){bxReply({wahdaMsg:"reel-feed-ack",rid:d.rid,ok:false});break}
+   bxReply({wahdaMsg:"reel-feed-ack",rid:d.rid,ok:bxCreateReelCard(d.reel,d.caption)});break;
   case "profile":
    /* a creator tapped in Reels opens the same Wahda user profile the rest of
       the app uses, so the page stays identical everywhere */

@@ -2,7 +2,7 @@
    - HTML（index.html / reels.html）：网络优先（原型频繁更新，保证打开即最新版），断网回退缓存
    - 其余静态资源：缓存优先
    多页结构：Reels 页以 iframe 形式加载，同样走网络优先，且缓存按各自 URL 分开存放 */
-var CACHE = "wahda-ux-demo-v5";
+var CACHE = "wahda-ux-demo-v6";
 var ASSETS = [
   "./",
   "./index.html",
