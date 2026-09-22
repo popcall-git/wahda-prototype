@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="only light">
-<title>Wahda Prototype</title>
+<title>Wahda UX Demo</title>
 <meta name="theme-color" content="#0E7C66">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -464,6 +464,9 @@
   .feed-time{font-size:12px;color:var(--ink-3,#9B9993)}
   .feed-text{font-size:14px;line-height:1.55;color:var(--ink,#1C1B18)}
   .feed-media{margin-top:10px;height:120px;border-radius:12px;background:linear-gradient(135deg,#DDEDE7,#C9E2D8);display:flex;align-items:center;justify-content:center;color:#0A5D4E;font-size:12px;font-weight:600}
+  /* poster of a title shared from Wahda Reels */
+  .feed-media-real{height:auto;padding:0;overflow:hidden;background:var(--surface-2,#EFECE5);display:block}
+  .feed-media-real img{display:block;width:100%;height:190px;object-fit:cover}
   /* messages page */
   .msg-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between}
   /* places page */
@@ -613,6 +616,17 @@
   .bub-voice svg{flex:none}
   .bub-call{display:flex;align-items:center;gap:8px;font-weight:500}
   .bub-call svg{flex:none;color:var(--brand,#0E7C66)}
+  /* title shared from Wahda Reels — tap plays it in the Reels tab */
+  .bub-drama{display:flex;align-items:center;gap:10px;max-width:258px;padding:9px;cursor:pointer}
+  .bub-drama-thumb{width:56px;height:74px;flex:none;border-radius:9px;overflow:hidden;position:relative;
+   background:linear-gradient(160deg,#0d9488,#134e4a);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .bub-drama-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bub-drama-mid{min-width:0;flex:1}
+  .bub-drama-title{font-size:13.5px;font-weight:800;color:var(--ink,#1C1B18);line-height:1.3;
+   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bub-drama-meta{font-size:11.5px;color:var(--ink-2,#6B6A66);margin-top:3px}
+  .bub-drama-tag{display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--brand,#0E7C66);
+   background:rgba(14,124,102,.1);border-radius:7px;padding:2px 6px}
   .chat-bar{flex:none;display:flex;align-items:center;gap:8px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--card,#FFFFFF);border-top:1px solid var(--line,#E5E2DC)}
   .ci-btn{width:40px;height:40px;border:none;background:none;border-radius:20px;display:flex;align-items:center;justify-content:center;color:var(--ink-2,#6B6A66);cursor:pointer;flex:none}
   .ci-btn.on{color:var(--brand,#0E7C66)}
@@ -1347,13 +1361,18 @@
         </div>
       </div>
       <div class="scroll" id="nfBody" style="display:none;padding:0 16px 14px"></div>
+      <!-- Wahda Reels view (embedded iframe; shares the main tabbar — one nav for all tabs) -->
+      <div id="reelsHost" style="display:none;flex:1;position:relative;background:#F4F2EE">
+        <iframe id="reelsFrame" title="Wahda Reels" src="" style="width:100%;height:100%;border:0;background:#F4F2EE;display:block"></iframe>
+      </div>
       <div class="tabbar" id="tabbar">
         <button class="tab active" data-tab="feeds" onclick="switchTab('feeds')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H8l-4 4V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_feeds">Feeds</span></button>
-        <button class="tab" data-tab="places" onclick="switchTab('places')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="tab_places">Places</span><span class="nf-dot" id="plDot"></span></button>
+        <button class="tab" data-tab="reels" onclick="switchTab('reels')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 8.5h18M8.2 3l2.4 5.5M14.4 3l2.4 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="15" r="2.4" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="tab_reels">Reels</span></button>
         <button class="tab-fab" onclick="openCreateHub()" aria-label="Create"><div class="fab-plus"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div></button>
         <button class="tab" data-tab="messages" onclick="switchTab('messages')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_messages">Chats</span><span class="badge" id="msgBadge">3</span></button>
         <button class="tab" data-tab="hub" onclick="switchTab('hub')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="tab_hub">My Hub</span></button>
       </div>
+      <span style="display:none" aria-hidden="true"><span class="nf-dot" id="plDot"></span></span>
     </section>
 
     <!-- Add Place (full-screen publish form) -->
@@ -2987,7 +3006,7 @@ en:{
  pr_uname_note:"Friends can find you by this username. You can change it later.",
  pr_cta:"Create profile", pr_skip:"Skip for now",
  d_h:"You're all set!", d_sub:"Welcome to Wahda, ", d_cta:"Enter Wahda",
- home_title:"Feeds", tab_feeds:"Feeds", tab_places:"Places", tab_messages:"Chats", tab_hub:"My Hub",
+ home_title:"Feeds", tab_feeds:"Feeds", tab_places:"Places", tab_reels:"Reels", tab_messages:"Chats", tab_hub:"My Hub",
  ft_foryou:"For You", ft_following:"Following", ft_community:"Community",
  fl_title:"Filter posts", fl_media:"Media Type", fl_date:"Date",
  fl_all:"All", fl_text:"Text", fl_images:"Images", fl_video:"Video",
@@ -3221,7 +3240,7 @@ zh:{
  pr_uname_note:"朋友可以通过用户名找到你，之后也可以修改。",
  pr_cta:"创建资料", pr_skip:"暂时跳过",
  d_h:"一切就绪！", d_sub:"欢迎来到 Wahda，", d_cta:"进入 Wahda",
- home_title:"动态", tab_feeds:"动态", tab_places:"本地", tab_messages:"聊天", tab_hub:"我的",
+ home_title:"动态", tab_feeds:"动态", tab_places:"本地", tab_reels:"Reels", tab_messages:"聊天", tab_hub:"我的",
  ft_foryou:"为你推荐", ft_following:"已关注", ft_community:"社群",
  fl_title:"筛选帖子", fl_media:"媒体类型", fl_date:"时间范围",
  fl_all:"全部", fl_text:"文字", fl_images:"图片", fl_video:"视频",
@@ -4104,7 +4123,7 @@ function applyChatHead(){
 }
 function openChatPeer(m){
  raisePage("pg-chat");
- chatPeer=m;chatList=CHAT_MSGS;
+ chatPeer=m;chatList=dmThread(m);
  document.getElementById("chatName").textContent=txt(m.n);
  applyChatHead();applyChatTheme();
  if(!chatInit){renderEmojiGrid();renderPlusGrid();chatInit=true}
@@ -4151,6 +4170,14 @@ function closeChat(){
  closeChatPanels();
  chatPeer=null;chatList=CHAT_MSGS;
 }
+/* each 1-on-1 peer keeps its own thread, seeded from CHAT_MSGS on first open,
+   so a title shared from Wahda Reels lands in that friend's conversation only */
+function dmThread(m){
+ if(!m.msgs)m.msgs=CHAT_MSGS.map(function(x){return Object.assign({},x)});
+ return m.msgs;
+}
+function threadOf(m){return m.members?threadOfGroup(m):dmThread(m)}
+function threadOfGroup(g){return g.msgs||(g.msgs=[])}
 function renderChat(){
  var el=document.getElementById("chatBody");
  var g=chatPeer,isG=!!(g&&g.members);
@@ -4164,12 +4191,18 @@ function chRow(m,idx){
  if(m.dir==="out")av='<div class="ch-av me">'+avatarInitial+'</div>';
  else if(m.mb)av='<div class="ch-av">'+m.mb.charAt(0)+'</div>';
  else av='<div class="ch-av">'+(chatPeer?chatPeer.ini:"A")+'</div>';
- return '<div class="ch-row '+m.dir+'" data-mi="'+idx+'">'+av+bubHtml(m)+'</div>';
+ return '<div class="ch-row '+m.dir+'" data-mi="'+idx+'">'+av+bubHtml(m,idx)+'</div>';
 }
-function bubHtml(m){
+function bubHtml(m,idx){
  var d=m.dir;
  switch(m.type){
   case "text":return '<div class="bub '+d+'">'+txt(m.tx)+'</div>';
+  /* a title shared from Wahda Reels (tap → plays in the Reels tab) */
+  case "drama":return '<div class="bub '+d+' bub-drama" onclick="openDramaFromChat('+idx+')">'+
+   '<div class="bub-drama-thumb">'+(m.d.img?'<img src="assets/'+m.d.img+'" alt="" onerror="this.remove()">':'<span>'+m.d.e+'</span>')+'</div>'+
+   '<div class="bub-drama-mid"><div class="bub-drama-title">'+m.d.t+'</div>'+
+   '<div class="bub-drama-meta">★ '+m.d.r+' · '+m.d.s+'</div>'+
+   '<span class="bub-drama-tag">🎬 Wahda Reels · '+m.d.cat+'</span></div></div>';
   case "voice":return '<div class="bub '+d+' bub-voice" onclick="chatVoicePlay()">'+
    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'+
    '<svg width="20" height="15" viewBox="0 0 20 16" fill="none"><rect x="1" y="6" width="2.4" height="4" rx="1.2" fill="currentColor"/><rect x="5.4" y="4" width="2.4" height="8" rx="1.2" fill="currentColor"/><rect x="9.8" y="2" width="2.4" height="12" rx="1.2" fill="currentColor"/><rect x="14.2" y="5" width="2.4" height="6" rx="1.2" fill="currentColor"/></svg>'+
@@ -4594,7 +4627,7 @@ function hubFeedCard(f,idx){
  var chip=f.cm?'<div class="feed-chip" style="margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
  return '<div class="feed-card" style="cursor:default" onclick="openPost('+idx+')">'
   +'<div class="feed-user">'+coStackHtml(f)+'<div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+(f.ai?'<span class="np-ai-chip">AI</span>':"")+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+(f.mine?"":followBtn(f))+'</div>'
-  +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type)+chip+faBar(f,idx)+'</div>';
+   +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,idx)+'</div>';
 }
 function hubCards(list){
  return '<div class="fp-list">'+list.map(function(f){return hubFeedCard(f,FEEDS.indexOf(f))}).join("")+'</div>';
@@ -7050,7 +7083,7 @@ function timeLabel(min){
  return lang==="zh"?"更早":"earlier";
 }
 function feedMatches(f){
- if(f.mine)return false;
+ if(f.mine&&!f.showInFeed)return false;
  if(feedTab==="following"&&!follows[f.n])return false;
  if(feedTab==="community"&&!f.cm)return false;
  if(fMedia!=="all"&&f.type!==fMedia)return false;
@@ -7081,7 +7114,9 @@ function setFeedTab(tab){
  document.querySelectorAll(".ftab").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-ftab")===tab)});
  renderHome();
 }
-function feedMediaBlock(type){
+function feedMediaBlock(type,f){
+ /* a post created from a Wahda Reels title carries a real poster */
+ if(f&&f.img)return '<div class="feed-media feed-media-real'+(type==="video"?" video":"")+'"><img src="assets/'+f.img+'" alt="" loading="lazy" onerror="this.closest(\'.feed-media\').style.display=\'none\'"></div>';
  if(type==="text")return "";
  var cls=type==="video"?" feed-media video":"";
  var label=type==="image"?(lang==="zh"?"图片（占位）":"Image (placeholder)"):(lang==="zh"?"视频（占位）":"Video (placeholder)");
@@ -7090,6 +7125,7 @@ function feedMediaBlock(type){
  return '<div class="feed-media'+cls+'">'+ic+'<span>'+label+'</span></div>';
 }
 function followBtn(f){
+ if(f.mine)return "";
  if(isGuest)return '<button class="follow-btn" onclick="event.stopPropagation();toggleFollow(\''+f.n+'\')">+ '+t("fw_add")+'</button>';
  if(findFriendIdx(f.n)>-1)return '<button class="follow-btn on" style="cursor:default"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:4px"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t("fw_on")+'</button>';
  if(follows[f.n])return '<button class="follow-btn on" onclick="event.stopPropagation();toggleFollow(\''+f.n+'\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="margin-right:4px"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t("fw_on")+'</button>';
@@ -7310,7 +7346,7 @@ function renderPostDetail(f){
  var chip=f.cm?'<div class="feed-chip" style="margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
  var html='<div class="feed-card" style="margin-top:12px;cursor:default">'
   +'<div class="feed-user"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div></div>'
-  +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type)+chip+faBar(f,i);
+  +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,i);
  if(f.like>0){
   html+='<div class="pd-idrow"><div class="pd-stack" style="display:flex">'
    +'<div class="pd-mini">'+(f.lk[0]||"A").charAt(0)+'</div><div class="pd-mini">'+(f.lk[1]||"B").charAt(0)+'</div></div>'
@@ -7449,7 +7485,7 @@ function renderHome(){
  var cards=list.map(function(f,i){
   var idx=FEEDS.indexOf(f);
   var chip=f.cm?'<div class="feed-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
-  return '<div class="feed-card" onclick="openPost('+idx+')"><div class="feed-user">'+feedAv(f)+'<div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type)+chip+faBar(f,idx)+'</div>';
+  return '<div class="feed-card" onclick="openPost('+idx+')"><div class="feed-user">'+feedAv(f)+'<div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,idx)+'</div>';
  });
  if(feedTab==="foryou"){cards.splice(1,0,feedLiveCard());cards.splice(4,0,feedAdCard())}
  body.innerHTML=(feedTab==="following"?lvFollowingStrip():"")+cards.join("")+'<div class="feed-end">'+t("feed_end")+'</div>';
@@ -8660,16 +8696,22 @@ function submitPlace(){
  renderPlaces();
 }
 function switchTab(name){
- if(name!=="feeds"&&name!=="messages"&&name!=="places"&&name!=="hub"&&name!=="notif"){toast(t("tab_soon",I18N[lang]["tab_"+name]));name="feeds"}
+ if(name!=="feeds"&&name!=="messages"&&name!=="places"&&name!=="hub"&&name!=="notif"&&name!=="reels"){toast(t("tab_soon",I18N[lang]["tab_"+name]));name="feeds"}
  if(name==="messages"&&isGuest&&!guestGate(function(){switchTab("messages")}))return;
  if(name==="hub"&&isGuest&&!guestGate(function(){switchTab("hub")}))return;
  if(name==="notif"&&isGuest&&!guestGate(function(){switchTab("notif")}))return;
+ if(!pageEl("home").classList.contains("active")){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active","back-anim")});
+  pageEl("home").classList.add("active");
+ }
  curTab=name;
  closeITPanel();
  var tabHi=name==="notif"?"feeds":name;
  document.querySelectorAll(".tab").forEach(function(tb){tb.classList.toggle("active",tb.getAttribute("data-tab")===tabHi)});
  closePlusMenu();
- var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isFeed=!isMsg&&!isPl&&!isHub&&!isNf;
+ var isMsg=name==="messages",isPl=name==="places",isHub=name==="hub",isNf=name==="notif",isRe=name==="reels",isFeed=!isMsg&&!isPl&&!isHub&&!isNf&&!isRe;
+ document.getElementById("reelsHost").style.display=isRe?"block":"none";
+ if(isRe){var rf=document.getElementById("reelsFrame");if(rf&&!rf.getAttribute("src"))rf.src="reels.html"}
  document.getElementById("homeHead").style.display=isFeed?"flex":"none";
  document.getElementById("feedTabsRow").style.display=isFeed?"flex":"none";
  document.getElementById("itHintFeeds").style.display=isFeed?"flex":"none";
@@ -8693,6 +8735,120 @@ function switchTab(name){
  else if(isNf){renderNotifs();markNotifsRead()}
  else renderHome();
 }
+
+/* ---------- Wahda Reels iframe → main shell navigation bridge ---------- */
+/* Reels is the source of the share sheet; the shell owns chats and posts,
+   so sharing is routed through here and really mutates MSGS / FEEDS. */
+var reelsReady=false, pendingDrama=null, pendingReplyTimers={};
+
+/* friend list = 1-on-1 chats; group list = the group chats already in Chats */
+function bxContacts(){
+ return MSGS.map(function(m,i){return {m:m,i:i}}).filter(function(o){
+  return o.m.type==="dm";
+ }).map(function(o){return {idx:o.i,n:txt(o.m.n),ini:o.m.ini,kind:"dm",sub:t("ch_online")}});
+}
+function bxGroups(){
+ return MSGS.map(function(m,i){return {m:m,i:i}}).filter(function(o){
+  return o.m.type==="group"&&!!o.m.members;
+ }).map(function(o){return {idx:o.i,n:txt(o.m.n),ini:o.m.ini,kind:"group",sub:(o.m.meta||"")+" "+t("ng_members_n",gmTotal(o.m))}});
+}
+/* read the drama payload coming from the Reels iframe, keeping only known fields */
+function bxDrama(d){
+ d=d||{};
+ return {t:String(d.t||""),s:String(d.s||""),r:String(d.r||""),p:String(d.p||""),
+  cat:String(d.cat||""),e:String(d.e||"🎬"),img:String(d.img||""),g:String(d.g||"")};
+}
+function bxShareToChat(idx,drama,caption){
+ var m=MSGS[idx];
+ if(!m)return false;
+ var list=threadOf(m);
+ list.push({dir:"out",type:"drama",d:drama,tx:{en:caption||"",zh:caption||""}});
+ m.unread=0;
+ m.tm={en:"now",zh:"刚刚"};
+ m.pv={en:"You shared "+drama.t,zh:"你分享了《"+drama.t+"》"};
+ if(chatPeer===m){chatList=list;renderChat()}
+ renderMsgs();refreshMsgBadge();
+ bxAutoReply(idx,drama);
+ return true;
+}
+/* the recipient replies shortly after — keeps the demo conversation alive */
+function bxAutoReply(idx,drama){
+ var m=MSGS[idx];
+ if(!m)return;
+ if(pendingReplyTimers[idx])clearTimeout(pendingReplyTimers[idx]);
+ pendingReplyTimers[idx]=setTimeout(function(){
+  var who=(m.members&&m.members[0])||txt(m.n);
+  var list=threadOf(m);
+  var added=[
+   {dir:"in",type:"text",mb:who,tx:{
+    en:"Just added “"+drama.t+"” to my watchlist — thanks for sharing! 🎬",
+    zh:"我把《"+drama.t+"》加进待看清单了，谢谢分享！🎬"}},
+   {dir:"in",type:"text",mb:who,tx:{
+    en:"Let's watch it together tonight?",
+    zh:"今晚一起看好不好？"}}
+  ];
+  added.forEach(function(x){list.push(x)});
+  m.tm={en:"now",zh:"刚刚"};
+  m.pv={en:who+": Just added “"+drama.t+"” to my watchlist",zh:who+"：我把《"+drama.t+"》加进待看清单了"};
+  if(chatPeer===m){chatList=list;renderChat()}
+  else m.unread=(m.unread||0)+added.length;
+  renderMsgs();refreshMsgBadge();
+ },1800);
+}
+/* Share → Post: a real post built from the title, shown in Feeds and My Hub → Posts */
+function bxCreateDramaPost(drama,caption){
+ var cap=caption&&caption.trim()?caption.trim():(lang==="zh"
+  ?"正在 Wahda Reels 看《"+drama.t+"》。"+drama.s+"，评分 ★"+drama.r+"，推荐给你 🎬"
+  :"Watching “"+drama.t+"” on Wahda Reels. "+drama.s+", rated ★"+drama.r+" — highly recommend 🎬");
+ var f={n:txt(ACCOUNTS[curAcct].n),cm:"",min:0,type:"image",mine:true,showInFeed:true,
+  img:drama.img,drama:drama,loc:t("hb_loc"),tx:{en:cap,zh:cap}};
+ f.like=0;f.cmt=0;f.rp=0;f.lk=[];f.rby=null;f.likedByMe=false;f.repostedByMe=false;f.savedByMe=false;f.userCmts=[];
+ FEEDS.unshift(f);                       /* own drama posts sit on top of Feeds */
+ hubTab="posts";
+ if(document.getElementById("hubHead").style.display==="flex")renderHub();
+ var home=document.getElementById("homeBody");
+ if(home&&document.getElementById("homeHead").style.display==="flex")renderHome();
+ return true;
+}
+/* tapping a shared title in Chats jumps to the Reels tab and plays it there */
+function openDramaFromChat(idx){
+ var msg=chatList&&chatList[idx];
+ if(!msg||!msg.d)return;
+ closeChat();
+ pendingDrama=msg.d.t;
+ switchTab("reels");
+ bxFlushDrama();
+}
+function bxFlushDrama(){
+ if(!pendingDrama||!reelsReady)return;
+ var rf=document.getElementById("reelsFrame");
+ if(rf&&rf.contentWindow){
+  try{rf.contentWindow.postMessage({wahdaMsg:"play",title:pendingDrama},"*")}catch(e){}
+  pendingDrama=null;
+ }
+}
+function bxReply(obj){
+ var rf=document.getElementById("reelsFrame");
+ if(rf&&rf.contentWindow){try{rf.contentWindow.postMessage(obj,"*")}catch(e){}}
+}
+window.addEventListener("message",function(e){
+ var d=e.data||{};
+ /* legacy: Reels tab bar hands navigation back to the shell */
+ var tab=d.wahdaTab;
+ if(tab==="feeds"||tab==="messages"||tab==="hub"){switchTab(tab);return}
+ if(tab==="create"){openCreateHub();return}
+ if(!d.wahdaMsg)return;
+ switch(d.wahdaMsg){
+  case "ready":
+   reelsReady=true;bxFlushDrama();break;
+  case "friends":
+   bxReply({wahdaMsg:"friends",rid:d.rid,contacts:bxContacts(),groups:bxGroups()});break;
+  case "share":
+   bxReply({wahdaMsg:"share-ack",rid:d.rid,ok:bxShareToChat(d.idx,bxDrama(d.drama),d.caption)});break;
+  case "post":
+   bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:bxCreateDramaPost(bxDrama(d.drama),d.caption)});break;
+ }
+});
 
 
 /* ---------- global search ---------- */
