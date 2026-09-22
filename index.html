@@ -130,7 +130,7 @@
   .avatar-btn.has-photo{border-style:solid;border-color:var(--brand,#0E7C66);background:var(--brand,#0E7C66);color:#fff;font-size:30px;font-weight:700}
   .progress-note{font-size:13px;color:var(--ink-3,#9B9993);text-align:center;margin-top:6px}
   /* home —— 页头与标题规范对齐 Places/Chats：标题 24px/700、页头 14px 20px 7px，内容栏统一 20px */
-  .home-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between}
+  .home-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between;position:relative}
   .home-head .hi{font-size:24px;font-weight:700}
   .feed-avwrap{position:relative;flex:none}
   .av-live{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.4px;color:#fff;background:#E24B4A;border:1.5px solid var(--card,#FFFFFF);border-radius:6px;padding:0 3px;line-height:10px;white-space:nowrap;pointer-events:none}
@@ -372,6 +372,16 @@
   .li-switch{display:block;margin:16px auto 4px;text-align:center}
   /* islamic tools pull-down panel */
   .it-hint{display:flex;align-items:center;justify-content:center;gap:5px;padding:0;color:var(--ink-3,#9B9993);font-size:11px;font-weight:500;cursor:pointer;background:none;border:none;width:100%;font-family:inherit}
+  .it-menu{position:absolute;top:calc(100% + 6px);right:14px;width:250px;max-height:336px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card,#FFFFFF);border:1px solid var(--line,#E5E2DC);border-radius:16px;box-shadow:0 12px 32px rgba(28,27,24,.16);padding:8px;display:none;z-index:60;text-align:left}
+  .it-menu.open{display:block}
+  .it-menu-sec{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3,#9B9993);padding:8px 10px 6px}
+  .it-menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;border-radius:12px;font-size:14px;font-weight:600;color:var(--ink,#1C1B18);cursor:pointer;font-family:inherit;text-align:left}
+  .it-menu-item:active{background:var(--bg,#F4F2EE)}
+  .imi-ic{flex:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9px}
+  .imi-new{margin-left:auto;flex:none;background:var(--brand,#0E7C66);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;border-radius:999px;padding:2px 7px;text-transform:uppercase}
+  .imi-soon{margin-left:auto;flex:none;background:var(--brand-soft,#E3F2EE);color:var(--brand-dark,#0A5D4E);font-size:9px;font-weight:800;letter-spacing:.5px;border-radius:999px;padding:2px 7px;text-transform:uppercase}
+  .it-menu-sep{height:1px;background:var(--line,#E5E2DC);margin:8px 6px 4px}
+  .it-menu-foot{font-size:10.5px;color:var(--ink-3,#9B9993);padding:8px 10px 4px;line-height:1.45}
   .it-hint svg{opacity:.7}
   #itBackdrop{position:absolute;inset:0;background:rgba(20,19,16,.42);z-index:54;display:none}
   #itBackdrop.show{display:block;animation:fadein .25s ease}
@@ -459,7 +469,10 @@
   /* places page */
   .pl-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between}
   .pl-head .hi{font-size:24px;font-weight:700}
-  .pl-sub{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2,#6B6A66);margin-top:3px}
+  .pl-back{flex:none;width:36px;height:36px;margin:0 6px 0 -8px;border:0;background:none;border-radius:18px;display:flex;align-items:center;justify-content:center;color:var(--ink,#1C1B18);cursor:pointer;font-family:inherit}
+  .pl-back:active{background:var(--bg,#F4F2EE)}
+  .pl-sub{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2,#6B6A66);margin-top:3px;min-width:0;white-space:nowrap}
+  .pl-sub span{overflow:hidden;text-overflow:ellipsis}
   .seg{flex:none;display:flex;background:#E8E5DF;border-radius:10px;padding:3px;margin:0 20px 7px}
   .seg button{flex:1;border:none;background:none;border-radius:8px;padding:7px 0;font-size:13px;font-weight:600;color:var(--ink-2,#6B6A66);cursor:pointer;font-family:inherit}
   .seg button.active{background:var(--card,#FFFFFF);color:var(--brand-dark,#0A5D4E);box-shadow:0 1px 3px rgba(0,0,0,.10)}
@@ -1224,6 +1237,28 @@
         <button class="icon-btn lv-entry" onclick="openLive()" aria-label="Live"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M8.6 8.6a4.8 4.8 0 000 6.8M15.4 8.6a4.8 4.8 0 010 6.8M6 6a8.5 8.5 0 000 12M18 6a8.5 8.5 0 010 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="lv-dot"></span></button>
         <button class="icon-btn" onclick="openSearch()" aria-label="Search"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         <button class="icon-btn nf-bell" onclick="switchTab('notif')" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 00-6 6v3.5L4.5 16h15L18 12.5V9a6 6 0 00-6-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 19a2 2 0 004 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="nf-bell-dot" id="homeNfDot"></span></button>
+        <button class="icon-btn" id="itMenuBtn" onclick="toggleItMenu(event)" aria-label="Islamic Tools"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M20 13.5A8 8 0 1110.5 4 6.5 6.5 0 0020 13.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="it-menu" id="itMenu">
+          <div class="it-menu-sec" data-i18n="it_sec_it">Islamic Tools</div>
+          <button class="it-menu-item" onclick="itMenuGo('prayer')"><span class="imi-ic" style="color:#0E7C66;background:rgba(14,124,102,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 21v-6c0-4 3.1-7 7-7s7 3 7 7v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.5c.8 1 1.6 1.6 1.6 2.6a1.6 1.6 0 11-3.2 0c0-1 .8-1.6 1.6-2.6z" fill="currentColor"/><path d="M3.5 21h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_prayer">Prayer Times</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('qibla')"><span class="imi-ic" style="color:#C9803B;background:rgba(201,128,59,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><span data-i18n="it_qibla">Qibla Compass</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('quran')"><span class="imi-ic" style="color:#6B5CA5;background:rgba(107,92,165,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 6c-1.8-1.6-4-2-6.5-2v14c2.5 0 4.7.4 6.5 2 1.8-1.6 4-2 6.5-2V4c-2.5 0-4.7.4-6.5 2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 6v14" stroke="currentColor" stroke-width="1.7"/></svg></span><span data-i18n="it_quran">Holy Qura'n</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('cal')"><span class="imi-ic" style="color:#5E7A8B;background:rgba(94,122,139,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_cal">Hijri Calendar</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('tasbih')"><span class="imi-ic" style="color:#B0685E;background:rgba(176,104,94,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4.5" r="1.4" fill="currentColor"/><circle cx="18" cy="8" r="1.4" fill="currentColor"/><circle cx="19.5" cy="14.5" r="1.4" fill="currentColor"/><circle cx="15" cy="19" r="1.4" fill="currentColor"/><circle cx="9" cy="19" r="1.4" fill="currentColor"/><circle cx="4.5" cy="14.5" r="1.4" fill="currentColor"/><circle cx="6" cy="8" r="1.4" fill="currentColor"/><circle cx="12" cy="12.5" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg></span><span data-i18n="it_tasbih">Tasbih Counter</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('places')"><span class="imi-ic" style="color:#D64545;background:rgba(214,69,69,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></span><span data-i18n="it_places">Places</span><span class="imi-new" data-i18n="pl_new">New</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('duas')"><span class="imi-ic" style="color:#C9A24B;background:rgba(201,162,75,.15)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M7 21v-6c0-2.8 2-5 5-5s5 2.2 5 5v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1L7 6.5l2.1-.9.9-2.1z" fill="currentColor"/></svg></span><span data-i18n="it_duas">Duas</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('zakat')"><span class="imi-ic" style="color:#0A5D4E;background:rgba(10,93,78,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M14.5 8.5a4 4 0 100 7 5 5 0 110-7z" fill="currentColor" opacity=".85"/></svg></span><span data-i18n="it_zakat">Zakat Calculator</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('adhan')"><span class="imi-ic" style="color:#4E8B6E;background:rgba(78,139,110,.14)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M6 16v-4a6 6 0 1112 0v4l1.5 2.5H4.5L6 16z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 21a2.2 2.2 0 004 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_adhan">Adhan Alerts</span></button>
+          <div class="it-menu-sep"></div>
+          <div class="it-menu-sec" data-i18n="it_more_sec">More Tools</div>
+          <button class="it-menu-item" onclick="itMenuGo('hajj')"><span class="imi-ic" style="color:#7A6BA8;background:rgba(122,107,168,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5l8 4.2v8.6L12 20.5l-8-4.2V7.7l8-4.2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 3.5v17M4 7.7l8 4.3 8-4.3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><span data-i18n="it_hajj">Hajj &amp; Umrah Guide</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('halal')"><span class="imi-ic" style="color:#0E7C66;background:rgba(14,124,102,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 8.5V5.6A1.6 1.6 0 015.6 4h2.9M15.5 4h2.9A1.6 1.6 0 0120 5.6v2.9M20 15.5v2.9a1.6 1.6 0 01-1.6 1.6h-2.9M8.5 20H5.6A1.6 1.6 0 014 18.4v-2.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 12h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_halal">Halal Scanner</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('mosque')"><span class="imi-ic" style="color:#5E7A8B;background:rgba(94,122,139,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 20v-5.5C4 11 7.6 8 12 8s8 3 8 6.5V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.2c.9 1.1 1.7 1.8 1.7 2.9a1.7 1.7 0 11-3.4 0c0-1.1.8-1.8 1.7-2.9z" fill="currentColor"/><path d="M3 20h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_mosque_f">Mosque Finder</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('radio')"><span class="imi-ic" style="color:#C9803B;background:rgba(201,128,59,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 8.5a5 5 0 000 7M15.5 8.5a5 5 0 010 7M6 6a8.6 8.6 0 000 12M18 6a8.6 8.6 0 010 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_radio">Quran Radio</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('finance')"><span class="imi-ic" style="color:#5262ED;background:rgba(82,98,237,.12)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="7" rx="7" ry="3" stroke="currentColor" stroke-width="1.7"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_finance">Islamic Finance</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <button class="it-menu-item" onclick="itMenuGo('kids')"><span class="imi-ic" style="color:#B0685E;background:rgba(176,104,94,.13)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M11 4.5H6a1.5 1.5 0 00-1.5 1.5v12A1.5 1.5 0 006 19.5h5v-15z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M11 4.5h7A1.5 1.5 0 0119.5 6v12a1.5 1.5 0 01-1.5 1.5h-7" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M11 4.5v15" stroke="currentColor" stroke-width="1.7"/></svg></span><span data-i18n="it_kids">Kids Quran</span><span class="imi-soon" data-i18n="it_soon">Soon</span></button>
+          <div class="it-menu-foot" data-i18n="it_more_foot">More tools &amp; Mini Apps plug in here as they ship</div>
         </div>
       </div>
       <div class="feed-tabs-row" id="feedTabsRow">
@@ -1236,7 +1271,7 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <button class="it-hint" id="itHintFeeds" onclick="openITPanel()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint">Pull down for Islamic Tools &amp; Mini Apps</span></button>
+      <button class="it-hint" id="itHintFeeds" onclick="openITPanel(true)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint_ma">Pull Down For Mini Apps</span></button>
       <div class="scroll" id="homeBody" style="padding:8px 20px 24px"></div>
       <div class="msg-head" id="msgHead" style="display:none">
         <button class="hi msg-title-btn" onclick="openAccounts()"><span data-i18n="msg_title">Chats</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -1246,11 +1281,14 @@
           <button class="icon-btn" onclick="togglePlusMenu(event)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 7.5v5M9.5 10h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </div>
-      <button class="it-hint" id="itHintMsg" style="display:none" onclick="openITPanel()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint">Pull down for Islamic Tools &amp; Mini Apps</span></button>
+      <button class="it-hint" id="itHintMsg" style="display:none" onclick="openITPanel(true)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint_ma">Pull Down For Mini Apps</span></button>
       <div class="pl-head" id="plHead" style="display:none">
-        <div>
-          <div class="hi" data-i18n="pl_title">Places</div>
-          <div class="pl-sub"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="pl_loc">Riyadh, Saudi Arabia · based on your location</span></div>
+        <div style="display:flex;align-items:center;flex:1;min-width:0">
+          <button class="pl-back" onclick="switchTab('feeds')" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div style="min-width:0">
+            <div class="hi" data-i18n="pl_title">Places</div>
+            <div class="pl-sub"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="pl_loc">Riyadh, Saudi Arabia · based on your location</span></div>
+          </div>
         </div>
         <div class="msg-actions">
           <button class="icon-btn" id="plFilterBtn" onclick="openPlCatFilter()" aria-label="Filter"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 5h16l-6.2 7.3V19l-3.6-2v-4.7L4 5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
@@ -1263,7 +1301,7 @@
         <button data-mode="map" onclick="setPlMode('map')" data-i18n="pl_map">Map</button>
         <button data-mode="list" onclick="setPlMode('list')" data-i18n="pl_list">List</button>
       </div>
-      <button class="it-hint" id="itHintPl" style="display:none" onclick="openITPanel()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint">Pull down for Islamic Tools &amp; Mini Apps</span></button>
+      <button class="it-hint" id="itHintPl" style="display:none" onclick="openITPanel(true)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="it_hint_ma">Pull Down For Mini Apps</span></button>
       <div class="pl-map" id="plMapWrap" style="display:none">
         <svg width="100%" height="100%" viewBox="0 0 340 250" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0">
           <rect width="340" height="250" fill="#DFEDE2"/>
@@ -2996,8 +3034,8 @@ en:{
  ch_event:"Create Event", ch_event_d:"Invite the community to a gathering",
  ch_story:"Create Mystory", ch_story_d:"Post a 24h story for your followers", ch_story_toast:"Mystory camera — next iteration.",
  ch_live:"Live Streaming", ch_live_d:"Broadcast live to the community", ch_live_toast:"Live streaming setup — next iteration.",
- it_t:"Quick Panel", it_hint:"Pull down for Islamic Tools & Mini Apps", it_next:"Next prayer",
- it_prayer:"Prayer Times", it_qibla:"Qibla", it_quran:"Quran", it_tasbih:"Tasbih", it_cal:"Hijri Calendar", it_duas:"Duas", it_zakat:"Zakat Calculator", it_adhan:"Adhan Alerts",
+ it_t:"Quick Panel", it_hint_ma:"Pull Down For Mini Apps", it_next:"Next prayer",
+ it_prayer:"Prayer Times", it_qibla:"Qibla Compass", it_quran:"Holy Qura'n", it_tasbih:"Tasbih Counter", it_cal:"Hijri Calendar", it_duas:"Duas", it_zakat:"Zakat Calculator", it_adhan:"Adhan Alerts", it_places:"Places", it_more_sec:"More Tools", it_soon:"Soon", it_more_foot:"More tools & Mini Apps plug in here as they ship", it_hajj:"Hajj & Umrah Guide", it_halal:"Halal Scanner", it_mosque_f:"Mosque Finder", it_radio:"Quran Radio", it_finance:"Islamic Finance", it_kids:"Kids Quran",
  it_toast:"{0} — coming in the next iteration.", it_sec_it:"Islamic Tools", qp_search_ph:"Search tools & mini apps", qp_recent:"Recently used", qp_ma_sec:"Mini Apps", qp_more:"Discover more Mini Apps", qp_all:"All Mini Apps", qp_my:"My Mini Apps", qp_fav_on:"Added to My Mini Apps", qp_fav_off:"Removed from My Mini Apps", qp_empty:"No matching tools or mini apps", qp_open_toast:"Opening {0} — mini app runtime in the next iteration.", qp_hub_toast:"Mini Apps Hub — coming in the next iteration.",
  cr_spot:"Creator Spotlight", cr_spot_d:"The recitations & lectures behind your tools",
  cr_title:"Creator", cr_acct:"Creator Account", cr_verify:"Verified Creator", cr_fl:"followers", cr_li:"listens",
@@ -3230,9 +3268,9 @@ zh:{
  ch_event:"创建活动", ch_event_d:"邀请社区参加一次聚会",
  ch_story:"创建 Mystory", ch_story_d:"发布 24 小时限时动态", ch_story_toast:"Mystory 相机——下一轮迭代补充。",
  ch_live:"直播", ch_live_d:"向社区进行实时直播", ch_live_toast:"直播开播流程——下一轮迭代补充。",
- it_t:"快捷面板", it_hint:"下拉打开伊斯兰工具与小程序", it_next:"下一次礼拜",
- it_prayer:"礼拜时间", it_qibla:"朝向指引", it_quran:"古兰经", it_tasbih:"赞珠计数", it_cal:"希吉来历", it_duas:"都阿", it_zakat:"天课计算", it_adhan:"宣礼提醒",
- it_toast:"{0}——下一轮迭代补充。", it_sec_it:"Islamic Tools", qp_search_ph:"搜索工具与小程序", qp_recent:"最近使用", qp_ma_sec:"小程序", qp_more:"发现更多 Mini Apps", qp_all:"全部小程序", qp_my:"我的小程序", qp_fav_on:"已收藏到我的小程序", qp_fav_off:"已取消收藏", qp_empty:"没有找到相关工具或小程序", qp_open_toast:"正在打开 {0}——小程序运行层下一轮迭代。", qp_hub_toast:"Mini Apps 聚合页——下一轮迭代补充。",
+ it_t:"快捷面板", it_hint_ma:"下拉进入小程序", it_next:"下一次礼拜",
+ it_prayer:"礼拜时间", it_qibla:"朝向指南", it_quran:"古兰经", it_tasbih:"赞珠计数", it_cal:"希吉来历", it_duas:"都阿", it_zakat:"天课计算", it_adhan:"宣礼提醒", it_places:"地点", it_more_sec:"更多工具", it_soon:"即将", it_more_foot:"更多工具与小程序将在此处持续接入", it_hajj:"朝觐与副朝指南", it_halal:"清真扫描", it_mosque_f:"清真寺查找", it_radio:"古兰经电台", it_finance:"伊斯兰金融", it_kids:"儿童古兰经",
+ it_toast:"{0}——下一轮迭代补充。", it_sec_it:"伊斯兰工具", qp_search_ph:"搜索工具与小程序", qp_recent:"最近使用", qp_ma_sec:"小程序", qp_more:"发现更多 Mini Apps", qp_all:"全部小程序", qp_my:"我的小程序", qp_fav_on:"已收藏到我的小程序", qp_fav_off:"已取消收藏", qp_empty:"没有找到相关工具或小程序", qp_open_toast:"正在打开 {0}——小程序运行层下一轮迭代。", qp_hub_toast:"Mini Apps 聚合页——下一轮迭代补充。",
  cr_spot:"创作者精选", cr_spot_d:"工具背后的诵经与课程创作者",
  cr_title:"创作者主页", cr_acct:"创作者账号", cr_verify:"认证创作者", cr_fl:"粉丝", cr_li:"收听",
  cr_listen:"立即收听", cr_listening:"正在播放",
@@ -7678,13 +7716,19 @@ function renderQp(q){
  res.innerHTML=html||('<div class="qp-empty">'+t("qp_empty")+'</div>');
  res.style.display="";
 }
-function openITPanel(){
+function openITPanel(goMiniApps){
  var p=document.getElementById("itPanel");
  p.classList.remove("dragging");p.style.transform="";
  p.classList.add("open");
  document.getElementById("itBackdrop").classList.add("show");
  var sv=document.getElementById("qpSearch");if(sv)sv.value="";
  renderQp("");
+ if(goMiniApps){
+  setTimeout(function(){
+   var body=document.getElementById("qpBody"),rec=document.getElementById("qpRecent");
+   if(body&&rec&&rec.style.display!=="none"&&rec.offsetTop)body.scrollTop=rec.offsetTop-body.offsetTop||0;
+  },80);
+ }
 }
 function closeITPanel(){
  var p=document.getElementById("itPanel");
@@ -7692,6 +7736,22 @@ function closeITPanel(){
  document.getElementById("itBackdrop").classList.remove("show");
 }
 function chTool(kind){toast(t("it_toast",t("it_"+kind)))}
+function toggleItMenu(e){
+ if(e)e.stopPropagation();
+ var m=document.getElementById("itMenu");
+ if(m.classList.contains("open")){closeItMenu();return}
+ m.classList.add("open");
+ setTimeout(function(){document.addEventListener("click",closeItMenu)},0);
+}
+function closeItMenu(){
+ var m=document.getElementById("itMenu");
+ if(m)m.classList.remove("open");
+ document.removeEventListener("click",closeItMenu);
+}
+function itMenuGo(kind){
+ closeItMenu();
+ if(kind==="places"){switchTab("places")}else{chTool(kind)}
+}
 /* ---------- next prayer banner ---------- */
 var PRAYERS=[["Fajr","晨礼","05:12"],["Dhuhr","晌礼","12:31"],["Asr","晡礼","15:42"],["Maghrib","昏礼","18:24"],["Isha","宵礼","19:36"]];
 function npNext(){
@@ -8440,7 +8500,7 @@ function itPanelOpen(){return document.getElementById("itPanel").classList.conta
   armed=false;
   panel.classList.remove("dragging");
   panel.style.transform="";
-  if(engaged&&dy>90)openITPanel();
+  if(engaged&&dy>90)openITPanel(true);
   engaged=false;
  }
  home.addEventListener("pointerdown",down);
