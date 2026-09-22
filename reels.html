@@ -317,41 +317,6 @@
   /* avatar / handle are tappable -> creator profile */
   .r-ava { cursor: pointer; }
   .vhandle { cursor: pointer; }
-
-  /* ---------- creator profile (full-screen light panel) ---------- */
-  .prof {
-    position: absolute; inset: 0; z-index: 60; background: var(--bg);
-    transform: translateX(6%); opacity: 0; pointer-events: none; transition: all .26s;
-    display: flex; flex-direction: column;
-  }
-  .prof.show { transform: none; opacity: 1; pointer-events: auto; }
-  .prof-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; border-bottom: 1px solid rgba(0,0,0,.06); background: var(--bg); flex: none; }
-  .prof-back { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; flex: none; }
-  .prof-top .prof-h { flex: 1; min-width: 0; text-align: center; font-size: 15px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; }
-  .prof-more { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-weight: 900; flex: none; }
-  .prof-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
-  .prof-hero { padding: 20px 16px 4px; text-align: center; }
-  .prof-ava {
-    width: 84px; height: 84px; border-radius: 50%; margin: 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 34px; font-weight: 800;
-    border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.12);
-  }
-  .prof-name { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 11px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-  .prof-bio { font-size: 12.5px; color: var(--text-2); line-height: 1.5; margin: 7px auto 0; max-width: 300px; }
-  .prof-stats { display: flex; justify-content: center; gap: 30px; margin-top: 16px; }
-  .prof-stats div { text-align: center; min-width: 58px; }
-  .prof-stats b { display: block; font-size: 16.5px; font-weight: 900; color: var(--text); }
-  .prof-stats span { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
-  .prof-acts { display: flex; justify-content: center; gap: 9px; margin: 16px 0 6px; }
-  .prof-fol { min-width: 122px; height: 40px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 13.5px; font-weight: 800; padding: 0 22px; }
-  .prof-fol.on { background: var(--surface); color: var(--text-2); border: 1px solid rgba(0,0,0,.1); }
-  .prof-msg { height: 40px; padding: 0 20px; border-radius: 20px; background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 800; border: 1px solid rgba(0,0,0,.1); }
-  .prof-sec { font-size: 11.5px; font-weight: 800; letter-spacing: .4px; color: var(--text-3); padding: 16px 16px 10px; }
-  .prof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 10px 26px; }
-  .pcell { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 9/14; background: var(--surface-2); cursor: pointer; }
-  .pcell img { width: 100%; height: 100%; object-fit: cover; }
-  .pcell .pc-play { position: absolute; left: 6px; bottom: 5px; color: #fff; font-size: 10px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.6); display: flex; align-items: center; gap: 3px; }
 </style>
 </head>
 <body>
@@ -394,18 +359,6 @@
         <div class="sr-chips" id="srChips"></div>
         <div id="srRes"></div>
       </div>
-    </div>
-
-    <!-- creator profile (opened from the avatar or the @handle) -->
-    <div class="prof" id="profView">
-      <div class="prof-top">
-        <button class="prof-back" onclick="closeProfile(event)" aria-label="Back">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-        </button>
-        <div class="prof-h" id="profHandle"></div>
-        <button class="prof-more" onclick="profMore(event)" aria-label="More">⋯</button>
-      </div>
-      <div class="prof-body" id="profBody"></div>
     </div>
 
     <!-- comments sheet -->
@@ -654,9 +607,7 @@
       gofy:'Browse For You', posted:'Posted to Feeds & My Hub', cmtok:'Comment posted',
       sndon:'Sound on', sndoff:'Sound off', fol:'Following @', unfol:'Unfollowed @',
       shareok:'Shared with ', postcap:'Sharing a Wahda Reels video: ', watch:'Reels',
-      videos:'Videos', followers:'Followers', following:'Following', likes:'Likes',
-      fwb:'Follow', fwing:'Following', message:'Message', vids:'Videos', km:'km',
-      msgdemo:'Demo: messaging lives in Chats' },
+      km:'km', noapp:'Open this page inside the Wahda app to see user profiles' },
     zh: { fy:'推荐', fw:'关注', hot:'热门', near:'附近', trend:'热门话题', cancel:'取消',
       srph:'搜索视频、创作者、话题', nores:'没有找到相关视频', comments:'条评论',
       ph:'说点什么…', post:'发送', share:'分享', via:'分享到 Wahda',
@@ -665,9 +616,7 @@
       gofy:'去看看推荐', posted:'已发布到 Feeds 与 My Hub', cmtok:'评论已发布',
       sndon:'已开启声音', sndoff:'已静音', fol:'已关注 @', unfol:'已取消关注 @',
       shareok:'已分享给 ', postcap:'分享一条 Wahda Reels 视频：', watch:'Reels',
-      videos:'视频', followers:'粉丝', following:'关注', likes:'获赞',
-      fwb:'关注', fwing:'已关注', message:'发消息', vids:'作品', km:'公里',
-      msgdemo:'演示版：消息入口在 Chats' },
+      km:'公里', noapp:'在 Wahda App 内打开以查看用户主页' },
   };
   const T = k => (L[rlang] && L[rlang][k]) || L.en[k] || k;
   function fmtN(n) {
@@ -746,7 +695,13 @@
         '<p>' + T('fwempty') + '</p><button onclick="pickFeed(\'fy\')">' + T('gofy') + '</button></div>';
   }
   function vidsFY() { return VIDS.slice(); }
-  function vidsFW() { return VIDS.filter(v => v.followed); }
+  /* Following is per creator, not per video: if any of a creator's videos is
+     followed the account follows that creator, and every one of their videos
+     carries that state (otherwise one card would show "+" while another of the
+     same creator shows "✓"). */
+  function creatorFollowed(h) { return VIDS.some(v => v.handle === h && v.followed); }
+  function setCreatorFollowed(h, on) { VIDS.forEach(v => { if (v.handle === h) v.followed = on; }); }
+  function vidsFW() { return VIDS.filter(v => creatorFollowed(v.handle)); }
   function vidsHot() { return VIDS.filter(v => v.hot).sort((a, b) => b.likes - a.likes); }
   function vidsNear() { return VIDS.filter(v => v.near).sort((a, b) => (a.dist || 99) - (b.dist || 99)); }
 
@@ -754,7 +709,7 @@
     document.querySelectorAll('.vcard[data-id="' + v.id + '"]').forEach(card => {
       card.classList.toggle('liked', !!v.liked);
       card.classList.toggle('faved', !!v.faved);
-      card.classList.toggle('followed', !!v.followed);
+      card.classList.toggle('followed', creatorFollowed(v.handle));
       const set = (sel, txt) => { const el = card.querySelector(sel); if (el) el.textContent = txt; };
       set('[data-lk]', fmtN(v.likes)); set('[data-cm]', fmtN(v.comments));
       set('[data-fv]', fmtN(v.favs)); set('[data-sh]', fmtN(v.shares));
@@ -880,9 +835,11 @@
   }
   function toggleFollow(e, handle) {
     if (e) e.stopPropagation();
-    const mine = VIDS.filter(v => v.handle === handle); if (!mine.length) return;
-    const to = !mine.some(v => v.followed);          /* creator-level: any followed = followed */
-    mine.forEach(v => { v.followed = to; paintCounts(v); });
+    if (!VIDS.some(v => v.handle === handle)) return;
+    const to = !creatorFollowed(handle);          /* creator-level: any followed = followed */
+    setCreatorFollowed(handle, to);
+    VIDS.forEach(paintCounts);                    /* every card of that creator, in every tab */
+    if (curTab === 'fw') { buildCards(pagers.fw, vidsFW()); refreshPlayState(); }
     toast((to ? T('fol') : T('unfol')) + handle);
   }
   function toggleCap(btn) {
@@ -1089,62 +1046,33 @@
     'habibi.grandpa':  { followers: 3140000, following: 8,   bio:{en:'82 years young, trying everything once 😂', zh:'82 岁的年轻心态，什么都试一次 😂'} },
     'rooftop.fc':      { followers: 894000,  following: 156, bio:{en:'Street football · Cairo rooftops ⚽', zh:'街头足球 · 开罗天台 ⚽'} },
   };
-  let profHandle = null;
+  /* ---------- creator profile ----------
+     Tapping an avatar or an @handle opens the very same Wahda user profile the
+     rest of the app already shows (the shell renders it), so a creator looks
+     identical everywhere. This page only forwards the identity — it does not
+     render a profile of its own. */
+  const LOC_ZH = {
+    'Cairo, Egypt': '开罗，埃及', 'Istanbul, T\u00fcrkiye': '伊斯坦布尔，土耳其',
+    'Madinah, Saudi Arabia': '麦地那，沙特阿拉伯', 'Riyadh, Saudi Arabia': '利雅得，沙特阿拉伯',
+    'Dubai, UAE': '迪拜，阿联酋', 'Amman, Jordan': '安曼，约旦', 'Wadi Rum, Jordan': '瓦迪拉姆，约旦',
+    'Casablanca, Morocco': '卡萨布兰卡，摩洛哥', 'Fez, Morocco': '非斯，摩洛哥',
+    'Nev\u015fehir, T\u00fcrkiye': '内夫谢希尔，土耳其', 'Kuala Lumpur, Malaysia': '吉隆坡，马来西亚',
+    'London, UK': '伦敦，英国', 'Dearborn, USA': '迪尔伯恩，美国'
+  };
   function openProfile(e, handle) {
     if (e) e.stopPropagation();
-    if (!CREATORS[handle]) return;
-    profHandle = handle;
-    renderProfile();
-    $('profView').classList.add('show');
-  }
-  function closeProfile(e) {
-    if (e) e.stopPropagation();
-    $('profView').classList.remove('show');
-    profHandle = null;
-  }
-  function profMore(e) { if (e) e.stopPropagation(); toast(rlang === 'zh' ? '演示版：更多操作' : 'Demo: more actions'); }
-  function profMsg(e) {
-    if (e) e.stopPropagation();
-    toast(T('msgdemo'));
-  }
-  function creatorsVideos(h) { return VIDS.filter(v => v.handle === h); }
-  function renderProfile() {
-    const vids = creatorsVideos(profHandle);
-    const v0 = vids[0] || VIDS[0];
-    const c = CREATORS[profHandle] || {};
-    const fol = vids.some(x => x.followed);
-    const totalLikes = vids.reduce((s, x) => s + x.likes, 0);
-    $('profHandle').innerHTML = '@' + esc(profHandle) + (v0.vf ? ICONS.vf : '');
-    $('profBody').innerHTML =
-      '<div class="prof-hero">' +
-        '<div class="prof-ava" style="background:' + v0.avaBg + '">' + profHandle.charAt(0).toUpperCase() + '</div>' +
-        '<div class="prof-name">' + esc(v0.name[rlang] || v0.name.en) + (v0.vf ? ICONS.vf : '') + '</div>' +
-        '<div class="prof-bio">' + esc((c.bio && (c.bio[rlang] || c.bio.en)) || '') + '</div>' +
-        '<div class="prof-stats">' +
-          '<div><b>' + fmtN(vids.length) + '</b><span>' + T('videos') + '</span></div>' +
-          '<div><b>' + fmtN(c.followers || 0) + '</b><span>' + T('followers') + '</span></div>' +
-          '<div><b>' + fmtN(c.following || 0) + '</b><span>' + T('following') + '</span></div>' +
-          '<div><b>' + fmtN(totalLikes) + '</b><span>' + T('likes') + '</span></div>' +
-        '</div>' +
-        '<div class="prof-acts">' +
-          '<button class="prof-fol' + (fol ? ' on' : '') + '" onclick="profFollow(event)">' + (fol ? T('fwing') : T('fwb')) + '</button>' +
-          '<button class="prof-msg" onclick="profMsg(event)">' + T('message') + '</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="prof-sec">' + T('vids') + ' · ' + vids.length + '</div>' +
-      '<div class="prof-grid">' + vids.map(v =>
-        '<div class="pcell" onclick="profGo(\'' + v.id + '\')">' +
-          '<img src="assets/' + v.img + '" alt="" loading="lazy">' +
-          '<div class="pc-play">▶ ' + fmtN(v.likes) + '</div></div>').join('') + '</div>';
-  }
-  function profFollow(e) {
-    toggleFollow(e, profHandle);
-    renderProfile();
-  }
-  function profGo(id) {
-    closeProfile();
-    if (curTab !== 'fy') pickFeed('fy');
-    jumpTo('fy', id, true);
+    const v = VIDS.filter(x => x.handle === handle)[0];
+    if (!v) return;
+    if (!EMBEDDED) { toast(T('noapp')); return; }      /* standalone review: no shell around us */
+    const c = CREATORS[handle] || {};
+    try {
+      window.parent.postMessage({
+        wahdaMsg: 'profile',
+        name: v.name,                                   /* bilingual: the shell renders it in its own language */
+        bio: c.bio || { en: 'Wahda creator', zh: 'Wahda 创作者' },
+        loc: { en: v.loc, zh: LOC_ZH[v.loc] || v.loc }
+      }, '*');
+    } catch (err) {}
   }
 
   /* ---------- search ---------- */
@@ -1219,10 +1147,7 @@
     const d = e.data || {};
     if (d.wahdaMsg === 'ctx') {
       guestMode = !!d.guest;
-      if (d.lang && d.lang !== rlang) {
-        rlang = d.lang; paintAll();
-        if (profHandle && $('profView').classList.contains('show')) renderProfile();
-      }
+      if (d.lang && d.lang !== rlang) { rlang = d.lang; paintAll(); }
       return;
     }
     if (d.wahdaMsg === 'friends') {

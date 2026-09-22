@@ -4352,9 +4352,13 @@ function findFriendIdx(name){
  return -1;
 }
 function openProfileByName(name,bio,loc){
- if(!isGuest){var idx=findFriendIdx(name);if(idx>-1){openFProfile(idx);return}}
+ /* name may be a bilingual {en,zh} record (a creator handed over by Reels):
+    the account keeps its canonical string, the page renders the live language */
+ var nLoc=(name&&typeof name==="object")?name:null;
+ var nN=txt(name)||String(name||"");
+ if(!isGuest){var idx=findFriendIdx(nN);if(idx>-1){openFProfile(idx);return}}
  raisePage("pg-fprofile");
- fpGuest={n:name,f:Math.max(name.replace(/[^A-Za-z]/g,"").length*7%160+14,14),
+ fpGuest={n:nN,nLoc:nLoc,f:Math.max(nN.replace(/[^A-Za-z]/g,"").length*7%160+14,14),
   bio:bio||{en:"Wahda community member",zh:"Wahda 社区成员"},loc:loc||{en:"Riyadh, Saudi Arabia",zh:"利雅得，沙特阿拉伯"}};
  fpRequested=false;
  renderFProfile();
@@ -4499,7 +4503,7 @@ function renderFProfile(){
  document.getElementById("fpBody").innerHTML=
   '<div class="fp-top"><div class="fp-av">'+f.n.charAt(0)+'</div>'
   +'<div class="fp-id"><div class="fp-acct">'+person+t("fp_member")+'</div>'
-  +'<div class="fp-name">'+f.n+'</div>'
+  +'<div class="fp-name">'+txt(f.nLoc||f.n)+'</div>'
   +'<div class="fp-stats"><div class="fp-stat"><b>'+fmtN(f.f*50)+'</b> <span>'+t("fp_fl")+'</span></div>'
   +'<div class="fp-stat"><b>'+fmtN(f.f*9)+'</b> <span>'+t("fp_fg")+'</span></div></div></div></div>'
   +'<div class="fp-bio">'+txt(f.bio)+' <span class="fp-more">'+t("fp_more")+'</span></div>'
@@ -8863,6 +8867,11 @@ window.addEventListener("message",function(e){
   case "post":
    if(isGuest){bxGateReels("share",d.drama&&d.drama.t);bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:false});break}
    bxReply({wahdaMsg:"post-ack",rid:d.rid,ok:bxCreateDramaPost(bxDrama(d.drama),d.caption)});break;
+  case "profile":
+   /* a creator tapped in Reels opens the same Wahda user profile the rest of
+      the app uses, so the page stays identical everywhere */
+   if(d.name)openProfileByName(d.name,d.bio,d.loc);
+   break;
  }
 });
 
