@@ -2022,6 +2022,11 @@
       const hit = rankingPool.filter(function (x) { return x.t === d.title })[0];
       if (hit) openPlayer(hit.t);
       return;
+    } else if (d.wahdaMsg === 'subpay-done') {
+      /* the shell's Wahda Pay gateway charged the wallet — show the receipt */
+      const p = planOf((d.plan && d.plan.id) || curPlan) || planOf(curPlan);
+      if (p) renderPremiumActive(p);
+      return;
     } else if (d.wahdaMsg === 'resumeShare') {
       /* the shell sent the guest through sign-up; pick the share up where it stopped */
       if (curDrama) openShare({ stopPropagation: function () {} });
@@ -2203,8 +2208,22 @@
     document.getElementById('subView').classList.remove('show');
   }
 
+  /* Subscribe → the host shell's Wahda Pay gateway (identical flow to paid events
+     and mini-app purchases: amount due in Wahda Coin → method → PIN → success).
+     The receipt is rendered once the shell confirms the payment went through. */
   function subscribe() {
     const p = planOf(curPlan);
+    if (EMBEDDED) {
+      try {
+        window.parent.postMessage({ wahdaMsg:'subpay',
+          plan:{ id:p.id, name:p.name, price:Number(p.price), per:p.per, note:p.note } }, '*');
+      } catch (e) {}
+      return;
+    }
+    renderPremiumActive(p);            /* opened outside the app: no wallet to charge */
+  }
+
+  function renderPremiumActive(p) {
     document.getElementById('subBody').innerHTML = `
       <div class="sub-done show">
         <div class="tick">
@@ -2215,7 +2234,7 @@
         <div class="sub-receipt">
           <div class="rc-row"><span>Plan</span><b>Wahda Premium · ${p.name}</b></div>
           <div class="rc-row"><span>Billing cycle</span><b>${p.per.replace('/', '')}</b></div>
-          <div class="rc-row"><span>Payment method</span><b>Wahda Pay</b></div>
+          <div class="rc-row"><span>Payment method</span><b>Wahda Pay · Wahda Coin</b></div>
           <div class="rc-row total"><span>Total today</span><b>$${p.price} USD</b></div>
         </div>
         <button class="sub-ghost" onclick="closeSub()">Back to Reels</button>
