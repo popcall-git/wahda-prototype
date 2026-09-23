@@ -136,6 +136,10 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 19px; font-weight: 800; color: #fff;
   }
+  .r-ava-c .ava-img, .cmt-ava .ava-img {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+    object-position: center 28%; display: block;
+  }
   .r-follow {
     position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%);
     width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff;
@@ -698,6 +702,11 @@
       likes:74300, comments:1180, favs:8900, shares:4120, followed:true },
   ];
   const TAG_POOL = ['halalfood','travel','quran','modestwear','cats','dubai','calligraphy','homedecor'];
+  /* AI-generated portrait avatars for recurring creators (handle -> assets/avatars/<key>.jpg) */
+  const RAVA = { 'chef.amina':'aisha', 'wanderwithzayd':'zayd', 'qari.yusuf':'yusuf',
+    'stylebynoor':'nour', 'coach.bilal':'bilal', 'nile.diaries':'layla', 'lantern.nour':'nour',
+    'khan.walks':'kareem', 'habibi.grandpa':'omar', 'you':'ahmad' };
+  function ravaImg(h){ return RAVA[h] ? '<img class="ava-img" src="' + assetUrl('avatars/' + RAVA[h] + '.jpg') + '" alt="" loading="lazy">' : ''; }
   const CMT_POOL = [
     { h:'recipe.sara',   t:{en:'Made this twice this week already 😍',zh:'这周已经做了两次了 😍'}, likes:842, time:{en:'2h',zh:'2小时'} },
     { h:'omar.k',        t:{en:'The sound of the grill alone deserves an award',zh:'光是烤架的声音就该获奖'}, likes:311, time:{en:'3h',zh:'3小时'} },
@@ -799,7 +808,7 @@
         '<div class="vloc">' + ICONS.pin + esc(v.loc) + chips + '</div>' +
       '</div>' +
       '<div class="vright">' +
-        '<div class="r-ava" onclick="openProfile(event,\'' + v.handle + '\')"><span class="r-ava-c" style="background:' + v.avaBg + '">' + v.handle.charAt(0).toUpperCase() + '</span>' +
+        '<div class="r-ava" onclick="openProfile(event,\'' + v.handle + '\')"><span class="r-ava-c" style="background:' + v.avaBg + '">' + (ravaImg(v.handle) || v.handle.charAt(0).toUpperCase()) + '</span>' +
           '<button class="r-follow" onclick="toggleFollow(event,\'' + v.handle + '\')" aria-label="Follow"><span>+</span></button></div>' +
         '<button class="r-act lik" onclick="toggleLike(event,\'' + v.id + '\')"><span data-ic>' + ICONS.heart + '</span><b data-lk></b></button>' +
         '<button class="r-act" onclick="openComments(event,\'' + v.id + '\')">' + ICONS.cmt + '<b data-cm></b></button>' +
@@ -1036,7 +1045,7 @@
     $('cmtCount').textContent = fmtN(v.comments) + ' ' + T('comments');
     $('cmtList').innerHTML = v.cmts.map((c, i) =>
       '<div class="cmt-row2">' +
-        '<span class="cmt-ava" style="background:' + avaColor(c.h) + '">' + c.h.charAt(0).toUpperCase() + '</span>' +
+        '<span class="cmt-ava" style="background:' + avaColor(c.h) + '">' + (ravaImg(c.h) || c.h.charAt(0).toUpperCase()) + '</span>' +
         '<div class="cmt-body"><div class="cmt-name">@' + esc(c.h) + '</div>' +
           '<div class="cmt-text">' + esc(c.t[rlang] || c.t.en) + '</div>' +
           '<div class="cmt-meta"><span>' + (c.time[rlang] || c.time.en) + '</span>' +

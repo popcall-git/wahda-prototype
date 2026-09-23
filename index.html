@@ -459,7 +459,18 @@
   .fr-box{flex:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--line,#E5E2DC);display:flex;align-items:center;justify-content:center;color:#fff;margin-top:1px;transition:.15s}
   .fr-box.on{background:var(--brand,#0E7C66);border-color:var(--brand,#0E7C66)}
   .feed-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .feed-avatar{width:38px;height:38px;border-radius:50%;background:var(--brand-soft,#E3F2EE);color:var(--brand-dark,#0A5D4E);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none}
+  .feed-avatar{width:38px;height:38px;border-radius:50%;background:var(--brand-soft,#E3F2EE);color:var(--brand-dark,#0A5D4E);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;overflow:hidden}
+  .ava-img{width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:center 28%;display:block}
+  /* tap-through chat avatars */
+  .ch-av{cursor:pointer}
+  /* profile remark line */
+  .fp-remark{margin-top:3px;font-size:12px;font-weight:600;color:var(--ink-3,#9B9993)}
+  /* full-screen avatar viewer */
+  .ava-viewer{position:fixed;inset:0;z-index:9999;background:rgba(8,8,10,.92);display:none;align-items:center;justify-content:center;cursor:zoom-out;-webkit-tap-highlight-color:transparent}
+  .ava-viewer.show{display:flex}
+  .ava-viewer img{max-width:86vw;max-height:70vh;border-radius:20px;object-fit:cover;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+  .ava-viewer .ava-viewer-name{position:absolute;bottom:48px;left:0;right:0;text-align:center;color:#fff;font-size:15px;font-weight:700}
+  .ava-viewer .ava-viewer-letter{width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,#0E7C66,#0a5c4d);color:#fff;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:800}
   .feed-name{font-size:14px;font-weight:600}
   .feed-time{font-size:12px;color:var(--ink-3,#9B9993)}
   .feed-text{font-size:14px;line-height:1.55;color:var(--ink,#1C1B18)}
@@ -626,6 +637,12 @@
   .bub-drama-thumb{width:56px;height:74px;flex:none;border-radius:9px;overflow:hidden;position:relative;
    background:linear-gradient(160deg,#0d9488,#134e4a);display:flex;align-items:center;justify-content:center;font-size:24px}
   .bub-drama-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bub-card{display:flex;align-items:center;gap:10px;min-width:208px;padding:10px 12px;cursor:pointer}
+  .bub-card-av{width:42px;height:42px;border-radius:11px;overflow:hidden;flex:none;background:var(--brand-soft,#E3F2EE);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--brand,#0E7C66);font-size:17px}
+  .bub-card-av .ava-img{border-radius:0;object-position:center 28%}
+  .bub-card-n{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bub-card-s{font-size:11px;color:var(--ink-3,#9B9993);margin-top:2px}
+  .bub-card-arrow{margin-left:auto;color:var(--ink-3,#9B9993);font-size:20px;line-height:1;flex:none}
   .bub-drama-mid{min-width:0;flex:1}
   .bub-drama-title{font-size:13.5px;font-weight:800;color:var(--ink,#1C1B18);line-height:1.3;
    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -2390,7 +2407,7 @@
       <div class="nav">
         <button class="back-btn" onclick="closeFProfile()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav-title" data-i18n="fp_title">Profile</div>
-        <button class="icon-btn" style="margin-left:auto" onclick="toast(t('fp_more_toast'))" aria-label="More"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg></button>
+        <button class="icon-btn" style="margin-left:auto" onclick="openFpMenu()" aria-label="More"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg></button>
       </div>
       <div class="scroll" id="fpBody" style="padding-top:0"></div>
     </section>
@@ -2766,6 +2783,30 @@
       <button class="sheet-item" onclick="pickAvatar('gallery')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="9.5" cy="9.5" r="1.8" stroke="currentColor" stroke-width="1.7"/><path d="M5 17l4.5-4.5 3.5 3.5 2.5-2.5L19 16" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-i18n="av_gallery">Choose from gallery</span></button>
       <button class="sheet-item" onclick="closeSheets()" style="color:var(--danger,#D64545)" data-i18n="av_cancel">Cancel</button>
     </div>
+    <div class="sheet" id="sheetFpMenu">
+      <div class="sheet-handle"></div>
+      <button class="sheet-item" onclick="closeSheets();openSheet('sheetFpRemark')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span data-i18n="fp_menu_remark">Set remark name</span></button>
+      <button class="sheet-item" onclick="closeSheets();fpCardShare()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="15.5" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg><span data-i18n="fp_menu_card">Share contact card</span></button>
+      <button class="sheet-item" onclick="fpBlock()" style="color:var(--danger,#D64545)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M6 6l12 12" stroke="currentColor" stroke-width="1.7"/></svg><span data-i18n="fp_menu_block">Block</span></button>
+      <button class="sheet-item" onclick="fpReport()" style="color:var(--danger,#D64545)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 21V4m0 1h11l-2.5 3.5L17 12H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="fp_menu_report">Report</span></button>
+      <button class="sheet-item" onclick="closeSheets()" data-i18n="av_cancel">Cancel</button>
+    </div>
+    <div class="sheet" id="sheetFpRemark">
+      <div class="sheet-handle"></div>
+      <div style="font-weight:700;font-size:15px;padding:2px 8px 10px" data-i18n="fp_remark_title">Set remark name</div>
+      <input class="input" id="fpRemarkIn" style="width:100%" maxlength="24" data-i18n-ph="fp_remark_ph" placeholder="Remark name">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-secondary" style="flex:1" onclick="closeSheets()" data-i18n="av_cancel">Cancel</button>
+        <button class="btn btn-primary" style="flex:1" onclick="fpSaveRemark()" data-i18n="fp_remark_save">Save</button>
+      </div>
+    </div>
+    <div class="sheet" id="sheetFpShare">
+      <div class="sheet-handle"></div>
+      <div style="font-weight:700;font-size:15px;padding:2px 8px 10px" data-i18n="fp_card_title">Share contact card to</div>
+      <div id="fpCardList" style="max-height:46vh;overflow-y:auto"></div>
+      <button class="sheet-item" onclick="closeSheets()" data-i18n="av_cancel">Cancel</button>
+    </div>
+    <div class="ava-viewer" id="avaViewer" onclick="closeAvaViewer()"><div class="ava-viewer-letter" id="avaViewerLetter"></div><img id="avaViewerImg" alt=""><div class="ava-viewer-name" id="avaViewerName"></div></div>
     <div class="sheet" id="sheetFilter">
       <div class="sheet-handle"></div>
       <div style="font-weight:600;font-size:15px;padding:2px 8px 2px" data-i18n="fl_title">Filter posts</div>
@@ -3160,7 +3201,7 @@ en:{
  acc_add:"Add account", acc_add_toast:"Add account — next iteration.",
  ct_title:"Contacts",
  fp_title:"Profile", fp_member:"Personal Account", fp_fl:"followers", fp_fg:"following", fp_more:"more", flist_title:"Followers & Followings", flist_fg:"Followings",
- fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reels:"Reels", fp_tab_reviews:"Reviews", fp_reels_empty:"No reels yet", fp_more_toast:"More actions — next iteration.", fp_up_hd:"Upcoming Activities", fp_up_remind:"Remind me", fp_up_reminded:"✓ Reminded", fp_up_toast:"Reminder saved to your calendar", fp_up_min:"min", fp_up_livesoon:"Live soon",
+ fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reels:"Reels", fp_tab_reviews:"Reviews", fp_reels_empty:"No reels yet", fp_more_toast:"More actions — next iteration.", fp_menu_remark:"Set remark name", fp_menu_card:"Share contact card", fp_menu_block:"Block", fp_menu_report:"Report", fp_remark_title:"Set remark name", fp_remark_ph:"Enter a remark name", fp_remark_save:"Save", fp_remark_label:"Remark:", fp_remark_ok:"Remark name updated", fp_card_title:"Share contact card to", fp_card_ok:"Contact card sent to {0}",ch_card_sub:"Contact card", fp_block_ok:"Added to your blocklist", fp_report_ok:"Report submitted — thank you", fp_up_hd:"Upcoming Activities", fp_up_remind:"Remind me", fp_up_reminded:"✓ Reminded", fp_up_toast:"Reminder saved to your calendar", fp_up_min:"min", fp_up_livesoon:"Live soon",
  fp_p1:"Jumu'ah carpool list for this Friday is up — reply to join!", fp_p1t:"2 d ago",
  fp_p2:"Alhamdulillah, our iftar drive served 120 families this week.", fp_p2t:"5 d ago",
  fp_rv1t:"Al-Hakim Mosque", fp_rv1c:"Mosque", fp_rv1d:"9 Months ago",
@@ -3395,7 +3436,7 @@ zh:{
  acc_add:"添加账号", acc_add_toast:"添加账号——下一轮迭代补充。",
  ct_title:"联系人",
  fp_title:"个人主页", fp_member:"个人账号", fp_fl:"粉丝", fp_fg:"关注中", fp_more:"展开", flist_title:"粉丝与关注", flist_fg:"关注中",
- fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reels:"Reels", fp_tab_reviews:"评价", fp_reels_empty:"还没有发布 Reels", fp_more_toast:"更多操作——下一轮迭代补充。", fp_up_hd:"直播预告", fp_up_remind:"提醒我", fp_up_reminded:"✓ 已设提醒", fp_up_toast:"已写入日历提醒", fp_up_min:"分钟", fp_up_livesoon:"即将开播",
+ fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reels:"Reels", fp_tab_reviews:"评价", fp_reels_empty:"还没有发布 Reels", fp_more_toast:"更多操作——下一轮迭代补充。", fp_menu_remark:"设置备注名", fp_menu_card:"分享名片给好友", fp_menu_block:"加入黑名单", fp_menu_report:"投诉", fp_remark_title:"设置备注名", fp_remark_ph:"输入备注名", fp_remark_save:"保存", fp_remark_label:"备注名：", fp_remark_ok:"备注名已更新", fp_card_title:"分享名片给", fp_card_ok:"名片已发送给 {0}",ch_card_sub:"个人名片", fp_block_ok:"已加入黑名单", fp_report_ok:"投诉已提交，感谢反馈", fp_up_hd:"直播预告", fp_up_remind:"提醒我", fp_up_reminded:"✓ 已设提醒", fp_up_toast:"已写入日历提醒", fp_up_min:"分钟", fp_up_livesoon:"即将开播",
  fp_p1:"周五主麻拼车表更新了——回复即可参加！", fp_p1t:"2 天前",
  fp_p2:"感谢真主，我们这周的开饭公益送餐服务了 120 户家庭。", fp_p2t:"5 天前",
  fp_rv1t:"Al-Hakim 清真寺", fp_rv1c:"清真寺", fp_rv1d:"9 个月前",
@@ -3503,7 +3544,7 @@ function applyLang(){
  if(document.getElementById("sheetGroupCat").classList.contains("show"))renderGroupCat()
  refreshMsgBadge();
  if(homeEntered)renderHome();
- if(postOpenIdx>-1){document.getElementById("pdMe").textContent=avatarInitial;renderPostDetail(FEEDS[postOpenIdx]);
+ if(postOpenIdx>-1){document.getElementById("pdMe").innerHTML=meAva();renderPostDetail(FEEDS[postOpenIdx]);
   if(document.getElementById("pg-comments").classList.contains("active"))renderComments(FEEDS[postOpenIdx])}
  if(document.getElementById("plHead").style.display==="flex")renderPlaces();
  renderPlCats();
@@ -3612,7 +3653,7 @@ function renderReco(){
  h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_creators")+'</span><span class="rc-sec-d">'+t("rc_creators_d")+'</span></div><div class="rc-list">';
  RC_CREATORS.forEach(function(c,i){
   h+='<button class="rc-card" onclick="recoOpenCreator('+i+')">'
-   +'<span class="rc-av" style="background:'+c.g+'">'+c.ic+'</span>'
+   +'<span class="rc-av" style="background:'+c.g+'">'+avaI(c.fn)+'</span>'
    +'<span style="flex:1;min-width:0"><span class="rc-n">'+txt(c.n)+'</span><span class="rc-d" style="display:block">'+txt(c.d)+'</span></span>'
    +'<span class="rc-meta">'+c.meta+'</span></button>';
  });
@@ -3928,10 +3969,18 @@ function verifyOtp(){
 
 /* ---------- profile ---------- */
 var avatarInitial="A";
+/* AI-generated portrait avatars for the demo community (name -> assets/avatars/<key>.jpg);
+   anyone missing from the map falls back to the letter tile */
+var AVA={"Aisha K.":"aisha","Omar F.":"omar","Layla M.":"layla","Yusuf I.":"yusuf","Amira K.":"amira","Bilal R.":"bilal","Hafsa W.":"hafsa","Maryam S.":"maryam","Zayd H.":"zayd","Sara D.":"sara","Kareem A.":"kareem","Nour S.":"nour","Imam Yasin":"imam","Fatima Z.":"fatima","Ahmad Rahman":"ahmad","Nadia T.":"nadia","Imran Q.":"imran","Rania B.":"rania","Tariq J.":"tariq","Brooklyn Simmons":"brooklyn","Sheikh Yusuf Al-Rashid":"sheikh","Ust. Maryam Haddad":"maryamh","Coach Bilal Rahman":"coach"};
+function avaKey(n){return AVA[txt(n)||String(n||"")]||null}
+function avaPath(a){var p="avatars/"+a+".jpg";return (typeof __ASSET==="function")?__ASSET(p):"assets/"+p}
+function grpImgPath(p){return (typeof __ASSET==="function")?__ASSET(p):"assets/"+p}
+function avaI(n){var a=avaKey(n);return a?'<img class="ava-img" src="'+avaPath(a)+'" alt="" loading="lazy">':String(txt(n)||n||"?").charAt(0).toUpperCase()}
+function meAva(){return curAcct===0?'<img class="ava-img" src="'+avaPath("ahmad")+'" alt="">':avatarInitial}
 function pickAvatar(src){
  closeSheets();
  var btn=document.getElementById("avatarBtn");
- btn.classList.add("has-photo");btn.textContent=avatarInitial;
+ btn.classList.add("has-photo");btn.innerHTML=meAva();
  toast(t("av_set"));
 }
 function togglePwd(id,btn){
@@ -3967,7 +4016,7 @@ function saveProfile(){
 var MSGS=[
  {n:"Aisha K.",ini:"A",type:"dm",tm:{en:"09:41",zh:"09:41"},unread:2,
   pv:{en:"Thanks for the ride to the mosque today!",zh:"今天谢谢你载我去清真寺！"}},
- {n:{en:"Ummah KC · Group",zh:"Ummah KC · 群聊"},ini:"U",type:"group",key:"ummahKC",meta:"128",mtotal:128,owner:"Omar F.",admins:["Aisha K."],
+ {n:{en:"Ummah KC · Group",zh:"Ummah KC · 群聊"},ini:"U",type:"group",key:"ummahKC",gimg:"posts/p_halaqah.jpg",meta:"128",mtotal:128,owner:"Omar F.",admins:["Aisha K."],
   cat:"gcat_4",vis:"public",req:false,
   desc:{en:"Community coordination for carpool, Jumu'ah and local events.",zh:"社区协调群：拼车、主麻与本地活动信息。"},
   ann:{en:"Jumu'ah carpool list is updated every Thursday at 9pm.",zh:"主麻拼车表每周四晚 9 点更新。"},
@@ -3980,7 +4029,7 @@ var MSGS=[
    {dir:"out",type:"text",tx:{en:"Count me in for the carpool, jazakAllah khair.",zh:"拼车算我一个，求主回赐你们。"}},
    {dir:"in",type:"photo",mb:"Hafsa W."}
   ]},
- {n:{en:"Quran Study Circle",zh:"古兰学习圈"},ini:"Q",type:"group",key:"quran",meta:"64",mtotal:64,
+ {n:{en:"Quran Study Circle",zh:"古兰学习圈"},ini:"Q",type:"group",key:"quran",gimg:"groups/g_quran.jpg",meta:"64",mtotal:64,
   owner:"Layla M.",admins:["Amira K."],cat:"gcat_1",vis:"public",req:true,
   desc:{en:"Weekly tajweed and tafsir circle — recitation practice, tafsir notes and class recordings.",zh:"每周 Tajweed 与经注学习圈——诵读练习、经注笔记与课堂录音。"},
   ann:{en:"This week's session moves to Thursday 8pm — same room.",zh:"本周课程改到周四晚 8 点——同一间教室。"},
@@ -4001,7 +4050,7 @@ var MSGS=[
   pv:{en:"Your account is now protected with two-step verification.",zh:"你的账号已开启两步验证保护。"}},
  {n:"Omar F.",ini:"O",type:"dm",tm:{en:"Yesterday",zh:"昨天"},unread:0,
   pv:{en:"Sure, see you at iftar.",zh:"好的，开饭时见。"}},
- {n:{en:"Iftar Volunteers",zh:"开饭志愿者群"},ini:"I",type:"group",key:"iftar",meta:"24",mtotal:24,owner:"Aisha K.",admins:["Layla M."],
+ {n:{en:"Iftar Volunteers",zh:"开饭志愿者群"},ini:"I",type:"group",key:"iftar",gimg:"groups/g_iftar.jpg",meta:"24",mtotal:24,owner:"Aisha K.",admins:["Layla M."],
   cat:"gcat_7",vis:"private",req:true,muted:true,
   desc:{en:"Volunteer roster for the weekly community iftar.",zh:"每周社区开饭的志愿者排班群。"},
   ann:{en:"Friday iftar setup starts at 4pm at the community hall.",zh:"周五开饭布置 16:00 在社区大厅开始。"},
@@ -4014,7 +4063,7 @@ var MSGS=[
    {dir:"out",type:"text",tx:{en:"I'll be there at 4pm to help with the tables.",zh:"我 4 点到，帮忙摆桌。"}},
    {dir:"in",type:"text",mb:"Bilal R.",tx:{en:"Bringing disposable plates and cups.",zh:"我带一次性盘子和杯子。"}}
   ]},
- {n:{en:"Hifz Buddy Circle",zh:"背诵伙伴圈"},ini:"H",type:"group",key:"hifz",meta:"16",mtotal:16,
+ {n:{en:"Hifz Buddy Circle",zh:"背诵伙伴圈"},ini:"H",type:"group",key:"hifz",gimg:"groups/g_hifz.jpg",meta:"16",mtotal:16,
   owner:"Hafsa W.",admins:["Sara D."],cat:"gcat_8",vis:"private",req:true,saved:true,
   desc:{en:"Accountability partners for hifz — daily ayah logs and a weekly check-in.",zh:"背诵互助圈——每日经文打卡与每周互检。"},
   ann:{en:"Weekly check-in every Sunday 9pm — post your ayah count.",zh:"每周互检：周日 21:00，请报本周背诵节数。"},
@@ -4029,7 +4078,7 @@ var MSGS=[
    {dir:"in",type:"text",mb:"Yusuf I.",tx:{en:"Any tips for revising the last five surahs before the check-in?",zh:"互检前复习最后五章有什么好方法吗？"}},
    {dir:"in",type:"text",mb:"Hafsa W.",tx:{en:"Read them aloud in pairs — it sticks much faster that way.",zh:"两人一组出声对读——记得快得多。"}}
   ]},
- {n:{en:"Noor Youth Collective",zh:"努尔青年社"},ini:"N",type:"group",key:"youth",meta:"214",mtotal:214,
+ {n:{en:"Noor Youth Collective",zh:"努尔青年社"},ini:"N",type:"group",key:"youth",gimg:"groups/g_youth.jpg",meta:"214",mtotal:214,
   owner:"Zayd H.",admins:["Omar F."],cat:"gcat_3",vis:"public",req:false,
   desc:{en:"Sports, hikes and mentorship for young Muslims — a new activity every weekend.",zh:"青年体育、徒步与导师计划——每个周末都有新活动。"},
   ann:{en:"Friday football moved to 7pm this week — bring water.",zh:"本周周五足球改到 19:00——记得带水。"},
@@ -4043,7 +4092,7 @@ var MSGS=[
    {dir:"in",type:"text",mb:"Bilal R.",tx:{en:"Of course, the more the better. Meeting point is the masjid car park at 6:30.",zh:"当然，人越多越好。6:30 在清真寺停车场集合。"}},
    {dir:"in",type:"file",mb:"Zayd H."}
   ]},
- {n:{en:"Sisters Halaqa Circle",zh:"姐妹学习圈"},ini:"S",type:"group",key:"sisters",meta:"89",mtotal:89,
+ {n:{en:"Sisters Halaqa Circle",zh:"姐妹学习圈"},ini:"S",type:"group",key:"sisters",gimg:"groups/g_sisters.jpg",meta:"89",mtotal:89,
   owner:"Amira K.",admins:["Aisha K."],cat:"gcat_1",vis:"private",req:true,
   desc:{en:"A private sisters-only circle for tafsir, fiqh and honest conversation.",zh:"仅限姐妹的私密学习圈——经注、教法与真诚交流。"},
   ann:{en:"Tafsir session on Surah Al-Kahf this Thursday after Maghrib.",zh:"本周四昏礼后讲解《山洞章》。"},
@@ -4056,7 +4105,7 @@ var MSGS=[
    {dir:"out",type:"text",tx:{en:"I can record the audio and share it here afterwards.",zh:"我可以录音，之后分享到群里。"}},
    {dir:"in",type:"text",mb:"Aisha K.",tx:{en:"That would be a huge help, jazakillah khairan.",zh:"那太有帮助了，求主回赐你。"}}
   ]},
- {n:{en:"Muslim Founders Network",zh:"穆斯林创业者网络"},ini:"F",type:"group",key:"founders",meta:"143",mtotal:143,
+ {n:{en:"Muslim Founders Network",zh:"穆斯林创业者网络"},ini:"F",type:"group",key:"founders",gimg:"posts/p_souq.jpg",meta:"143",mtotal:143,
   owner:"Bilal R.",admins:["Yusuf I."],cat:"gcat_6",vis:"private",req:true,
   desc:{en:"Founders, freelancers and operators building halal businesses — monthly pitch nights.",zh:"创业者与自由职业者社区——每月一次路演夜。"},
   ann:{en:"Pitch night sign-ups close Sunday — 5 slots left.",zh:"路演夜报名周日截止——还剩 5 个名额。"},
@@ -4073,7 +4122,7 @@ var MSGS=[
   pv:{en:"The recitation circle starts at 7, right?",zh:"诵经circle是 7 点开始对吧？"}},
  {n:{en:"Masjid An-Noor",zh:"An-Noor 清真寺"},ini:"M",type:"official",tm:{en:"Tue",zh:"周二"},unread:0,
   pv:{en:"Friday khutbah schedule updated.",zh:"周五呼图白时间表已更新。"}},
- {n:{en:"Halaqat Al-Noor",zh:"Halaqat Al-Noor"},ini:"H",type:"group",key:"halaqat",meta:"56",mtotal:56,
+ {n:{en:"Halaqat Al-Noor",zh:"Halaqat Al-Noor"},ini:"H",type:"group",key:"halaqat",gimg:"posts/p_tafsir.jpg",meta:"56",mtotal:56,
   owner:"Amira K.",admins:["Maryam S."],cat:"gcat_4",vis:"public",req:false,muted:true,
   desc:{en:"Neighbourhood halaqa programme at Masjid An-Noor — weekly circles, youth classes and study material.",zh:"An-Noor 清真寺的社区学习项目——每周学习圈、青年课堂与学习资料。"},
   ann:{en:"Ramadan prep circle starts next week — sign up at the masjid desk.",zh:"斋月准备学习圈下周开始——请在清真寺服务台报名。"},
@@ -4098,7 +4147,7 @@ function msgAvatarHtml(m,lv){
  var extra=m.muted?'<span class="muted-ic"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 8l5 8M22 8l-5 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>':"";
  var pst=(m.ph!=null&&typeof COVERS!=="undefined"&&COVERS[m.ph])?' style="background:'+COVERS[m.ph]+';color:#fff"':"";
  var isGrp=(m.type==="group")||!!m.members;
- return '<div class="msg-avatar'+(m.type==="official"?" official":"")+(isGrp?" av-g":"")+(lv?" live":"")+'"'+pst+'>'+(m.type==="official"?'<div class="crescent" style="transform:scale(.5);width:22px;height:22px"><div class="star" style="right:-10px"></div></div>':m.ini)+extra+'</div>';
+ return '<div class="msg-avatar'+(m.type==="official"?" official":"")+(isGrp?" av-g":"")+(lv?" live":"")+'"'+pst+'>'+(m.type==="official"?'<div class="crescent" style="transform:scale(.5);width:22px;height:22px"><div class="star" style="right:-10px"></div></div>':(isGrp?(m.gimg?'<img class="ava-img" src="'+grpImgPath(m.gimg)+'" alt="" loading="lazy">':m.ini):(m.n?avaI(m.n):m.ini)))+extra+'</div>';
 }
 /* friend currently on air, looked up from LIVE_ROOMS (declared later in the file) */
 function liveOf(name){
@@ -4158,7 +4207,7 @@ function applyChatHead(){
 function openChatPeer(m){
  raisePage("pg-chat");
  chatPeer=m;chatList=dmThread(m);
- document.getElementById("chatName").textContent=txt(m.n);
+ document.getElementById("chatName").textContent=fpRemarkOf(m.n)||txt(m.n);
  applyChatHead();applyChatTheme();
  if(!chatInit){renderEmojiGrid();renderPlusGrid();chatInit=true}
  closeChatPanels();
@@ -4223,9 +4272,16 @@ function renderChat(){
 function chRow(m,idx){
  var av;
  if(m.dir==="out")av='<div class="ch-av me">'+avatarInitial+'</div>';
- else if(m.mb)av='<div class="ch-av">'+m.mb.charAt(0)+'</div>';
- else av='<div class="ch-av">'+(chatPeer?chatPeer.ini:"A")+'</div>';
+ else if(m.mb)av='<div class="ch-av" onclick="event.stopPropagation();chAvTap('+idx+')">'+avaI(m.mb)+'</div>';
+ else av='<div class="ch-av" onclick="event.stopPropagation();chAvTap('+idx+')">'+(chatPeer?(chatPeer.members?(chatPeer.gimg?'<img class="ava-img" src="'+grpImgPath(chatPeer.gimg)+'" alt="">':chatPeer.ini):(chatPeer.n?avaI(chatPeer.n):chatPeer.ini)):"A")+'</div>';
  return '<div class="ch-row '+m.dir+'" data-mi="'+idx+'">'+av+bubHtml(m,idx)+'</div>';
+}
+/* tap a chat avatar → open that person's profile */
+function chAvTap(idx){
+ var m=chatList&&chatList[idx];if(!m)return;
+ var nm=m.mb||((chatPeer&&!chatPeer.members)?txt(chatPeer.n):null);
+ if(!nm)return;
+ openProfileByName(nm);
 }
 function bubHtml(m,idx){
  var d=m.dir;
@@ -4237,6 +4293,11 @@ function bubHtml(m,idx){
    '<div class="bub-drama-mid"><div class="bub-drama-title">'+m.d.t+'</div>'+
    '<div class="bub-drama-meta">★ '+m.d.r+' · '+m.d.s+'</div>'+
    '<span class="bub-drama-tag">🎬 Wahda Reels · '+m.d.cat+'</span></div></div>';
+  /* a contact card shared from a profile ("..." → 分享名片): tap → opens that person's profile */
+  case "card":return '<div class="bub '+d+' bub-card nol" onclick="openCardProfile('+idx+')">'
+   +'<div class="bub-card-av">'+(m.ck?'<img class="ava-img" src="'+avaPath(m.ck)+'" alt="" onerror="this.parentNode.textContent=\''+String(m.cn||"?").charAt(0).toUpperCase()+'\'">':String(m.cn||"?").charAt(0).toUpperCase())+'</div>'
+   +'<div style="min-width:0"><div class="bub-card-n">'+(m.cn||"")+'</div><div class="bub-card-s">'+t("ch_card_sub")+'</div></div>'
+   +'<span class="bub-card-arrow">›</span></div>';
   case "voice":return '<div class="bub '+d+' bub-voice" onclick="chatVoicePlay()">'+
    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'+
    '<svg width="20" height="15" viewBox="0 0 20 16" fill="none"><rect x="1" y="6" width="2.4" height="4" rx="1.2" fill="currentColor"/><rect x="5.4" y="4" width="2.4" height="8" rx="1.2" fill="currentColor"/><rect x="9.8" y="2" width="2.4" height="12" rx="1.2" fill="currentColor"/><rect x="14.2" y="5" width="2.4" height="6" rx="1.2" fill="currentColor"/></svg>'+
@@ -4374,7 +4435,7 @@ function openContacts(){renderContacts();document.getElementById("pg-contacts").
 function closeContacts(){document.getElementById("pg-contacts").classList.remove("active")}
 function renderContacts(){
  document.getElementById("ctList").innerHTML=FRIENDS.map(function(f,i){
-  return '<div class="msg-row" onclick="openFProfile('+i+')">'+msgAvatarHtml({ini:f.n.charAt(0),type:"dm"})+
+  return '<div class="msg-row" onclick="openFProfile('+i+')">'+msgAvatarHtml({n:f.n,ini:f.n.charAt(0),type:"dm"})+
    '<div class="msg-mid"><div class="msg-name">'+f.n+'</div><div class="msg-preview">'+t("sh_freq",f.f)+'</div></div>'+
    '<div class="msg-right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="var(--ink-3,#9B9993)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>';
  }).join("");
@@ -4413,15 +4474,14 @@ function fpSetTab(tb){fpTab=tb;renderFProfile()}
 function fpChat(){
  if(isGuest&&!guestGate(null))return;
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return;
- if(fpGuest){openChatPeer({n:f.n,ini:f.n.charAt(0),type:"dm",unread:0});return}
- var idx=-1;
+ if(fpGuest){openChatPeer({n:f.n,ini:f.n.charAt(0),type:"dm",unread:0});return} var idx=-1;
  for(var k=0;k<MSGS.length;k++){if(MSGS[k].type==="dm"&&txt(MSGS[k].n)===f.n){idx=k;break}}
  if(idx>-1)openChat(idx);
  else openChatPeer({n:f.n,ini:f.n.charAt(0),type:"dm",unread:0});
 }
 function fpPost(n,tx,tm){
  return '<div class="fp-item"><div class="fp-item-head"><div style="display:flex;align-items:center;gap:9px;min-width:0">'
-  +'<div class="feed-avatar" style="width:34px;height:34px;font-size:13px;flex:none">'+n.charAt(0)+'</div>'
+  +'<div class="feed-avatar" style="width:34px;height:34px;flex:none">'+avaI(n)+'</div>'
   +'<div style="min-width:0"><div class="feed-name" style="font-size:13.5px">'+n+'</div><div class="feed-time">'+tm+'</div></div></div>'
   +'<span style="color:var(--ink-3,#9B9993);flex:none">···</span></div>'
   +'<div class="fp-item-tx">'+tx+'</div></div>';
@@ -4479,7 +4539,7 @@ function fpToggleFollow(){
 function openFpReq(){
  if(isGuest&&!guestGate(null))return;
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return;
- document.getElementById("fpReqAv").textContent=f.n.charAt(0);
+ document.getElementById("fpReqAv").innerHTML=avaI(f.n);
  document.getElementById("fpReqName").textContent=f.n;
  document.getElementById("fpReqMsg").value="";
  openSheet("sheetFpReq");
@@ -4566,9 +4626,10 @@ function renderFProfile(){
   content='<div class="fp-list">'+fpReview(t("fp_rv1t"),t("fp_rv1c"),t("fp_rv1d"),t("fp_rv1x"))+fpReview(t("fp_rv2t"),t("fp_rv2c"),t("fp_rv2d"),t("fp_rv2x"))+'</div>';
  }
  document.getElementById("fpBody").innerHTML=
-  '<div class="fp-top"><div class="fp-av">'+f.n.charAt(0)+'</div>'
+  '<div class="fp-top"><div class="fp-av" onclick="fpOpenAva()">'+avaI(f.n)+'</div>'
   +'<div class="fp-id"><div class="fp-acct">'+person+t("fp_member")+'</div>'
   +'<div class="fp-name">'+txt(f.nLoc||f.n)+'</div>'
+  +(fpRemarkOf(f.n)?'<div class="fp-remark">'+t("fp_remark_label")+' '+fpRemarkOf(f.n)+'</div>':'')
   +'<div class="fp-stats"><div class="fp-stat"><b>'+fmtN(f.f*50)+'</b> <span>'+t("fp_fl")+'</span></div>'
   +'<div class="fp-stat"><b>'+fmtN(f.f*9)+'</b> <span>'+t("fp_fg")+'</span></div></div></div></div>'
   +'<div class="fp-bio">'+txt(f.bio)+' <span class="fp-more">'+t("fp_more")+'</span></div>'
@@ -4580,6 +4641,64 @@ function renderFProfile(){
   +content+fpSections();
  document.getElementById("fpBody").scrollTop=0;
 }
+/* ---------- profile: "..." menu (remark / card / block / report) + avatar viewer ---------- */
+var REMARKS={};
+function fpTarget(){return fpGuest||FRIENDS[fpIdx]||null}
+function fpNameKey(n){return txt(n)||String(n||"")}
+function fpRemarkOf(n){return REMARKS[fpNameKey(n)]||""}
+function fpOpenAva(){
+ var f=fpTarget();if(!f)return;
+ var k=avaKey(f.n),img=document.getElementById("avaViewerImg"),lt=document.getElementById("avaViewerLetter");
+ if(k){img.style.display="";lt.style.display="none";img.src=avaPath(k)}
+ else{img.style.display="none";lt.style.display="flex";lt.textContent=fpNameKey(f.n).charAt(0).toUpperCase()||"?"}
+ document.getElementById("avaViewerName").textContent=fpNameKey(f.n);
+ document.getElementById("avaViewer").classList.add("show");
+}
+function closeAvaViewer(){document.getElementById("avaViewer").classList.remove("show")}
+function openFpMenu(){if(!fpTarget())return;openSheet("sheetFpMenu")}
+function fpSaveRemark(){
+ var f=fpTarget();if(!f)return;
+ var v=document.getElementById("fpRemarkIn").value.trim();
+ if(v)REMARKS[fpNameKey(f.n)]=v;else delete REMARKS[fpNameKey(f.n)];
+ closeSheets();renderFProfile();toast(t("fp_remark_ok"));
+}
+function fpCardShare(){
+ var f=fpTarget();if(!f)return;
+ var h=FRIENDS.map(function(fr,i){
+  return '<button class="sheet-item" onclick="fpSendCard('+i+')"><span style="width:34px;height:34px;border-radius:50%;overflow:hidden;flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:var(--brand,#0E7C66);background:var(--brand-soft,#E3F2EE)">'+avaI(fr.n)+'</span><span>'+fr.n+'</span></button>';
+ }).join("");
+ document.getElementById("fpCardList").innerHTML=h;
+ openSheet("sheetFpShare");
+}
+function fpSendCard(i){
+ var from=fpTarget();if(!from)return;
+ var fr=FRIENDS[i];
+ closeSheets();
+ if(isGuest&&!guestGate(null))return;
+ var cn=txt(from.n),ck=avaKey(cn)||"";
+ /* find (or create) the DM thread with the chosen friend */
+ var dm=null;
+ for(var k=0;k<MSGS.length;k++){if(MSGS[k].type==="dm"&&txt(MSGS[k].n)===txt(fr.n)){dm=MSGS[k];break}}
+ if(!dm){dm={n:fr.n,ini:txt(fr.n).charAt(0),type:"dm",unread:0,pv:{en:"[Card] "+cn,zh:"[名片] "+cn},tm:{en:"Now",zh:"现在"}};MSGS.unshift(dm);renderMsgs()}
+ dm.unread=0;
+ dm.pv={en:"[Card] "+cn,zh:"[名片] "+cn};
+ dm.tm={en:"Now",zh:"现在"};
+ /* leave the profile page and enter that conversation */
+ closeFProfile();
+ openChatPeer(dm);
+ chatList.push({dir:"out",type:"card",cn:cn,ck:ck});
+ renderChat();
+ setTimeout(fakeReply,1300);
+}
+/* tap a shared contact card in chat → open the shared user's profile */
+function openCardProfile(idx){
+ var m=chatList&&chatList[idx];if(!m||!m.cn)return;
+ closeChat();
+ openProfileByName(m.cn);
+}
+function fpBlock(){closeSheets();toast(t("fp_block_ok"))}
+function fpReport(){closeSheets();toast(t("fp_report_ok"))}
+
 /* ---------- profile: conditional sections below tabs ---------- */
 function fpSections(){
  var cs=fpComms(),es=fpEvts(),out="";
@@ -4632,7 +4751,7 @@ function renderCommDetail(){
   +'<span class="cm-chip'+(c.vis==="private"?" cm-chip-gold":"")+'">'+t(c.vis==="private"?"aev_private":"aev_public")+'</span>'
   +(c.req?'<span class="cm-chip cm-chip-gold">'+t("acm_appr_tag")+'</span>':"");
  var roster=cmRoster(c);
- var stack='<div class="ev-stack">'+roster.slice(0,4).map(function(m){return '<div class="ev-av">'+m.charAt(0)+'</div>'}).join("")+'</div>';
+ var stack='<div class="ev-stack">'+roster.slice(0,4).map(function(m){return '<div class="ev-av">'+avaI(m)+'</div>'}).join("")+'</div>';
  document.getElementById("cmScroll").innerHTML=
   '<div class="cm-cover" style="background:'+c.g+'"></div>'
   +'<div class="cm-head"><div class="cm-cover-av" style="background:'+c.g+'">'+c.ini+'</div>'
@@ -4690,13 +4809,13 @@ function feedTextHtml(f){
 function coStackHtml(f){
  if(!f.co||!f.co.length)return "";
  return '<div style="display:flex;align-items:center;flex:none;margin-left:-2px">'+f.co.map(function(ci){
-  return '<div class="feed-avatar" style="width:22px;height:22px;font-size:10px;margin-left:-7px;border:2px solid var(--card,#FFFFFF);background:var(--gold,#C9A24B);color:#7A5D10">'+FRIENDS[ci].n.charAt(0)+'</div>';
+  return '<div class="feed-avatar" style="width:22px;height:22px;font-size:10px;margin-left:-7px;border:2px solid var(--card,#FFFFFF);background:var(--gold,#C9A24B);color:#7A5D10">'+avaI(FRIENDS[ci].n)+'</div>';
  }).join("")+'</div>';
 }
 function hubFeedCard(f,idx){
  var chip=f.cm?'<div class="feed-chip" style="margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
  return '<div class="feed-card" style="cursor:default" onclick="openPost('+idx+')">'
-  +'<div class="feed-user">'+coStackHtml(f)+'<div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+(f.ai?'<span class="np-ai-chip">AI</span>':"")+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+(f.mine?"":followBtn(f))+'</div>'
+  +'<div class="feed-user">'+coStackHtml(f)+'<div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+avaI(f.n)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+(f.ai?'<span class="np-ai-chip">AI</span>':"")+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+(f.mine?"":followBtn(f))+'</div>'
    +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,idx)+'</div>';
 }
 function hubCards(list){
@@ -4740,7 +4859,7 @@ function renderHub(){
  }
  document.getElementById("hubBody").innerHTML=
   '<button class="hub-note" onclick="openCreateHub()"><span class="crescent" style="width:15px;height:15px;flex:none"><span class="star" style="right:-7px;top:1px;width:7px;height:7px"></span></span><span>'+t("hb_note")+'</span></button>'
-  +'<div class="fp-top"><div class="fp-av" style="cursor:pointer" onclick="toast(t(\'av_set\'))">'+avatarInitial+'<span class="fp-plus">+</span></div>'
+  +'<div class="fp-top"><div class="fp-av" style="cursor:pointer" onclick="toast(t(\'av_set\'))">'+meAva()+'<span class="fp-plus">+</span></div>'
   +'<div class="fp-id"><div class="fp-acct">'+person+t("fp_member")+'</div>'
   +'<div class="fp-name">'+txt(a.n)+'</div>'
   +'<div class="fp-stats"><div class="fp-stat" style="cursor:pointer" onclick="openFlist(\'fo\')"><b>1.2K</b> <span>'+t("fp_fl")+'</span></div>'
@@ -4867,7 +4986,7 @@ function evCard(idx,badge){
   +'<div class="ev-line">'+calIc(12)+'<span>'+txt(e.tm)+'</span></div>'
   +'<div class="ev-line">'+pinIc(12)+'<span>'+txt(e.loc)+'</span></div>'
   +(e.price?'<div class="ev-line"><span class="ev-coin">W</span><span style="color:#8a6d24;font-weight:700">'+e.price+' Wahda Coin</span></div>':"")
-  +'<div class="ev-line"><div class="ev-stack">'+e.atts.slice(0,3).map(function(a){return '<div class="ev-av" style="width:18px;height:18px;font-size:9px;border-width:1px">'+a.charAt(0)+'</div>'}).join("")+'</div><span>'+t("ev_going",e.att)+'</span></div></div>'
+  +'<div class="ev-line"><div class="ev-stack">'+e.atts.slice(0,3).map(function(a){return '<div class="ev-av" style="width:18px;height:18px;font-size:9px;border-width:1px">'+avaI(a)+'</div>'}).join("")+'</div><span>'+t("ev_going",e.att)+'</span></div></div>'
   +(badge===undefined?'<span class="ev-badge">'+t(e.role==="created"?"ev_org_badge":(e.role==="booked"?"ev_go_badge":"ev_rc_badge"))+'</span>':(badge?'<span class="ev-badge">'+badge+'</span>':""))+chev+'</button>';
 }
 function evSetTab(tb){evTab=tb;renderHub()}
@@ -4883,7 +5002,7 @@ function closeEvent(){document.getElementById("pg-event").classList.remove("acti
 function evCmtHtml(c){
  var me=c.n===txt(ACCOUNTS[curAcct].n);
  var id=me?'':' onclick="openProfileByName(\''+c.n+'\')"',cls=me?'':' c-id';
- return '<div class="pd-cmt"><div class="feed-avatar'+cls+'"'+id+' style="width:34px;height:34px;font-size:14px;flex:none">'+c.n.charAt(0)+'</div>'
+ return '<div class="pd-cmt"><div class="feed-avatar'+cls+'"'+id+' style="width:34px;height:34px;font-size:14px;flex:none">'+(me?meAva():avaI(c.n))+'</div>'
   +'<div style="flex:1;min-width:0"><div class="feed-name'+cls+'"'+id+' style="font-size:13px">'+c.n+'</div>'
   +'<div class="feed-text" style="font-size:13.5px;margin-top:2px">'+txt(c.tx)+'</div>'
   +'<div class="pd-cmeta"><span>'+c.tm+'</span></div></div></div>';
@@ -4917,14 +5036,14 @@ function renderEvent(){
   +'<span class="ev-role">'+t("ev_org")+'</span></div>';
  var plusN=Math.max(e.att-e.atts.length,0);
  h+='<button class="ev-atts" onclick="toast(t(\'ev_att_toast\'))">'
-  +'<div class="ev-stack">'+e.atts.slice(0,4).map(function(a){return '<div class="ev-av">'+a.charAt(0)+'</div>'}).join("")
+  +'<div class="ev-stack">'+e.atts.slice(0,4).map(function(a){return '<div class="ev-av">'+avaI(a)+'</div>'}).join("")
   +(plusN?'<div class="ev-av" style="background:var(--gold,#C9A24B)">+'+plusN+'</div>':"")+'</div>'
   +'<div style="flex:1;min-width:0;text-align:left"><div class="feed-name" style="font-size:13.5px">'+t("ev_going",fmtN(e.att))+'</div><div class="feed-time">'+t("ev_att")+'</div></div>'
   +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M9 6l6 6-6 6" stroke="var(--ink-3,#9B9993)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
  /* Discussion */
  h+='<div class="ev-sec"><div class="ev-sec-h"><span class="ev-sec-t">'+t("ev_disc")+'</span><span class="ev-sec-n">'+e.cmts.length+'</span></div>';
  e.cmts.forEach(function(c){h+=evCmtHtml(c)});
- h+='<div class="ev-inline"><div class="feed-avatar" style="width:30px;height:30px;font-size:13px;flex:none;background:var(--gold,#C9A24B)">'+avatarInitial+'</div>'
+ h+='<div class="ev-inline"><div class="feed-avatar" style="width:30px;height:30px;font-size:13px;flex:none;background:var(--gold,#C9A24B)">'+meAva()+'</div>'
   +'<input class="input" id="evInput" type="text" style="flex:1;min-width:0;height:36px" placeholder="'+t("ev_cmt_ph")+'" onkeydown="if(event.key===\'Enter\')evSend()">'
   +'<button class="pd-send" onclick="evSend()">'+t("cmt_send")+'</button></div>';
  h+='</div>';
@@ -4936,7 +5055,7 @@ function renderEvent(){
   +'<div class="ev-ratebox"><div class="ev-big">'+(all.length?avg.toFixed(1):"—")+'</div>'
   +'<div><div>'+evStarRow("setEvStars",e.myRating)+'</div><div class="feed-time" style="margin-top:4px">'+(e.myRating?t("ev_my_rate",e.myRating):t("ev_tap_rate"))+'</div></div></div>';
  e.reviews.forEach(function(r){
-  h+='<div class="pd-cmt"><div class="feed-avatar" style="width:34px;height:34px;font-size:14px;flex:none;background:var(--gold,#C9A24B)">'+r.n.charAt(0)+'</div>'
+  h+='<div class="pd-cmt"><div class="feed-avatar" style="width:34px;height:34px;font-size:14px;flex:none;background:var(--gold,#C9A24B)">'+avaI(r.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="feed-name" style="font-size:13px">'+r.n+'</div>'
    +'<div style="color:#C9A24B;font-size:13px;letter-spacing:1px;margin-top:2px">'+"★★★★★".slice(0,r.stars)+''+"★".repeat(5-r.stars).replace(/★/g,'<span style="color:#D9D6CF">★</span>')+'</div>'
    +'<div class="feed-text" style="font-size:13.5px;margin-top:2px">'+txt(r.tx)+'</div></div></div>';
@@ -5262,7 +5381,7 @@ function renderEvShareList(){
  var shown=evShareMore?list:list.slice(0,5);
  el.innerHTML=shown.map(function(x){
   var av=x.g?'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none;border-radius:12px">'+x.n.charAt(0)+'</div>'
-   :'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+x.n.charAt(0)+'</div>';
+   :'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+avaI(x.n)+'</div>';
   return '<button class="fr-item" onclick="evSharePick(\''+x.n+'\')">'+av
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+x.n+'</div><div class="fr-sub">'+t(x.g?"sh_grp_freq":"sh_freq",x.f)+'</div></div>'
    +'<span class="fr-check'+(evShareSel[x.n]?" on":"")+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>';
@@ -5424,7 +5543,7 @@ function renderNpPickList(){
  el.innerHTML=FRIENDS.map(function(f,i){
   var on=npPickTmp.indexOf(i)>-1;
   return '<button class="fr-item" onclick="npPickFriend('+i+')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+f.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+avaI(f.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+f.n+'</div><div class="fr-sub">'+t("sh_freq",f.f)+'</div></div>'
    +'<span class="fr-check'+(on?" on":"")+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>';
  }).join("");
@@ -5631,7 +5750,7 @@ function openAevPick(mode){
  var el=document.getElementById("evPickList");
  el.innerHTML=FRIENDS.map(function(f,i){
   return '<button class="fr-item" onclick="aevDoPick('+i+')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+f.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+avaI(f.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+f.n+'</div><div class="fr-sub">'+t("sh_freq",f.f)+'</div></div>'
    +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="var(--ink-3,#9B9993)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
  }).join("");
@@ -5650,8 +5769,8 @@ function aevDoPick(i){
 function setAevOrg(i){
  aevOrgIdx=i;
  var av=document.getElementById("aevOrgAv"),nm=document.getElementById("aevOrgName");
- if(i<0){av.textContent=avatarInitial;nm.textContent=txt(ACCOUNTS[curAcct].n)}
- else{av.textContent=FRIENDS[i].n.charAt(0);nm.textContent=FRIENDS[i].n}
+ if(i<0){av.innerHTML=meAva();nm.textContent=txt(ACCOUNTS[curAcct].n)}
+ else{av.innerHTML=avaI(FRIENDS[i].n);nm.textContent=FRIENDS[i].n}
 }
 /* visibility picker */
 var evVisLabelId="aevVisLabel";
@@ -5667,7 +5786,7 @@ function renderEvVis(){
  document.getElementById("evVisList").innerHTML=FRIENDS.map(function(f,i){
   var k=(aevVisTab==="fr"?"F":"O")+i;
   return '<button class="fr-item" onclick="aevVisPick(\''+k+'\')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+f.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+avaI(f.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+f.n+'</div><div class="fr-sub">'+(aevVisTab==="fr"?t("sh_freq",f.f):t("aev_follower"))+'</div></div>'
    +'<span class="fr-check'+(aevVisSel[k]?" on":"")+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>';
  }).join("");
@@ -5841,7 +5960,7 @@ function renderComLoc(){
   +'<span class="fr-check'+(acmLocIdx<0?" on":"")+'">'+ck+'</span></button>';
  h+=acmLocList.map(function(p,i){
   return '<button class="fr-item" onclick="pickComLoc('+i+')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none;border-radius:12px">'+p.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none;border-radius:12px">'+avaI(p.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+p.n+'</div><div class="fr-sub">'+t("cat_"+p.cat)+' · '+p.dist+' km</div></div>'
    +'<span class="fr-check'+(acmLocIdx===i?" on":"")+'">'+ck+'</span></button>';
  }).join("");
@@ -5918,7 +6037,7 @@ function renderNgList(){
  h+=rows.map(function(o){
   var on=!!ngSel[o.f.n];
   return '<button class="fr-item" onclick="ngToggleAt('+o.i+')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[o.i%NG_G.length]+';color:#fff">'+o.f.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[o.i%NG_G.length]+';color:#fff">'+avaI(o.f.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+o.f.n+'</div><div class="fr-sub">'+o.f.loc[lang]+' \u00b7 '+t("sh_freq",o.f.f)+'</div></div>'
    +'<span class="fr-check'+(on?" on":"")+'">'+CK+'</span></button>';
  }).join("");
@@ -6035,7 +6154,7 @@ function gmLabel(o){return o.n===GM_SELF?txt(gmSelfName()):o.n}
 function gmAvHtml(n,sz){
  var me=n===GM_SELF,px=sz||42;
  var bg=me?"linear-gradient(135deg,#0E7C66,#0a5c4d)":NG_G[gmColorIdx(n)];
- return '<div class="feed-avatar" style="width:'+px+'px;height:'+px+'px;font-size:'+(px>30?16:11)+'px;background:'+bg+';color:#fff">'+(me?avatarInitial:n.charAt(0))+'</div>';
+ return '<div class="feed-avatar" style="width:'+px+'px;height:'+px+'px;font-size:'+(px>30?16:11)+'px;background:'+bg+';color:#fff">'+(me?meAva():avaI(n))+'</div>';
 }
 function chatHeadTap(){
  if(!chatPeer)return;
@@ -6112,7 +6231,7 @@ function renderGSet(){
   var me=o.n===GM_SELF;
   var bg=me?"linear-gradient(135deg,#0E7C66,#0a5c4d)":NG_G[gmColorIdx(o.n)];
   return '<button class="gs-cell"'+(me?"":' onclick="gmOpenMember(\''+o.n+'\')"')+'>'
-   +'<span class="gs-av" style="background:'+bg+'">'+(me?avatarInitial:o.n.charAt(0))+'</span>'
+   +'<span class="gs-av" style="background:'+bg+'">'+(me?meAva():avaI(o.n))+'</span>'
    +'<span class="gs-nm">'+gmLabel(o)+'</span></button>';
  }).join("");
  h+='<button class="gs-cell" onclick="openGInvite()"><span class="gs-act"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gs-nm">'+t("gs_add")+'</span></button>';
@@ -6300,7 +6419,7 @@ function addcRender(){
   var g=SCH_G[(o.fr?o.i:o.i+FRIENDS.length)%SCH_G.length];
   var sub=txt(o.f.loc)+' · '+p2pWid(o.f.n)+(o.fr?"":" · "+t("aev_follower"));
   var act="addcTap("+(o.fr?1:0)+","+(o.fr?o.i:0)+",'"+String(o.f.n).replace(/'/g,"\\'")+"')";
-  return schRow(g,o.f.n.charAt(0),o.f.n,sub,act);
+  return schRow(g,avaI(o.f.n),o.f.n,sub,act);
  }).join("");
 }
 /* scan QR code (camera) */
@@ -6728,7 +6847,7 @@ function renderTver(){
   +'<div style="font-size:19px;font-weight:800;color:var(--ink,#1C1B18);margin-top:14px">'+t("tver_ok")+'</div>'
   +'<span style="display:inline-flex;align-items:center;gap:6px;background:var(--brand-soft,#E3F2EE);color:var(--brand,#0E7C66);font-size:11.5px;font-weight:800;border-radius:14px;padding:5px 12px;margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+t("tver_valid")+'</span>'
   +'<div style="display:flex;align-items:center;gap:11px;border-top:1px solid var(--line,#E5E2DC);margin-top:16px;padding:14px 2px 2px;text-align:left">'
-  +'<div class="feed-avatar" style="width:38px;height:38px;font-size:15px;flex:none;background:#E3EFFB;color:#185FA5">'+TVER.holder.charAt(0)+'</div>'
+  +'<div class="feed-avatar" style="width:38px;height:38px;font-size:15px;flex:none;background:#E3EFFB;color:#185FA5">'+avaI(TVER.holder)+'</div>'
   +'<div style="flex:1;min-width:0"><div class="pq-m-sub" style="margin:0">'+t("tver_holder")+'</div><div style="font-size:13.5px;font-weight:700;color:var(--ink,#1C1B18)">'+TVER.holder+'</div></div>'
   +'<div style="flex:none;text-align:right"><div style="font-size:12px;font-weight:700;color:var(--ink,#1C1B18)">'+TVER.no+'</div><div class="pq-m-sub" style="margin-top:2px">'+t("tver_time")+' · '+TVER.tm+'</div></div></div>'
   +'<div style="display:flex;align-items:center;gap:11px;border-top:1px solid var(--line,#E5E2DC);margin-top:12px;padding:13px 2px 2px;text-align:left">'
@@ -6821,7 +6940,7 @@ function renderNear(){
  document.getElementById("nearBody").innerHTML=pool.map(function(o){
   var g=SCH_G[(o.fr?o.i:fpHash(o.f.n))%SCH_G.length];
   var sub=txt(o.f.loc)+" · "+o.d+" "+t("near_km")+(o.fr?"":" · "+t("aev_follower"));
-  return schRow(g,o.f.n.charAt(0),o.f.n,sub,"nearTap("+(o.fr?1:0)+","+(o.fr?o.i:0)+",'"+String(o.f.n).replace(/'/g,"\\'")+"')");
+  return schRow(g,avaI(o.f.n),o.f.n,sub,"nearTap("+(o.fr?1:0)+","+(o.fr?o.i:0)+",'"+String(o.f.n).replace(/'/g,"\\'")+"')");
  }).join("");
 }
 /* invite members (grid "+") */
@@ -6862,7 +6981,7 @@ function renderGInvite(){
  else h='<div class="nf-sec" style="margin:2px 4px 6px">'+t("ginv_all")+'</div>'+rows.map(function(o){
   var on=!!giSel[o.f.n];
   return '<button class="fr-item" onclick="ginvToggle('+o.i+')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[gmColorIdx(o.f.n)]+';color:#fff">'+o.f.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[gmColorIdx(o.f.n)]+';color:#fff">'+avaI(o.f.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+o.f.n+'</div><div class="fr-sub">'+o.f.loc[lang]+' \u00b7 '+t("sh_freq",o.f.f)+'</div></div>'
    +'<span class="fr-check'+(on?" on":"")+'">'+GS_CK+'</span></button>';
  }).join("");
@@ -6904,7 +7023,7 @@ function renderGKick(){
  else h='<div class="nf-sec" style="margin:2px 4px 6px">'+t("gk_choose")+'</div>'+rows.map(function(o){
   var on=!!gkSel[o.n],info=gmInfo(o.n);
   return '<button class="fr-item" onclick="gkToggle(\''+o.n+'\')">'
-   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[gmColorIdx(o.n)]+';color:#fff">'+o.n.charAt(0)+'</div>'
+   +'<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;background:'+NG_G[gmColorIdx(o.n)]+';color:#fff">'+avaI(o.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+o.n+'</div><div class="fr-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+txt(info.loc)+' \u00b7 '+txt(info.bio)+'</div></div>'
    +'<span class="fr-check'+(on?" on":"")+'">'+GS_CK+'</span></button>';
  }).join("");
@@ -7130,39 +7249,39 @@ var FEEDS=[
   tx:{en:"Ummah KC community kitchen: 300 plates in one afternoon 🍲",zh:"Ummah KC 社区厨房：一个下午 300 份餐食 🍲"}},
  {n:"Yusuf I.",cm:"Iftar Volunteers",min:12,type:"text",
   tx:{en:"Jumu'ah reminder: khutbah starts 12:30 at the community center. Carpool thread in Places.",zh:"主麻提醒：12:30 社区中心开始呼图白，拼车接龙见本地页。"}},
- {n:"Aisha K.",cm:"Ummah KC",min:60,type:"image",
+ {n:"Aisha K.",cm:"Ummah KC",min:60,type:"image",img:"posts/p_iftar.jpg",
   tx:{en:"Shared photos from last night's community iftar — thanks everyone who helped!",zh:"昨晚社区开斋饭的照片来了——感谢每一位帮忙的家人！"}},
- {n:"Omar F.",cm:"Quran Study Circle",min:180,type:"video",
+ {n:"Omar F.",cm:"Quran Study Circle",min:180,type:"video",img:"posts/p_tafsir.jpg",
   tx:{en:"Recap video of this week's tajweed session. Link to full recording in comments.",zh:"本周诵经课回顾视频，完整录像见评论区。"}},
- {n:"Sara D.",cm:"",min:240,type:"image",
+ {n:"Sara D.",cm:"",min:240,type:"image",img:"posts/p_souq.jpg",
   tx:{en:"Golden hour at the old souq. If you know, you know.",zh:"老巴扎的黄金时刻，懂的都懂。"}},
  {n:"Wahda Team",cm:"",min:300,type:"text",
   tx:{en:"Salam! Group Square is now open — discover and join communities near you.",zh:"赛俩目！群广场已上线——快来发现并加入你身边的社群。"}},
- {n:"Kareem A.",cm:"Masjid An-Noor",min:480,type:"video",
+ {n:"Kareem A.",cm:"Masjid An-Noor",min:480,type:"video",img:"posts/p_quran.jpg",
   tx:{en:"Sheikh's short tafsir of Ayat al-Kursi after Maghrib tonight.",zh:"今晚昏礼后谢赫关于「宝座经文」的简短经注。"}},
  {n:"Hafsa W.",cm:"Hifz Buddy Circle",min:900,type:"text",
   tx:{en:"Day 14 of memorizing Surah Yusuf. Halfway there, keep me in your duas!",zh:"背诵《优素福章》第 14 天，过半了，为我做个好嘟阿！"}},
- {n:"Layla M.",cm:"Iftar Volunteers",min:1200,type:"image",
+ {n:"Layla M.",cm:"Iftar Volunteers",min:1200,type:"image",img:"posts/p_kitchen.jpg",
   tx:{en:"Volunteer roster for next Friday's iftar is up. 4 slots left!",zh:"下周五开斋饭志愿者排班表已发布，还剩 4 个名额！"}},
  {n:"Bilal R.",cm:"",min:1560,type:"text",
   tx:{en:"Beautiful sunset after Asr today. Alhamdulillah for quiet moments.",zh:"晡礼后的晚霞真美。感谢安拉赐予这宁静的时刻。"}},
  {n:"Nour S.",cm:"Hifz Buddy Circle",min:1980,type:"text",
   tx:{en:"Looking for a memorization partner for Surah Al-Kahf — weekly check-ins, anyone in?",zh:"找一位《山洞章》背诵搭档——每周互相检查进度，有人参加吗？"}},
- {n:"Ummah KC",cm:"Ummah KC",min:2880,type:"video",
+ {n:"Ummah KC",cm:"Ummah KC",min:2880,type:"video",img:"posts/p_halaqah.jpg",
   tx:{en:"Highlights from our weekend youth halaqah — 40 attendees, masha'Allah!",zh:"周末青年学习班精彩回顾——四十人参加，愿安拉回赐！"}},
- {n:"Maryam S.",cm:"",min:5760,type:"image",
+ {n:"Maryam S.",cm:"",min:5760,type:"image",img:"posts/p_maamoul.jpg",
   tx:{en:"My first attempt at dates maamoul for Eid. Recipe in comments 🌙",zh:"第一次做开斋节椰枣玛慕勒，配方见评论 🌙"}},
  {n:"Imam Yasin",cm:"Masjid An-Noor",min:12960,type:"text",
   tx:{en:"Announcement: Friday prayer times shift next week due to daylight saving. First khutbah 12:15.",zh:"通知：下周起因冬令时调整主麻时间，第一场呼图白 12:15 开始。"}},
  {n:"Fatima Z.",cm:"Ummah KC",min:14400,type:"text",
   tx:{en:"Reminder: our charity drive for the new masjid library closes this Sunday.",zh:"提醒：新清真寺图书馆募捐活动本周日截止。"}},
- {n:"Zayd H.",cm:"Quran Study Circle",min:30240,type:"video",
+ {n:"Zayd H.",cm:"Quran Study Circle",min:30240,type:"video",img:"posts/p_quranstand.jpg",
   tx:{en:"Memorization milestone: Surah Al-Mulk complete. Dua for the next one!",zh:"背诵里程碑：完成了《国权章》。为下一章做个好嘟阿！"}},
- {n:"Ahmad Rahman",cm:"Iftar Volunteers",min:50,type:"image",mine:true,
+ {n:"Ahmad Rahman",cm:"Iftar Volunteers",min:50,type:"image",mine:true,img:"posts/p_mealboxes.jpg",
   tx:{en:"Weekend volunteer shift at the community kitchen — 200 meal boxes packed for the neighborhood. Alhamdulillah!",zh:"周末在社区厨房做志愿者——为街坊打包了 200 份餐盒。感谢安拉！"}},
  {n:"Ahmad Rahman",cm:"",min:1500,type:"text",mine:true,
   tx:{en:"Reflection from tonight's halaqah: consistency beats intensity. Ten minutes of Quran daily will change your heart.",zh:"今晚学习班的感悟：贵在坚持而非强度。每天十分钟古兰经，足以改变内心。"}},
- {n:"Ahmad Rahman",cm:"Quran Study Circle",min:5760,type:"video",mine:true,
+ {n:"Ahmad Rahman",cm:"Quran Study Circle",min:5760,type:"video",mine:true,img:"posts/p_openday.jpg",
   tx:{en:"Recap video: our masjid open day welcomed 150 neighbors — masjid tours, calligraphy workshop and a shared iftar.",zh:"回顾视频：清真寺开放日迎来 150 位邻居——参观导览、书法工坊与共享开斋饭。"}},
  /* my demo Reel: shows in My Hub (Posts pinned + Reels tab), never in Feeds */
  {n:"Ahmad Rahman",cm:"",min:35,type:"reel",mine:true,
@@ -7316,7 +7435,7 @@ function renderShareList(){
  FRIENDS.forEach(function(fr){
   var b=document.createElement("button");
   b.className="fr-item";
-  b.innerHTML='<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+fr.n.charAt(0)+'</div>'
+  b.innerHTML='<div class="feed-avatar" style="width:40px;height:40px;font-size:16px;flex:none">'+avaI(fr.n)+'</div>'
    +'<div style="flex:1;min-width:0"><div class="fr-name">'+fr.n+'</div><div class="fr-sub">'+t("sh_freq",fr.f)+'</div></div>'
    +'<span class="fr-check'+(shareSel[fr.n]?" on":"")+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   b.onclick=function(){shareSel[fr.n]=!shareSel[fr.n];renderShareList();
@@ -7401,15 +7520,15 @@ var CPOOL=[
 ];
 /* friends for share sheet — sorted by interaction frequency (desc) */
 var COMMUNITIES=[
- {key:"ummahKC",gkey:"ummahKC",ini:"U",g:"linear-gradient(135deg,#5262ED,#3a48b8)",n:{en:"Ummah KC",zh:"Ummah KC"},mem:128,cat:"gcat_4",vis:"public",req:true,joined:true,
+ {key:"ummahKC",gimg:"posts/p_halaqah.jpg",gkey:"ummahKC",ini:"U",g:"linear-gradient(135deg,#5262ED,#3a48b8)",n:{en:"Ummah KC",zh:"Ummah KC"},mem:128,cat:"gcat_4",vis:"public",req:true,joined:true,
   desc:{en:"The flagship ummah community — weekly halaqah, Jumu'ah carpools and neighbourhood support.",zh:"旗舰社群——每周学习班、主麻拼车与邻里互助。"}},
- {key:"halaqat",gkey:"halaqat",ini:"H",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",n:{en:"Halaqat Al-Noor",zh:"Halaqat Al-Noor"},mem:56,cat:"gcat_4",vis:"public",req:false,joined:true,
+ {key:"halaqat",gimg:"posts/p_tafsir.jpg",gkey:"halaqat",ini:"H",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",n:{en:"Halaqat Al-Noor",zh:"Halaqat Al-Noor"},mem:56,cat:"gcat_4",vis:"public",req:false,joined:true,
   desc:{en:"Quran study, Ramadan prep circles and family events around Masjid An-Noor.",zh:"围绕 An-Noor 清真寺的诵经学习、斋月准备与家庭活动。"}},
- {key:"youth",gkey:"youth",ini:"Y",g:"linear-gradient(135deg,#C9A24B,#a08032)",n:{en:"Noor Youth Collective",zh:"努尔青年社"},mem:214,cat:"gcat_3",vis:"public",req:false,joined:false,
+ {key:"youth",gimg:"groups/g_youth.jpg",gkey:"youth",ini:"Y",g:"linear-gradient(135deg,#C9A24B,#a08032)",n:{en:"Noor Youth Collective",zh:"努尔青年社"},mem:214,cat:"gcat_3",vis:"public",req:false,joined:false,
   desc:{en:"Sports, hikes and mentorship for young Muslims — a new activity every weekend.",zh:"青年体育、徒步与导师计划——每个周末都有新活动。"}},
- {key:"sisters",gkey:"sisters",ini:"S",g:"linear-gradient(135deg,#B85C8E,#8e3d6b)",n:{en:"Sisters Halaqa Circle",zh:"姐妹学习圈"},mem:89,cat:"gcat_1",vis:"private",req:true,joined:false,
+ {key:"sisters",gimg:"groups/g_sisters.jpg",gkey:"sisters",ini:"S",g:"linear-gradient(135deg,#B85C8E,#8e3d6b)",n:{en:"Sisters Halaqa Circle",zh:"姐妹学习圈"},mem:89,cat:"gcat_1",vis:"private",req:true,joined:false,
   desc:{en:"A private sisters-only circle for tafsir, fiqh and honest conversation.",zh:"仅限姐妹的私密学习圈——经注、教法与真诚交流。"}},
- {key:"founders",gkey:"founders",ini:"F",g:"linear-gradient(135deg,#3E8E7E,#1f5f54)",n:{en:"Muslim Founders Network",zh:"穆斯林创业者网络"},mem:143,cat:"gcat_6",vis:"private",req:true,joined:false,
+ {key:"founders",gimg:"posts/p_souq.jpg",gkey:"founders",ini:"F",g:"linear-gradient(135deg,#3E8E7E,#1f5f54)",n:{en:"Muslim Founders Network",zh:"穆斯林创业者网络"},mem:143,cat:"gcat_6",vis:"private",req:true,joined:false,
   desc:{en:"Founders, freelancers and operators building halal businesses — monthly pitch nights.",zh:"创业者与自由职业者社区——每月一次路演夜。"}}
 ];
 var FRIENDS=[
@@ -7437,7 +7556,7 @@ var postOpenIdx=-1;
 function openPost(i){
  raisePage("pg-post");
  postOpenIdx=i;
- document.getElementById("pdMe").textContent=avatarInitial;
+ document.getElementById("pdMe").innerHTML=meAva();
  renderPostDetail(FEEDS[i]);
  document.getElementById("pg-post").classList.add("active");
 }
@@ -7455,15 +7574,15 @@ function renderPostDetail(f){
  var i=postOpenIdx;
  var chip=f.cm?'<div class="feed-chip" style="margin-top:10px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
  var html='<div class="feed-card" style="margin-top:12px;cursor:default">'
-  +'<div class="feed-user"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div></div>'
+  +'<div class="feed-user"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+avaI(f.n)+'</div><div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div></div>'
   +'<div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,i);
  if(f.like>0){
   html+='<div class="pd-idrow"><div class="pd-stack" style="display:flex">'
-   +'<div class="pd-mini">'+(f.lk[0]||"A").charAt(0)+'</div><div class="pd-mini">'+(f.lk[1]||"B").charAt(0)+'</div></div>'
+   +'<div class="pd-mini">'+(f.lk[0]?avaI(f.lk[0]):"A")+'</div><div class="pd-mini">'+(f.lk[1]?avaI(f.lk[1]):"B")+'</div></div>'
    +'<span><b>'+f.lk[0]+'</b>, <b>'+(f.lk[1]||"")+'</b> + '+fmtN(Math.max(f.like-2,0))+' '+t("pd_others")+'</span></div>';
  }
  if(f.rp>0){
-  html+='<div class="pd-idrow"><div class="pd-mini" style="background:#5E7A8B">'+f.rby.charAt(0)+'</div><span>'+t("pd_reposted")+' <b>'+f.rby+'</b></span></div>';
+  html+='<div class="pd-idrow"><div class="pd-mini" style="background:#5E7A8B">'+avaI(f.rby)+'</div><span>'+t("pd_reposted")+' <b>'+f.rby+'</b></span></div>';
  }
  var lr=liveRoomOf(f.n);
  if(lr)html+=pdLiveCard(lr);
@@ -7482,7 +7601,7 @@ function renderPostDetail(f){
 }
 function cmtHtml(c,mine){
  var id=mine?'':' onclick="openProfileByName(\''+c.n+'\')"',cls=mine?'':' c-id';
- var h='<div class="pd-cmt"><div class="feed-avatar'+cls+'"'+id+' style="width:34px;height:34px;font-size:14px;flex:none;background:'+(mine?"var(--gold,#C9A24B)":"var(--brand,#0E7C66)")+'">'+c.n.charAt(0)+'</div>'
+ var h='<div class="pd-cmt"><div class="feed-avatar'+cls+'"'+id+' style="width:34px;height:34px;font-size:14px;flex:none;background:'+(mine?"var(--gold,#C9A24B)":"var(--brand,#0E7C66)")+'">'+(mine?meAva():avaI(c.n))+'</div>'
   +'<div style="flex:1;min-width:0"><div class="feed-name'+cls+'"'+id+' style="font-size:13px">'+c.n+'</div><div class="feed-text" style="font-size:13.5px;margin-top:2px">'+c.tx[lang]+'</div>'
   +'<div class="pd-cmeta"><span>'+c.tm+'</span>'
   +'<button class="pd-clk'+(c.liked?" on":"")+'" onclick="toggleCmtLike(this,'+(c.lk||0)+')"><svg width="12" height="12" viewBox="0 0 24 24" fill="'+(c.liked?"currentColor":"none")+'"><path d="M12 20.5s-7-4.3-8.9-8.4C1.7 9 3.5 6.2 6.4 6.2c1.8 0 3.3 1 4.2 2.5L12 11l1.4-2.3c.9-1.5 2.4-2.5 4.2-2.5 2.9 0 4.7 2.8 3.3 5.9-1.9 4.1-8.9 8.4-8.9 8.4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span class="cl">'+(c.lk||0)+'</span></button>'
@@ -7531,14 +7650,14 @@ function lvFmtV(n){return n>=1000?(Math.round(n/100)/10)+"K":""+n}
 function lvCard(r,strip){
  return '<button class="lv-card" style="'+(strip?"width:206px;flex:none":"")+'" onclick="openLiveRoom(\''+r.k+'\')">'
   +'<div class="lv-cover" style="background:'+lvGrad(r.host)+'"><span class="lv-badge"><i></i>LIVE</span><span class="lv-views">👁 '+t("lv_viewers",lvFmtV(r.v))+'</span><span class="lv-emoji">'+r.emoji+'</span></div>'
-  +'<div class="lv-host"><span class="lv-av">'+r.host.charAt(0)+'</span><span class="lv-hname">'+r.host+'</span></div>'
+  +'<div class="lv-host"><span class="lv-av">'+avaI(r.host)+'</span><span class="lv-hname">'+r.host+'</span></div>'
   +'<div class="lv-t">'+txt(r.t)+'</div>'
   +'<span class="lv-cat">'+t("lv_c_"+r.cat)+'</span></button>';
 }
 function renderLive(){
  var fr=LIVE_ROOMS.filter(function(r){return r.friend});
  document.getElementById("lvFollowing").innerHTML=fr.length?'<div class="lv-fhd">'+t("lv_flive")+'</div><div class="lv-frow">'
-  +fr.map(function(r){return '<button class="lv-ring" onclick="openLiveRoom(\''+r.k+'\')"><span class="lv-rav">'+r.host.charAt(0)+'<i>LIVE</i></span><div class="lv-rn">'+r.host+'</div></button>'}).join("")+'</div>':"";
+  +fr.map(function(r){return '<button class="lv-ring" onclick="openLiveRoom(\''+r.k+'\')"><span class="lv-rav">'+avaI(r.host)+'<i>LIVE</i></span><div class="lv-rn">'+r.host+'</div></button>'}).join("")+'</div>':"";
  var cats=[["all","lv_c_all"],["masjid","lv_c_masjid"],["quran","lv_c_quran"],["community","lv_c_comm"],["shop","lv_c_shop"],["game","lv_c_game"]];
  document.getElementById("lvChips").innerHTML=cats.map(function(c){
   return '<button class="sch-chip'+(lvCat===c[0]?" on":"")+'" onclick="lvCatSet(\''+c[0]+'\')">'+t(c[1])+'</button>';
@@ -7555,7 +7674,7 @@ function openLiveRoom(k){
  lvOpenIdx=LIVE_ROOMS.indexOf(r);
  document.getElementById("lrvCover").style.background=lvGrad(r.host);
  document.getElementById("lrvEmoji").textContent=r.emoji;
- document.getElementById("lrvAv").textContent=r.host.charAt(0);
+ document.getElementById("lrvAv").innerHTML=avaI(r.host);
  document.getElementById("lrvName").textContent=r.host;
  document.getElementById("lrvTitle").textContent=txt(r.t);
  document.getElementById("lrvViewers").textContent="👁 "+t("lv_viewers",lvFmtV(r.v));
@@ -7584,7 +7703,7 @@ function lvFollowingStrip(){
   +fr.map(function(r){return lvCard(r,true)}).join("")+'</div>';
 }
 function feedAv(f){
- return '<div class="feed-avwrap"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+f.n.charAt(0)+'</div>'+(liveRoomOf(f.n)?'<i class="av-live">LIVE</i>':"")+'</div>';
+ return '<div class="feed-avwrap"><div class="feed-avatar'+authCls(f)+'"'+authAttrs(f)+'>'+avaI(f.n)+'</div>'+(liveRoomOf(f.n)?'<i class="av-live">LIVE</i>':"")+'</div>';
 }
 function renderHome(){
  var body=document.getElementById("homeBody");
@@ -8285,7 +8404,7 @@ function renderFlist(){
  var rows=idxs.map(function(i){
   var u=FL_USERS[i],on=flTab==="fg"?true:!!follows[u.n];
   return '<div class="msg-row" style="cursor:default">'
-   +'<div class="msg-avatar" style="background:'+FL_GRADS[gmHash(u.n)%FL_GRADS.length]+';color:#fff">'+u.n.charAt(0)+'</div>'
+   +'<div class="msg-avatar" style="background:'+FL_GRADS[gmHash(u.n)%FL_GRADS.length]+';color:#fff">'+avaI(u.n)+'</div>'
    +'<div class="msg-mid" style="cursor:pointer" onclick="flOpenProf('+i+')"><div class="msg-name">'+u.n+'</div><div class="msg-preview">'+txt(u.bio)+'</div></div>'
    +'<button class="fl-btn'+(on?" on":"")+'" onclick="event.stopPropagation();flToggle('+i+')">'+t(on?"fw_on":"fw_add")+'</button></div>';
  }).join("");
@@ -9272,7 +9391,7 @@ function schRender(){
   var rows=FEEDS.map(function(f,i){return{i:i,f:f}}).filter(function(o){
    return schHit(o.f.tx,q)||schHitS(o.f.n,q)||schHitS(o.f.cm,q);
   }).map(function(o){
-   return schRow(SCH_G[o.i%SCH_G.length],o.f.n.charAt(0),o.f.n,txt(o.f.tx),"openPost("+o.i+")");
+   return schRow(SCH_G[o.i%SCH_G.length],avaI(o.f.n),o.f.n,txt(o.f.tx),"openPost("+o.i+")");
   });
   sec(t("sch_sc_feeds"),rows);
  }
@@ -9291,7 +9410,7 @@ function schRender(){
   }).map(function(o){
    var sub=txt(o.f.loc)+(o.i>=FRIENDS.length?" · "+t("aev_follower"):"");
    var act=o.i<FRIENDS.length?"openFProfile("+o.i+")":"openSchFoll('"+o.f.n+"')";
-   return schRow(SCH_G[o.i%SCH_G.length],o.f.n.charAt(0),o.f.n,sub,act);
+   return schRow(SCH_G[o.i%SCH_G.length],avaI(o.f.n),o.f.n,sub,act);
   });
   sec(t("sch_sc_users"),rows);
  }
@@ -9338,7 +9457,7 @@ function renderP2pFr(){
  if(!list.length){el.innerHTML='<div style="text-align:center;color:var(--ink-3,#9B9993);font-size:12.5px;padding:60px 20px">'+t("p2pfr_empty")+'</div>';return}
  el.innerHTML=list.map(function(f,i){
   return '<button class="p2p-user" onclick="p2pFrPick(\''+f.n+'\')">'
-   +'<span class="p2p-av" style="background:'+SCH_G[i%SCH_G.length]+'">'+f.n.charAt(0)+'</span>'
+   +'<span class="p2p-av" style="background:'+SCH_G[i%SCH_G.length]+'">'+avaI(f.n)+'</span>'
    +'<span style="flex:1;min-width:0;text-align:left"><span class="wl-tx-n">'+f.n+'</span><span class="wl-tx-t" style="display:block">'+p2pWid(f.n)+'</span></span>'
    +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M9 6l6 6-6 6" stroke="var(--ink-3,#9B9993)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
  }).join("");
