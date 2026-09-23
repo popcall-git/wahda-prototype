@@ -36,33 +36,47 @@
   #stage { position: relative; height: 100%; overflow: hidden; background: #000; }
 
   /* ---------- top bar ---------- */
+  /* row 1 = feed tabs; create / sound / search live in a vertical rail pinned to
+     the video's top-right corner (.tb-rail), structurally separate from the tabs
+     (tabs row reserves 64px right padding so it can never slide under the rail). */
   .top-bar {
     position: absolute; top: 0; left: 0; right: 0; z-index: 30;
-    display: flex; align-items: center; justify-content: flex-start;
-    padding: 10px 12px 16px 14px; pointer-events: none;
-    background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,0));
+    padding: 10px 64px 14px 14px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0));
   }
-  .ftabs { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+  .ftabs { display: flex; align-items: center; gap: 18px; pointer-events: auto; }
   .ftabs button {
-    color: rgba(255,255,255,.72); font-size: 14.5px; font-weight: 700;
-    padding: 3px 1px 7px; position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.4);
-    white-space: nowrap;
+    color: rgba(255,255,255,.72); font-size: 15px; font-weight: 700;
+    padding: 4px 2px 8px; position: relative; text-shadow: 0 1px 4px rgba(0,0,0,.4);
+    white-space: nowrap; flex: none;
   }
   .ftabs button.on { color: #fff; font-weight: 900; }
   .ftabs button.on::after {
     content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
     width: 26px; height: 3px; border-radius: 2px; background: #fff;
   }
+  .tb-rail {
+    position: absolute; top: 10px; right: 10px; z-index: 31;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    pointer-events: auto;
+  }
   .tb-ic {
-    position: absolute; top: 10px; pointer-events: auto;
-    width: 32px; height: 32px; border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 50%; flex: none;
     display: flex; align-items: center; justify-content: center; color: #fff;
     background: rgba(0,0,0,.22);
   }
   .tb-ic:active { background: rgba(0,0,0,.4); }
-  #muteBtn { right: 46px; }
-  #cmpBtn { right: 82px; }
-  #srchBtn { right: 10px; }
+  @media (max-width: 419px) {
+    .top-bar { padding-right: 56px; }
+    .ftabs { gap: 12px; }
+    .ftabs button { font-size: 14px; }
+    .tb-rail { gap: 7px; }
+    .tb-ic { width: 30px; height: 30px; }
+  }
+  @media (max-width: 340px) {
+    .ftabs { gap: 10px; }
+    .ftabs button { font-size: 13px; }
+  }
 
   /* ---------- video pager ---------- */
   .pager {
@@ -357,6 +371,30 @@
   .cmp-foot { flex: none; padding: 10px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(0,0,0,.06); background: var(--bg); }
   .cmp-foot .post-btn { width: 100%; }
   .cmp-foot .post-btn:disabled { opacity: .45; }
+  /* camera capture tile: first cell of the clip grid */
+  .cmp-cam { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: var(--text-3); }
+  .cmp-cam svg { width: 26px; height: 26px; }
+  .cmp-cam .cam-lb { font-size: 11.5px; font-weight: 800; }
+  .cmp-cam.on { color: var(--accent-deep); background: var(--accent-soft); }
+  /* camera capture overlay: live view + record */
+  .cam {
+    position: absolute; inset: 0; z-index: 60; background: #000; display: none; flex-direction: column;
+  }
+  .cam.show { display: flex; }
+  .cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cam-hud { position: absolute; left: 0; right: 0; top: 0; padding: 14px 14px 0; display: flex; align-items: center; justify-content: space-between; }
+  .cam-hud button { width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.45); color: #fff; display: flex; align-items: center; justify-content: center; border: none; }
+  .cam-timer { min-width: 58px; text-align: center; padding: 6px 10px; border-radius: 15px; background: rgba(0,0,0,.45); color: #fff; font-size: 12.5px; font-weight: 800; letter-spacing: .5px; visibility: hidden; }
+  .cam.rec .cam-timer { visibility: visible; }
+  .cam.rec .cam-timer::before { content: '● '; color: #ff4d4f; }
+  .cam-foot { position: absolute; left: 0; right: 0; bottom: calc(26px + env(safe-area-inset-bottom)); display: flex; justify-content: center; }
+  .cam-rec { width: 68px; height: 68px; border-radius: 50%; border: 4px solid rgba(255,255,255,.9); background: transparent; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .cam-rec i { width: 50px; height: 50px; border-radius: 50%; background: #ff4d4f; transition: border-radius .18s ease, transform .18s ease, background .18s ease; }
+  .cam.rec .cam-rec i { border-radius: 12px; transform: scale(.78); background: #fff; }
+  .cam-hint { position: absolute; left: 0; right: 0; bottom: calc(110px + env(safe-area-inset-bottom)); text-align: center; color: rgba(255,255,255,.85); font-size: 12px; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+  /* real video covers (recorded clips) replace the animated still covers */
+  .vcover { object-fit: cover; }
+  video.vcover { background: #000; }
 </style>
 </head>
 <body>
@@ -371,9 +409,11 @@
         <button id="ftHot" onclick="pickFeed('hot')"></button>
         <button id="ftNear" onclick="pickFeed('near')"></button>
       </div>
-      <button class="tb-ic" id="cmpBtn" onclick="openComposer(event)" aria-label="Create Reel"></button>
-      <button class="tb-ic" id="muteBtn" onclick="toggleMute(event)" aria-label="Sound"></button>
-      <button class="tb-ic" id="srchBtn" onclick="openSearch(event)" aria-label="Search"></button>
+      <div class="tb-rail">
+        <button class="tb-ic" id="cmpBtn" onclick="openComposer(event)" aria-label="Create Reel"></button>
+        <button class="tb-ic" id="muteBtn" onclick="toggleMute(event)" aria-label="Sound"></button>
+        <button class="tb-ic" id="srchBtn" onclick="openSearch(event)" aria-label="Search"></button>
+      </div>
     </div>
 
     <div class="pager" id="pagerFy"></div>
@@ -449,6 +489,18 @@
         </div>
       </div>
       <div class="cmp-foot"><button class="post-btn" id="cmpGo" onclick="publishReel()" disabled></button></div>
+    </div>
+
+    <!-- camera capture overlay: shoot a clip directly for the composer -->
+    <div class="cam" id="camView">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <div class="cam-hud">
+        <button onclick="closeCamera()" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <span class="cam-timer" id="camTimer">00:00</span>
+        <button onclick="camFlipFace()" aria-label="Flip camera"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8.5A8 8 0 005.8 6.2M4 15.5a8 8 0 0014.2 2.3"/><path d="M20 3.5v5h-5M4 20.5v-5h5"/></svg></button>
+      </div>
+      <div class="cam-hint" id="camHint"></div>
+      <div class="cam-foot"><button class="cam-rec" onclick="camToggleRec()" aria-label="Record"><i></i></button></div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -672,6 +724,8 @@
       cmp:'New Reel', clips:'Select a clip', capph:'Describe your reel… use #hashtags', caplb:'Caption',
       topics:'Topics', syncT:'Also share to Feeds', syncD:'Your reel appears as a card at the top of your feed',
       publish:'Publish', pickclip:'Pick a clip first', capreq:'Add a caption first',
+      shoot:'Shoot', camfail:'Camera unavailable', recnow:'Tap the button to record', recstop:'Tap again to finish',
+      camok:'Clip captured', recmax:'Recording stopped (30s max)',
       pubok:'Reel published', pubsync:'also in Feeds', cmrok:'Synced to Feeds', cmsyncfail:'Reel published — Feeds sync failed' },
     zh: { fy:'推荐', fw:'关注', hot:'热门', near:'附近', trend:'热门话题', cancel:'取消',
       srph:'搜索视频、创作者、话题', nores:'没有找到相关视频', comments:'条评论',
@@ -685,6 +739,8 @@
       cmp:'发布 Reel', clips:'选择一个片段', capph:'写点介绍… 可用 #话题', caplb:'文案',
       topics:'话题', syncT:'同步分享到 Feeds', syncD:'你的 Reel 会以卡片形式出现在动态顶部',
       publish:'发布', pickclip:'请先选择一个片段', capreq:'请先写点文案',
+      shoot:'拍摄', camfail:'无法访问摄像头', recnow:'点击按钮开始拍摄', recstop:'再次点击结束',
+      camok:'片段已录制', recmax:'已到 30 秒上限，自动结束',
       pubok:'Reel 已发布', pubsync:'已同步到 Feeds', cmrok:'已同步到 Feeds', cmsyncfail:'Reel 已发布——同步 Feeds 失败' },
   };
   const T = k => (L[rlang] && L[rlang][k]) || L.en[k] || k;
@@ -729,7 +785,9 @@
       (rank ? '<span class="chip hot">#' + rank + '</span>' : '');
     return '<section class="vcard" data-id="' + v.id + '">' +
       '<div class="vmedia" onclick="onMediaTap(event,\'' + v.id + '\')">' +
-        '<img class="vcover" src="assets/' + v.img + '" alt="" draggable="false">' +
+        (v.blobUrl
+          ? '<video class="vcover" src="' + v.blobUrl + '" muted loop playsinline draggable="false"></video>'
+          : '<img class="vcover" src="' + assetUrl(v.img) + '" alt="" draggable="false">') +
         '<div class="vscrim-t"></div><div class="vscrim-b"></div>' +
         '<div class="pp-flash" data-pp>' + playSVG() + '</div>' +
       '</div>' +
@@ -747,7 +805,7 @@
         '<button class="r-act" onclick="openComments(event,\'' + v.id + '\')">' + ICONS.cmt + '<b data-cm></b></button>' +
         '<button class="r-act" onclick="toggleFav(event,\'' + v.id + '\')"><span data-ic>' + ICONS.star + '</span><b data-fv></b></button>' +
         '<button class="r-act" onclick="openShare(event,\'' + v.id + '\')">' + ICONS.share + '<b data-sh></b></button>' +
-        '<div class="r-disc"><img src="assets/' + v.img + '" alt=""></div>' +
+        '<div class="r-disc"><img src="' + assetUrl(v.img) + '" alt=""></div>' +
       '</div>' +
       '<div class="vprog"><i style="animation-duration:' + v.dur + 's"></i></div>' +
     '</section>';
@@ -762,6 +820,9 @@
       ? list.map((v, i) => cardHTML(v, ranked ? i + 1 : 0)).join('')
       : '<div class="fw-empty"><div class="fe-ic">' + ICONS.note.replace('13', '26').replace('13', '26') + '</div>' +
         '<p>' + T('fwempty') + '</p><button onclick="pickFeed(\'fy\')">' + T('gofy') + '</button></div>';
+    /* fresh cards start with empty counts and caption state — paint them immediately
+       (covers first build, tab rebuilds and post-publish rebuilds alike) */
+    VIDS.forEach(paintCounts);
   }
   function vidsFY() { return VIDS.slice(); }
   /* Following is per creator, not per video: if any of a creator's videos is
@@ -782,6 +843,8 @@
       const set = (sel, txt) => { const el = card.querySelector(sel); if (el) el.textContent = txt; };
       set('[data-lk]', fmtN(v.likes)); set('[data-cm]', fmtN(v.comments));
       set('[data-fv]', fmtN(v.favs)); set('[data-sh]', fmtN(v.shares));
+      const more = card.querySelector('[data-capmore]');
+      if (more) more.style.display = capMoreNeeded(v) ? '' : 'none';
     });
   }
   function paintAll() {
@@ -833,7 +896,13 @@
   }
   function refreshPlayState() {
     const p = activePager();
-    Array.from(p.children).forEach((card, i) => card.classList.toggle('playing', playing && i === curIdx && card.classList.contains('vcard')));
+    Array.from(p.children).forEach((card, i) => {
+      const on = playing && i === curIdx && card.classList.contains('vcard');
+      card.classList.toggle('playing', on);
+      /* recorded clips carry real <video> covers: drive them with play/pause */
+      const vid = card.querySelector('video.vcover');
+      if (vid) { if (on) { vid.play().catch(() => {}) } else { vid.pause() } }
+    });
   }
 
   function bindPager(p) {
@@ -854,6 +923,7 @@
     const now = Date.now();
     if (now - lastTap < 300) {
       clearTimeout(tapTimer); tapTimer = 0; lastTap = 0;
+      if (!guestAsk('like')) return;      /* double-tap like is engagement too */
       burstAt(e); if (!vById(id).liked) toggleLike(null, id, true);
       return;
     }
@@ -887,8 +957,17 @@
   }
 
   /* ---------- actions ---------- */
+  /* guests may browse, but any engagement (like / save / comment / share /
+     follow / profile) must go through sign-up first: the shell owns the
+     registration gate and resumes the Reels tab afterwards */
+  function guestAsk(action) {
+    if (!EMBEDDED || !guestMode) return true;
+    try { window.parent.postMessage({ wahdaMsg: 'gate', action: action }, '*') } catch (err) {}
+    return false;
+  }
   function toggleLike(e, id, force) {
     if (e) e.stopPropagation();
+    if (!guestAsk('like')) return;
     const v = vById(id); if (!v) return;
     const on = force === true ? true : !v.liked;
     if (on === v.liked) return;
@@ -901,6 +980,7 @@
   }
   function toggleFav(e, id) {
     if (e) e.stopPropagation();
+    if (!guestAsk('fav')) return;
     const v = vById(id); if (!v) return;
     v.faved = !v.faved; v.favs += v.faved ? 1 : -1;
     paintCounts(v);
@@ -909,6 +989,7 @@
   }
   function toggleFollow(e, handle) {
     if (e) e.stopPropagation();
+    if (!guestAsk('follow')) return;
     if (!VIDS.some(v => v.handle === handle)) return;
     const to = !creatorFollowed(handle);          /* creator-level: any followed = followed */
     setCreatorFollowed(handle, to);
@@ -943,6 +1024,7 @@
   let cmtOpenId = null;
   function openComments(e, id) {
     if (e) e.stopPropagation();
+    if (!guestAsk('comment')) return;
     const v = vById(id); if (!v) return;
     cmtOpenId = id; seedCmts(v); renderCmts(v);
     $('cmtMask').classList.add('show'); $('cmtSheet').classList.add('show');
@@ -1019,6 +1101,7 @@
   }
   function openShare(e, id) {
     if (e) e.stopPropagation();
+    if (!guestAsk('share')) return;
     const v = vById(id); if (!v) return;
     shareOpenId = id;
     $('shrMask').classList.add('show'); $('shrSheet').classList.add('show');
@@ -1064,6 +1147,16 @@
         '<div class="share-name">' + esc(p.n) + '<small>' + esc(p.s) + '</small></div>' +
         '<button class="share-send" id="shr' + tab + i + '" onclick="shareTo(\'' + tab + '\',' + i + ')">' + (rlang === 'zh' ? '发送' : 'Send') + '</button></div>').join('');
   }
+  /* "View it in Feeds" after posting: hand navigation back to the shell so it
+     leaves the Reels overlay and lands on the Feeds tab (pickFeed only swaps
+     the in-page pager, which is why the button used to look dead) */
+  function gotoFeeds() {
+    if (EMBEDDED) {
+      try { window.parent.postMessage({ wahdaTab: 'feeds' }, '*'); } catch (err) {}
+    } else {
+      pickFeed('fy');                     /* standalone page: fall back to the For You pager */
+    }
+  }
   function shareTo(tab, i) {
     const btn = $('shr' + tab + i);
     const person = (tab === 'contacts' ? shareContacts : shareGroups)[i];
@@ -1092,7 +1185,7 @@
         '<div class="mp-card"><div class="mp-thumb"><img src="assets/' + v.img + '" alt="" onerror="this.remove()"></div>' +
           '<div><div class="mp-title">' + esc(v.t[rlang] || v.t.en) + '</div>' +
           '<div class="mp-tags"><span>@' + esc(v.handle) + '</span><span>#' + TAG_POOL[v.id.charCodeAt(2) % TAG_POOL.length] + '</span><span>#WahdaReels</span></div></div></div>' +
-        '<button class="mp-view" onclick="closeShare();pickFeed(\'fy\')">' + (rlang === 'zh' ? '去 Feeds 查看 →' : 'View it in Feeds →') + '</button></div>';
+        '<button class="mp-view" onclick="closeShare();gotoFeeds()">' + (rlang === 'zh' ? '去 Feeds 查看 →' : 'View it in Feeds →') + '</button></div>';
       toast(T('posted'));
     });
   }
@@ -1121,8 +1214,14 @@
     renderCmpGrid(); cmpValidate();
   }
   function renderCmpGrid() {
-    $('cmpGrid').innerHTML = VIDS.filter(v => !v.mine).map(v =>
-      '<button class="cmp-cell' + (cmpClip && cmpClip.src === v.id ? ' on' : '') + '" onclick="cmpPick(\'' + v.id + '\')">' +
+    const camOn = !!(cmpClip && cmpClip.cam);
+    $('cmpGrid').innerHTML =
+      '<button class="cmp-cell cmp-cam' + (camOn ? ' on' : '') + '" onclick="openCamera(event)">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 016.5 6h1.6l1.2-1.8h5.4L15.9 6h1.6A2.5 2.5 0 0120 8.5v8A2.5 2.5 0 0117.5 19h-11A2.5 2.5 0 014 16.5z"/><circle cx="12" cy="12.5" r="3.4"/></svg>' +
+        '<span class="cam-lb">' + T('shoot') + '</span>' +
+      '</button>' +
+      VIDS.filter(v => !v.mine).map(v =>
+      '<button class="cmp-cell' + (cmpClip && !cmpClip.cam && cmpClip.src === v.id ? ' on' : '') + '" onclick="cmpPick(\'' + v.id + '\')">' +
         '<img src="assets/' + v.img + '" alt="">' +
         '<span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
       '</button>').join('');
@@ -1141,6 +1240,103 @@
     $('cmpSyncRow').classList.toggle('on', cmpSyncOn);
   }
   function cmpValidate() { $('cmpGo').disabled = !(cmpClip && $('cmpCap').value.trim()); }
+  /* ---------- camera capture: shoot a clip straight into the composer ---------- */
+  let camStream = null, camRec = null, camChunks = [], camT0 = 0, camTimerInt = 0;
+  let camFacing = 'user', camSeq = 0, camAutoStop = 0;
+  const CAM_MAX_MS = 30000;
+  function assetUrl(p) { return /^data:|^blob:/.test(String(p)) ? p : 'assets/' + p; }
+  function openCamera(e) {
+    if (e) e.stopPropagation();
+    /* embedded (in-app / preview): the top document owns the camera — the
+       iframe origin (srcdoc / file://) can never get the permission itself */
+    if (EMBEDDED) {
+      try { window.parent.postMessage({ wahdaMsg: 'cam-request' }, '*'); } catch (err) { toast(T('camfail')); }
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { toast(T('camfail')); return; }
+    $('camHint').textContent = T('recnow');
+    $('camTimer').textContent = '00:00';
+    $('camView').classList.add('show');
+    camStartStream();
+  }
+  function camStartStream() {
+    camStopStream();
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing, width: { ideal: 720 } }, audio: false })
+      .then(s => { camStream = s; $('camVideo').srcObject = s; })
+      .catch(() => { toast(T('camfail')); closeCamera(); });
+  }
+  function camStopStream() {
+    if (camStream) { try { camStream.getTracks().forEach(t => t.stop()) } catch (e) {} camStream = null; }
+    if ($('camVideo').srcObject) $('camVideo').srcObject = null;
+  }
+  function closeCamera() {
+    if (camRec && camRec.state === 'recording') { try { camRec.stop() } catch (e) {} }
+    if (camAutoStop) { clearTimeout(camAutoStop); camAutoStop = 0; }
+    if (camTimerInt) { clearInterval(camTimerInt); camTimerInt = 0; }
+    camStopStream();
+    $('camView').classList.remove('show', 'rec');
+  }
+  function camFlipFace() {
+    camFacing = camFacing === 'user' ? 'environment' : 'user';
+    if (!camRec || camRec.state !== 'recording') camStartStream();
+  }
+  function camToggleRec() {
+    if (!camStream) { toast(T('camfail')); return; }
+    if (camRec && camRec.state === 'recording') { try { camRec.stop() } catch (e) {} return; }
+    try { camRec = new MediaRecorder(camStream, { mimeType: 'video/webm' }); }
+    catch (e) { try { camRec = new MediaRecorder(camStream); } catch (e2) { toast(T('camfail')); return; } }
+    camChunks = [];
+    camRec.ondataavailable = ev => { if (ev.data && ev.data.size) camChunks.push(ev.data); };
+    camRec.onstop = camFinish;
+    camRec.start();
+    camT0 = Date.now();
+    $('camHint').textContent = T('recstop');
+    $('camView').classList.add('rec');
+    camTimerInt = setInterval(() => {
+      const s = Math.floor((Date.now() - camT0) / 1000);
+      $('camTimer').textContent = '00:' + String(Math.min(59, s)).padStart(2, '0');
+    }, 250);
+    camAutoStop = setTimeout(() => {
+      $('camView').classList.add('rec');           /* keep state while stopping */
+      if (camRec && camRec.state === 'recording') { try { camRec.stop() } catch (e) {} toast(T('recmax')); }
+    }, CAM_MAX_MS);
+  }
+  function camFinish() {
+    if (camTimerInt) { clearInterval(camTimerInt); camTimerInt = 0; }
+    $('camView').classList.remove('rec');
+    const dur = Math.max(1, Math.round((Date.now() - camT0) / 1000));
+    const blob = new Blob(camChunks, { type: (camRec && camRec.mimeType) || 'video/webm' });
+    camChunks = [];
+    const url = URL.createObjectURL(blob);
+    /* grab a poster frame for the Feeds card, then hand the clip to the composer */
+    let settled = false;
+    const settle = (poster) => { if (settled) return; settled = true; camDone(url, poster, dur); };
+    try {
+      const pv = document.createElement('video');
+      pv.muted = true; pv.playsInline = true; pv.preload = 'auto';
+      pv.src = url;
+      pv.addEventListener('loadeddata', () => { try { pv.currentTime = Math.min(0.1, pv.duration || 0.1); } catch (e) { settle(null); } });
+      pv.addEventListener('seeked', () => {
+        try {
+          const c = document.createElement('canvas');
+          const ar = (pv.videoHeight && pv.videoWidth) ? pv.videoHeight / pv.videoWidth : 16 / 9;
+          c.width = 360; c.height = Math.round(360 * ar);
+          c.getContext('2d').drawImage(pv, 0, 0, c.width, c.height);
+          settle(c.toDataURL('image/jpeg', 0.72));
+        } catch (e) { settle(null); }
+        pv.src = '';
+      });
+      pv.addEventListener('error', () => settle(null));
+      setTimeout(() => settle(null), 1600);
+    } catch (e) { settle(null); }
+  }
+  function camDone(url, poster, dur) {
+    closeCamera();
+    camSeq++;
+    cmpClip = { src: '__cam' + camSeq, img: poster || '', dur: dur, blob: url, cam: true };
+    renderCmpGrid(); cmpValidate();
+    toast(T('camok'));
+  }
   function publishReel() {
     const cap = $('cmpCap').value.trim();
     if (!cmpClip) { toast(T('pickclip')); return; }
@@ -1151,6 +1347,7 @@
     myReelSeq++;
     const nv = {
       id: 'mv' + myReelSeq, img: cmpClip.img, dur: cmpClip.dur || 24, handle: 'you', vf: false,
+      blobUrl: cmpClip.blob || '',
       name: { en: 'You', zh: '你' }, avaBg: '#0E7C66',
       t: { en: cap.length > 42 ? cap.slice(0, 42) + '…' : cap, zh: cap },
       cap: { en: full, zh: full },
@@ -1206,6 +1403,7 @@
   };
   function openProfile(e, handle) {
     if (e) e.stopPropagation();
+    if (!guestAsk('profile')) return;   /* avatars & @handles are gated for guests */
     const v = VIDS.filter(x => x.handle === handle)[0];
     if (!v) return;
     if (!EMBEDDED) { toast(T('noapp')); return; }      /* standalone review: no shell around us */
@@ -1215,7 +1413,9 @@
         wahdaMsg: 'profile',
         name: v.name,                                   /* bilingual: the shell renders it in its own language */
         bio: c.bio || { en: 'Wahda creator', zh: 'Wahda 创作者' },
-        loc: { en: v.loc, zh: LOC_ZH[v.loc] || v.loc }
+        loc: { en: v.loc, zh: LOC_ZH[v.loc] || v.loc },
+        /* reels published by this creator, so the profile's Reels tab can show them */
+        reels: VIDS.filter(x => x.handle === handle).map(x => ({ vid: x.id, img: x.img }))
       }, '*');
     } catch (err) {}
   }
@@ -1306,6 +1506,12 @@
       return;
     } else if (d.wahdaMsg === 'compose') {
       openComposer(); return;
+    } else if (d.wahdaMsg === 'cam-clip') {
+      /* the shell recorded the clip (top-document camera); take it from here */
+      if (d.video) camDone(d.video, d.poster || '', d.dur || 1);
+      return;
+    } else if (d.wahdaMsg === 'cam-fail') {
+      toast(T('camfail')); return;
     } else if (d.wahdaMsg === 'open-reel' && d.vid) {
       if (curTab !== 'fy') pickFeed('fy');
       jumpTo('fy', d.vid, true); return;

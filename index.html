@@ -467,10 +467,10 @@
   /* poster of a title shared from Wahda Reels */
   .feed-media-real{height:auto;padding:0;overflow:hidden;background:var(--surface-2,#EFECE5);display:block}
   /* a Reel synced into Feeds renders as a tappable vertical video card */
-  .feed-reel{position:relative;margin-top:10px;width:min(64%,300px);aspect-ratio:9/14;border-radius:14px;overflow:hidden;background:#101014;display:block;padding:0;cursor:pointer}
+  .feed-reel{position:relative;margin-top:10px;width:min(62%,260px);height:auto;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#101014;display:block;padding:0;cursor:pointer}
   .feed-reel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .feed-reel .freel-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;color:#fff;pointer-events:none}
-  .feed-reel .freel-tag{position:absolute;left:9px;bottom:9px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:800;letter-spacing:.4px;padding:3px 9px;border-radius:9px;display:flex;align-items:center;gap:4px;pointer-events:none}
+  .feed-reel .freel-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;color:#fff;pointer-events:none}
+  .feed-reel .freel-tag{position:absolute;left:9px;top:9px;background:rgba(0,0,0,.6);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.4px;padding:3px 9px;border-radius:10px;display:flex;align-items:center;gap:4px;pointer-events:none}
   .feed-media-real img{display:block;width:100%;height:190px;object-fit:cover}
   /* messages page */
   .msg-head{padding:14px 20px 7px;display:flex;align-items:center;justify-content:space-between}
@@ -698,6 +698,11 @@
   .fp-tab{background:none;border:none;font-size:15px;font-weight:600;color:var(--ink-3,#9B9993);cursor:pointer;padding:4px 0;font-family:inherit;position:relative}
   .fp-tab.on{color:var(--ink,#1C1B18)}
   .fp-tab.on::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:3px;border-radius:2px;background:var(--ink,#1C1B18)}
+  .fp-reels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 16px}
+  .fp-reel-cell{position:relative;aspect-ratio:9/16;border:none;border-radius:10px;overflow:hidden;background:#101014;padding:0;cursor:pointer;display:block}
+  .fp-reel-cell img{width:100%;height:100%;object-fit:cover;display:block}
+  .fp-reel-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .fp-reels-empty{padding:56px 30px;text-align:center;color:var(--ink-3,#9B9993);font-size:14px;line-height:1.6}
   .fp-list{padding:0 20px}
   .fp-item{padding:14px 0;border-bottom:1px solid var(--line,#E5E2DC)}
   .fp-item:last-child{border-bottom:none}
@@ -719,7 +724,9 @@
   .hub-w-bal{font-size:17px;font-weight:800;color:#2B329C;margin-top:2px}
   .hub-topup{flex:none;background:var(--brand,#0E7C66);color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
   .hub-tabs{display:flex;gap:15px;padding:16px 20px 10px;border-bottom:1px solid var(--line,#E5E2DC);margin-top:8px}
-  .hub-tabs .fp-tab{font-size:13.5px}
+  .hub-tabs .fp-tab{font-size:12.5px}
+  .hub-tabs{gap:10px;padding:16px 12px 10px;overflow-x:auto;scrollbar-width:none}
+  .hub-tabs::-webkit-scrollbar{display:none}
   /* Events (My Hub) */
   .ev-seg{display:flex;gap:8px;padding:12px 20px 2px}
   .ev-seg button{flex:1;height:36px;border-radius:999px;border:1px solid var(--line,#E5E2DC);background:var(--card,#FFFFFF);color:var(--ink-2,#6B6A66);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
@@ -990,6 +997,22 @@
     .page-head{margin-bottom:8px}
     .phone{width:100%;max-width:none;height:auto;flex:1 1 auto;min-height:0}
   }
+  /* ---------- shell-owned camera capture (for Create Reel) ----------
+     getUserMedia runs in the TOP document: inside the Reels iframe
+     (srcdoc / file://) the permission is always denied. */
+  .bxcam{position:absolute;inset:0;z-index:999;background:#000;display:none;flex-direction:column}
+  .bxcam.show{display:flex}
+  .bxcam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bxcam-hud{position:absolute;left:0;right:0;top:0;padding:14px 14px 0;display:flex;align-items:center;justify-content:space-between}
+  .bxcam-hud button{width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;border:none}
+  .bxcam-timer{min-width:58px;text-align:center;padding:6px 10px;border-radius:15px;background:rgba(0,0,0,.45);color:#fff;font-size:12.5px;font-weight:800;letter-spacing:.5px;visibility:hidden}
+  .bxcam.rec .bxcam-timer{visibility:visible}
+  .bxcam.rec .bxcam-timer::before{content:'● ';color:#ff4d4f}
+  .bxcam-foot{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center}
+  .bxcam-rec{width:68px;height:68px;border-radius:50%;border:4px solid rgba(255,255,255,.9);background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+  .bxcam-rec i{width:50px;height:50px;border-radius:50%;background:#ff4d4f;transition:border-radius .18s ease,transform .18s ease,background .18s ease}
+  .bxcam.rec .bxcam-rec i{border-radius:12px;transform:scale(.78);background:#fff}
+  .bxcam-hint{position:absolute;left:0;right:0;bottom:110px;text-align:center;color:rgba(255,255,255,.85);font-size:12px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 </style>
 </head>
 <body>
@@ -1000,6 +1023,20 @@
 </div>
 
 <div class="phone" id="phone">
+
+  <!-- shell-owned camera capture overlay: getUserMedia runs in the top document
+       (iframe / srcdoc / file:// origins cannot get camera permission) -->
+  <div class="bxcam" id="bxCamView">
+    <video id="bxCamVideo" autoplay playsinline muted></video>
+    <div class="bxcam-hud">
+      <button onclick="bxCamClose()" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="bxcam-timer" id="bxCamTimer">00:00</span>
+      <button onclick="bxCamFlip()" aria-label="Flip camera"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 8.5A8 8 0 005.8 6.2M4 15.5a8 8 0 0014.2 2.3"/><path d="M20 3.5v5h-5M4 20.5v-5h5"/></svg></button>
+    </div>
+    <div class="bxcam-hint" id="bxCamHint"></div>
+    <div class="bxcam-foot"><button class="bxcam-rec" onclick="bxCamToggleRec()" aria-label="Record"><i></i></button></div>
+  </div>
+
   <div class="statusbar"><span id="clock">9:41</span><span>5G ▮▮▮</span></div>
   <div class="warn-banner" id="netBanner">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 20h20L12 3z" stroke="#7A5C14" stroke-width="1.8" fill="none" stroke-linejoin="round"/><path d="M12 10v4" stroke="#7A5C14" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#7A5C14"/></svg>
@@ -1368,7 +1405,7 @@
       <div class="scroll" id="nfBody" style="display:none;padding:0 16px 14px"></div>
       <!-- Wahda Reels view (embedded iframe; shares the main tabbar — one nav for all tabs) -->
       <div id="reelsHost" style="display:none;flex:1;position:relative;background:#F4F2EE">
-        <iframe id="reelsFrame" title="Wahda Reels" src="" style="width:100%;height:100%;border:0;background:#F4F2EE;display:block"></iframe>
+        <iframe id="reelsFrame" title="Wahda Reels" src="" allow="camera; microphone" style="width:100%;height:100%;border:0;background:#F4F2EE;display:block"></iframe>
       </div>
       <div class="tabbar" id="tabbar">
         <button class="tab active" data-tab="feeds" onclick="switchTab('feeds')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H8l-4 4V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_feeds">Feeds</span></button>
@@ -2384,7 +2421,7 @@
         <button class="back-btn" onclick="closeMiniHub()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav-title" data-i18n="qp_ma_sec">Mini Apps</div>
       </div>
-      <div style="padding:6px 20px 0"><input class="p2p-in" style="margin-top:0" id="maHubQ" data-i18n-ph="qp_search_ph" placeholder="Search tools &amp; mini apps" oninput="renderMiniHub()"></div>
+      <div style="padding:6px 20px 0"><input class="p2p-in" style="margin-top:0" id="maHubQ" data-i18n-ph="qp_search_ph" placeholder="Search mini apps" oninput="renderMiniHub()"></div>
       <div class="scroll" id="maHubBody" style="padding:6px 0 20px"></div>
     </section>
 
@@ -2793,10 +2830,9 @@
         <div style="font-weight:700;font-size:17px" data-i18n="it_t">Quick Panel</div>
         <button class="icon-btn" onclick="closeITPanel()" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
-      <div class="qp-search"><input class="ng-search-in" id="qpSearch" data-i18n-ph="qp_search_ph" placeholder="Search tools &amp; mini apps" oninput="qpOnSearch(this.value)"></div>
+      <div class="qp-search"><input class="ng-search-in" id="qpSearch" data-i18n-ph="qp_search_ph" placeholder="Search mini apps" oninput="qpOnSearch(this.value)"></div>
       <div id="qpBody">
       <div id="qpNative">
-        <div class="qp-sec" data-i18n="it_sec_it">Islamic Tools</div>
       <button class="it-banner" onclick="chTool('prayer')">
         <div style="text-align:left">
           <div style="font-size:11px;opacity:.85" data-i18n="it_next">Next prayer</div>
@@ -2804,16 +2840,6 @@
         </div>
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M20 13.5A8 8 0 1110.5 4 6.5 6.5 0 0020 13.5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </button>
-      <div class="it-grid">
-        <button class="it-card" onclick="chTool('prayer')"><span class="it-ic" style="color:#0E7C66;background:rgba(14,124,102,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 21v-6c0-4 3.1-7 7-7s7 3 7 7v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.5c.8 1 1.6 1.6 1.6 2.6a1.6 1.6 0 11-3.2 0c0-1 .8-1.6 1.6-2.6z" fill="currentColor"/><path d="M3.5 21h17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_prayer">Prayer Times</span></button>
-        <button class="it-card" onclick="chTool('qibla')"><span class="it-ic" style="color:#C9803B;background:rgba(201,128,59,.13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><span data-i18n="it_qibla">Qibla</span></button>
-        <button class="it-card" onclick="chTool('quran')"><span class="it-ic" style="color:#6B5CA5;background:rgba(107,92,165,.13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 6c-1.8-1.6-4-2-6.5-2v14c2.5 0 4.7.4 6.5 2 1.8-1.6 4-2 6.5-2V4c-2.5 0-4.7.4-6.5 2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 6v14" stroke="currentColor" stroke-width="1.7"/></svg></span><span data-i18n="it_quran">Quran</span></button>
-        <button class="it-card" onclick="chTool('tasbih')"><span class="it-ic" style="color:#B0685E;background:rgba(176,104,94,.13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="4.5" r="1.4" fill="currentColor"/><circle cx="18" cy="8" r="1.4" fill="currentColor"/><circle cx="19.5" cy="14.5" r="1.4" fill="currentColor"/><circle cx="15" cy="19" r="1.4" fill="currentColor"/><circle cx="9" cy="19" r="1.4" fill="currentColor"/><circle cx="4.5" cy="14.5" r="1.4" fill="currentColor"/><circle cx="6" cy="8" r="1.4" fill="currentColor"/><circle cx="12" cy="12.5" r="2.4" stroke="currentColor" stroke-width="1.5"/></svg></span><span data-i18n="it_tasbih">Tasbih</span></button>
-        <button class="it-card" onclick="chTool('cal')"><span class="it-ic" style="color:#5E7A8B;background:rgba(94,122,139,.13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_cal">Hijri Calendar</span></button>
-        <button class="it-card" onclick="chTool('duas')"><span class="it-ic" style="color:#C9A24B;background:rgba(201,162,75,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 21v-6c0-2.8 2-5 5-5s5 2.2 5 5v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 3.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1L7 6.5l2.1-.9.9-2.1z" fill="currentColor"/></svg></span><span data-i18n="it_duas">Duas</span></button>
-        <button class="it-card" onclick="chTool('zakat')"><span class="it-ic" style="color:#0A5D4E;background:rgba(10,93,78,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M14.5 8.5a4 4 0 100 7 5 5 0 110-7z" fill="currentColor" opacity=".85"/></svg></span><span data-i18n="it_zakat">Zakat Calculator</span></button>
-        <button class="it-card" onclick="chTool('adhan')"><span class="it-ic" style="color:#4E8B6E;background:rgba(78,139,110,.14)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 16v-4a6 6 0 1112 0v4l1.5 2.5H4.5L6 16z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 21a2.2 2.2 0 004 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="it_adhan">Adhan Alerts</span></button>
-      </div>
       </div>
       <div id="qpRecent" style="display:none"></div>
       <div id="qpResults" style="display:none"></div>
@@ -3062,7 +3088,7 @@ en:{
  ch_live:"Live Streaming", ch_live_d:"Broadcast live to the community", ch_live_toast:"Live streaming setup — next iteration.",
  it_t:"Quick Panel", it_hint_ma:"Pull Down For Mini Apps", it_next:"Next prayer",
  it_prayer:"Prayer Times", it_qibla:"Qibla Compass", it_quran:"Holy Qura'n", it_tasbih:"Tasbih Counter", it_cal:"Hijri Calendar", it_duas:"Duas", it_zakat:"Zakat Calculator", it_adhan:"Adhan Alerts", it_places:"Places", it_more_sec:"More Tools", it_soon:"Soon", it_more_foot:"More tools & Mini Apps plug in here as they ship", it_hajj:"Hajj & Umrah Guide", it_halal:"Halal Scanner", it_mosque_f:"Mosque Finder", it_radio:"Quran Radio", it_finance:"Islamic Finance", it_kids:"Kids Quran",
- it_toast:"{0} — coming in the next iteration.", it_sec_it:"Islamic Tools", qp_search_ph:"Search tools & mini apps", qp_recent:"Recently used", qp_ma_sec:"Mini Apps", qp_more:"Discover more Mini Apps", qp_all:"All Mini Apps", qp_my:"My Mini Apps", qp_fav_on:"Added to My Mini Apps", qp_fav_off:"Removed from My Mini Apps", qp_empty:"No matching tools or mini apps", qp_open_toast:"Opening {0} — mini app runtime in the next iteration.", qp_hub_toast:"Mini Apps Hub — coming in the next iteration.",
+ it_toast:"{0} — coming in the next iteration.", it_sec_it:"Islamic Tools", qp_search_ph:"Search mini apps", qp_recent:"Recently used", qp_ma_sec:"Mini Apps", qp_more:"Discover more Mini Apps", qp_all:"All Mini Apps", qp_my:"My Mini Apps", qp_fav_on:"Added to My Mini Apps", qp_fav_off:"Removed from My Mini Apps", qp_empty:"No matching tools or mini apps", qp_open_toast:"Opening {0} — mini app runtime in the next iteration.", qp_hub_toast:"Mini Apps Hub — coming in the next iteration.",
  cr_spot:"Creator Spotlight", cr_spot_d:"The recitations & lectures behind your tools",
  cr_title:"Creator", cr_acct:"Creator Account", cr_verify:"Verified Creator", cr_fl:"followers", cr_li:"listens",
  cr_listen:"Listen Now", cr_listening:"Now Playing",
@@ -3134,7 +3160,7 @@ en:{
  acc_add:"Add account", acc_add_toast:"Add account — next iteration.",
  ct_title:"Contacts",
  fp_title:"Profile", fp_member:"Personal Account", fp_fl:"followers", fp_fg:"following", fp_more:"more", flist_title:"Followers & Followings", flist_fg:"Followings",
- fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reviews:"Reviews", fp_more_toast:"More actions — next iteration.", fp_up_hd:"Upcoming Activities", fp_up_remind:"Remind me", fp_up_reminded:"✓ Reminded", fp_up_toast:"Reminder saved to your calendar", fp_up_min:"min", fp_up_livesoon:"Live soon",
+ fp_chat:"Chat", fp_tab_posts:"Posts", fp_tab_reels:"Reels", fp_tab_reviews:"Reviews", fp_reels_empty:"No reels yet", fp_more_toast:"More actions — next iteration.", fp_up_hd:"Upcoming Activities", fp_up_remind:"Remind me", fp_up_reminded:"✓ Reminded", fp_up_toast:"Reminder saved to your calendar", fp_up_min:"min", fp_up_livesoon:"Live soon",
  fp_p1:"Jumu'ah carpool list for this Friday is up — reply to join!", fp_p1t:"2 d ago",
  fp_p2:"Alhamdulillah, our iftar drive served 120 families this week.", fp_p2t:"5 d ago",
  fp_rv1t:"Al-Hakim Mosque", fp_rv1c:"Mosque", fp_rv1d:"9 Months ago",
@@ -3147,7 +3173,7 @@ en:{
  hb_loc:"Riyadh, Saudi Arabia",
  dr_ask:"Save as draft?", dr_sub:"Your content will be kept as a draft and restored the next time you open this page.", dr_save:"Save as Draft", dr_discard:"Discard", dr_saved:"Saved to draft \u2014 it will reopen next time", dr_restored:"Draft restored",
  hb_bal:"Estimated Balance", hb_topup:"Top Up", hb_wallet_toast:"My Wallet — next iteration.", hb_topup_toast:"Top up flow — next iteration.",
- hb_tab_posts:"Posts", hb_tab_saved:"Saved", hb_tab_comm:"Community", hb_tab_events:"Events", hb_tab_reviews:"Reviews",
+ hb_tab_posts:"Posts", hb_tab_reels:"Reels", hb_reels_empty:"No reels yet — tap Create → Create Reel to post your first one", hb_tab_saved:"Saved", hb_tab_comm:"Community", hb_tab_events:"Events", hb_tab_reviews:"Reviews",
  hb_posts_empty:"No posts yet — tap the + above to share your first note.",
  hb_saved_empty:"Nothing saved yet — tap the bookmark icon on any post to keep it here.",
  ev_title:"Event Details", ev_created:"Created", ev_booked:"Booked",
@@ -3297,7 +3323,7 @@ zh:{
  ch_live:"直播", ch_live_d:"向社区进行实时直播", ch_live_toast:"直播开播流程——下一轮迭代补充。",
  it_t:"快捷面板", it_hint_ma:"下拉进入小程序", it_next:"下一次礼拜",
  it_prayer:"礼拜时间", it_qibla:"朝向指南", it_quran:"古兰经", it_tasbih:"赞珠计数", it_cal:"希吉来历", it_duas:"都阿", it_zakat:"天课计算", it_adhan:"宣礼提醒", it_places:"地点", it_more_sec:"更多工具", it_soon:"即将", it_more_foot:"更多工具与小程序将在此处持续接入", it_hajj:"朝觐与副朝指南", it_halal:"清真扫描", it_mosque_f:"清真寺查找", it_radio:"古兰经电台", it_finance:"伊斯兰金融", it_kids:"儿童古兰经",
- it_toast:"{0}——下一轮迭代补充。", it_sec_it:"伊斯兰工具", qp_search_ph:"搜索工具与小程序", qp_recent:"最近使用", qp_ma_sec:"小程序", qp_more:"发现更多 Mini Apps", qp_all:"全部小程序", qp_my:"我的小程序", qp_fav_on:"已收藏到我的小程序", qp_fav_off:"已取消收藏", qp_empty:"没有找到相关工具或小程序", qp_open_toast:"正在打开 {0}——小程序运行层下一轮迭代。", qp_hub_toast:"Mini Apps 聚合页——下一轮迭代补充。",
+ it_toast:"{0}——下一轮迭代补充。", it_sec_it:"伊斯兰工具", qp_search_ph:"搜索小程序", qp_recent:"最近使用", qp_ma_sec:"小程序", qp_more:"发现更多 Mini Apps", qp_all:"全部小程序", qp_my:"我的小程序", qp_fav_on:"已收藏到我的小程序", qp_fav_off:"已取消收藏", qp_empty:"没有找到相关工具或小程序", qp_open_toast:"正在打开 {0}——小程序运行层下一轮迭代。", qp_hub_toast:"Mini Apps 聚合页——下一轮迭代补充。",
  cr_spot:"创作者精选", cr_spot_d:"工具背后的诵经与课程创作者",
  cr_title:"创作者主页", cr_acct:"创作者账号", cr_verify:"认证创作者", cr_fl:"粉丝", cr_li:"收听",
  cr_listen:"立即收听", cr_listening:"正在播放",
@@ -3369,7 +3395,7 @@ zh:{
  acc_add:"添加账号", acc_add_toast:"添加账号——下一轮迭代补充。",
  ct_title:"联系人",
  fp_title:"个人主页", fp_member:"个人账号", fp_fl:"粉丝", fp_fg:"关注中", fp_more:"展开", flist_title:"粉丝与关注", flist_fg:"关注中",
- fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reviews:"评价", fp_more_toast:"更多操作——下一轮迭代补充。", fp_up_hd:"直播预告", fp_up_remind:"提醒我", fp_up_reminded:"✓ 已设提醒", fp_up_toast:"已写入日历提醒", fp_up_min:"分钟", fp_up_livesoon:"即将开播",
+ fp_chat:"发消息", fp_tab_posts:"动态", fp_tab_reels:"Reels", fp_tab_reviews:"评价", fp_reels_empty:"还没有发布 Reels", fp_more_toast:"更多操作——下一轮迭代补充。", fp_up_hd:"直播预告", fp_up_remind:"提醒我", fp_up_reminded:"✓ 已设提醒", fp_up_toast:"已写入日历提醒", fp_up_min:"分钟", fp_up_livesoon:"即将开播",
  fp_p1:"周五主麻拼车表更新了——回复即可参加！", fp_p1t:"2 天前",
  fp_p2:"感谢真主，我们这周的开饭公益送餐服务了 120 户家庭。", fp_p2t:"5 天前",
  fp_rv1t:"Al-Hakim 清真寺", fp_rv1c:"清真寺", fp_rv1d:"9 个月前",
@@ -3382,7 +3408,7 @@ zh:{
  hb_loc:"沙特利雅得",
  dr_ask:"保存为草稿？", dr_sub:"当前内容将保留为草稿，下次打开此页面时自动恢复。", dr_save:"存为草稿", dr_discard:"不保留", dr_saved:"已保存草稿——下次进入时恢复", dr_restored:"已恢复草稿",
  hb_bal:"预估余额", hb_topup:"充值", hb_wallet_toast:"我的钱包——下一轮迭代补充。", hb_topup_toast:"充值流程——下一轮迭代补充。",
- hb_tab_posts:"动态", hb_tab_saved:"收藏", hb_tab_comm:"社群", hb_tab_events:"活动", hb_tab_reviews:"评价",
+ hb_tab_posts:"动态", hb_tab_reels:"Reels", hb_reels_empty:"还没有发布 Reels——点「创建 → Create Reel」发第一条", hb_tab_saved:"收藏", hb_tab_comm:"社群", hb_tab_events:"活动", hb_tab_reviews:"评价",
  hb_posts_empty:"暂无帖子——点击上方 + 发布你的第一条动态。",
  hb_saved_empty:"暂无收藏——点击帖子下方书签图标即可收藏到这里。",
  ev_title:"活动详情", ev_created:"我创建的", ev_booked:"已报名",
@@ -4359,7 +4385,7 @@ function findFriendIdx(name){
  for(var k=0;k<FRIENDS.length;k++){if(FRIENDS[k].n===name)return k}
  return -1;
 }
-function openProfileByName(name,bio,loc){
+function openProfileByName(name,bio,loc,reels){
  /* name may be a bilingual {en,zh} record (a creator handed over by Reels):
     the account keeps its canonical string, the page renders the live language */
  var nLoc=(name&&typeof name==="object")?name:null;
@@ -4367,7 +4393,8 @@ function openProfileByName(name,bio,loc){
  if(!isGuest){var idx=findFriendIdx(nN);if(idx>-1){openFProfile(idx);return}}
  raisePage("pg-fprofile");
  fpGuest={n:nN,nLoc:nLoc,f:Math.max(nN.replace(/[^A-Za-z]/g,"").length*7%160+14,14),
-  bio:bio||{en:"Wahda community member",zh:"Wahda 社区成员"},loc:loc||{en:"Riyadh, Saudi Arabia",zh:"利雅得，沙特阿拉伯"}};
+  bio:bio||{en:"Wahda community member",zh:"Wahda 社区成员"},loc:loc||{en:"Riyadh, Saudi Arabia",zh:"利雅得，沙特阿拉伯"},
+  reels:(reels&&reels.length)?reels:null};
  fpRequested=false;
  renderFProfile();
  document.getElementById("pg-fprofile").classList.add("active");
@@ -4404,6 +4431,29 @@ function fpReview(title,cat,tm,tx){
   +'<div class="fp-item-cat">'+cat+'</div>'
   +'<div class="fp-item-meta"><span>'+tm+'</span><span class="fp-stars">★★★★<span style="color:#D9D6CF">★</span></span><b style="color:var(--ink,#1C1B18)">4.0</b></div>'
   +'<div class="fp-item-tx">'+tx+'</div></div>';
+}
+/* ---------- profile Reels tab: reels this person published ----------
+   sources: reel posts in FEEDS authored by this person + (guest creator
+   profiles) the reel list handed over by the Reels page with the profile */
+function fpReelList(f){
+ var out=[],seen={},n=txt(f.n)||String(f.n||"");
+ FEEDS.forEach(function(p){
+  if(p.type==="reel"&&p.reel&&p.reel.vid&&txt(p.n)===n&&!seen[p.reel.vid]){
+   seen[p.reel.vid]=1;out.push({vid:p.reel.vid,img:p.img||""});
+  }
+ });
+ if(fpGuest&&fpGuest.reels&&fpGuest.reels.length){
+  fpGuest.reels.forEach(function(r){
+   if(r&&r.vid&&!seen[r.vid]){seen[r.vid]=1;out.push({vid:r.vid,img:r.img||""})}
+  });
+ }
+ return out;
+}
+function fpReelCell(r){
+ var play='<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="rgba(16,16,20,.55)"/><path d="M10 8.4v7.2l6-3.6-6-3.6z" fill="#fff"/></svg>';
+ return '<button class="fp-reel-cell" onclick="openReelCard(\''+r.vid+'\')">'
+  +(r.img?'<img src="assets/'+r.img+'" alt="" loading="lazy" onerror="this.remove()">':'')
+  +'<span class="fp-reel-play">'+play+'</span></button>';
 }
 function fpActions(){
  var f=fpGuest||FRIENDS[fpIdx];if(!f)return "";
@@ -4505,6 +4555,13 @@ function renderFProfile(){
  var content;
  if(fpTab==="posts"){
   content='<div class="fp-list">'+fpPost(f.n,t("fp_p1"),t("fp_p1t"))+fpPost(f.n,t("fp_p2"),t("fp_p2t"))+'</div>';
+ }else if(fpTab==="reels"){
+  var rl=fpReelList(f);
+  if(rl.length){
+   content='<div class="fp-reels">'+rl.map(fpReelCell).join("")+'</div>';
+  }else{
+   content='<div class="fp-reels-empty">'+t("fp_reels_empty")+'</div>';
+  }
  }else{
   content='<div class="fp-list">'+fpReview(t("fp_rv1t"),t("fp_rv1c"),t("fp_rv1d"),t("fp_rv1x"))+fpReview(t("fp_rv2t"),t("fp_rv2c"),t("fp_rv2d"),t("fp_rv2x"))+'</div>';
  }
@@ -4517,6 +4574,7 @@ function renderFProfile(){
   +'<div class="fp-bio">'+txt(f.bio)+' <span class="fp-more">'+t("fp_more")+'</span></div>'
   +'<div class="fp-loc">'+pin+txt(f.loc)+'</div>'
   +fpActions()+fpLiveEntry(f)+fpUpcoming(f)+'<div class="fp-tabs"><button class="fp-tab'+(fpTab==="posts"?" on":"")+'" onclick="fpSetTab(\'posts\')">'+t("fp_tab_posts")+'</button>'
+  +'<button class="fp-tab'+(fpTab==="reels"?" on":"")+'" onclick="fpSetTab(\'reels\')">'+t("fp_tab_reels")+'</button>'
   +'<button class="fp-tab'+(fpTab==="reviews"?" on":"")+'" onclick="fpSetTab(\'reviews\')">'+t("fp_tab_reviews")+'</button>'
   +'</div>'
   +content+fpSections();
@@ -4604,7 +4662,7 @@ function cmJoin(){
  renderCommDetail();
 }
 /* ---------- My Hub (hub-80 visual language) ---------- */
-var hubTab="reviews";
+var hubTab="posts";
 function hubSetTab(tb){hubTab=tb;renderHub()}
 function hubRow(iconCls,ic,name,sub,toastKey,actExpr){
  var act=actExpr||("toast(t(\'"+toastKey+"\'))");
@@ -4650,7 +4708,7 @@ function renderHub(){
  var person='<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="10" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M4.5 19c1-3 3-4.4 5.5-4.4s4.5 1.4 5.5 4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
  var pin='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>';
  var walletIc='<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="14.5" r="1.2" fill="currentColor"/></svg>';
- var tabDefs=[["posts","hb_tab_posts"],["saved","hb_tab_saved"],["comm","hb_tab_comm"],["events","hb_tab_events"],["reviews","hb_tab_reviews"]];
+ var tabDefs=[["posts","hb_tab_posts"],["reels","hb_tab_reels"],["saved","hb_tab_saved"],["comm","hb_tab_comm"],["events","hb_tab_events"],["reviews","hb_tab_reviews"]];
  var guestBan=isGuest?'<div style="background:var(--brand-soft,#E3F2EE);border:1px solid #cfe5df;border-radius:14px;padding:12px 14px;margin:12px 0 4px;display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800">'+t("gm_hub_t")+'</div><div style="font-size:11.5px;color:var(--ink-2,#6B6A66);margin-top:2px">'+t("gm_hub_b")+'</div></div><button style="flex:none;background:var(--brand,#0E7C66);color:#fff;border:none;border-radius:99px;font-size:12px;font-weight:700;padding:8px 14px;font-family:inherit;cursor:pointer" onclick="guestGateHub()">'+t("gm_hub_go")+'</button></div>':"";
  var tabs=guestBan+'<div class="fp-tabs hub-tabs">'+tabDefs.map(function(td){
   return '<button class="fp-tab'+(hubTab===td[0]?" on":"")+'" onclick="hubSetTab(\''+td[0]+'\')">'+t(td[1])+'</button>';
@@ -4658,7 +4716,14 @@ function renderHub(){
  var content="";
  if(hubTab==="posts"){
   var mine=FEEDS.filter(function(f){return f.mine});
+  /* reels pinned to the top of Posts, same pattern as Feeds (stable sort) */
+  mine.sort(function(a,b){return (b.type==="reel"?1:0)-(a.type==="reel"?1:0)});
   content=mine.length?hubCards(mine):'<div class="feed-empty" style="display:block">'+t("hb_posts_empty")+'</div>';
+ }else if(hubTab==="reels"){
+  var hr=FEEDS.filter(function(f){return f.mine&&f.type==="reel"&&f.reel&&f.reel.vid});
+  content=hr.length
+   ?'<div class="fp-reels">'+hr.map(function(f){return fpReelCell({vid:f.reel.vid,img:f.img})}).join("")+'</div>'
+   :'<div class="fp-reels-empty">'+t("hb_reels_empty")+'</div>';
  }else if(hubTab==="saved"){
   var saved=FEEDS.filter(function(f){return f.savedByMe});
   content=saved.length?hubCards(saved):'<div class="feed-empty" style="display:block">'+t("hb_saved_empty")+'</div>';
@@ -5649,7 +5714,9 @@ function scheduleEvent(){
  draftDel("wahda_draft_event_v1");
  closeAddEvent();
  evTab="created";
- if(document.getElementById("hubHead").style.display==="flex")renderHub();else switchTab("hub");
+ /* switchTab("hub") resets the Hub to Posts; re-select Events afterwards */
+ if(document.getElementById("hubHead").style.display==="flex"){hubTab="events";renderHub()}
+ else{switchTab("hub");hubTab="events";renderHub()}
  toast(t("aev_done",name));
 }
 /* ---------- Create Community ---------- */
@@ -5801,8 +5868,9 @@ function createCommunity(){
  COM_MINE.unshift({n:name,ic:name.charAt(0).toUpperCase(),vis:acmVis,cap:cap,req:acmReq,loc:document.getElementById("acmLoc").textContent});
  draftDel("wahda_draft_comm_v1");
  closeAddComm();
- hubTab="comm";
- if(document.getElementById("hubHead").style.display==="flex")renderHub();else switchTab("hub");
+ /* switchTab("hub") resets the Hub to Posts; re-select Community afterwards */
+ if(document.getElementById("hubHead").style.display==="flex"){hubTab="comm";renderHub()}
+ else{switchTab("hub");hubTab="comm";renderHub()}
  toast(t("acm_done"));
 }
 
@@ -7050,6 +7118,16 @@ var DATE_RANGES=[["all","fl_alltime"],["today","fl_today"],["week","fl_week"],["
 /* follows: pre-followed authors so the Following tab has content on first visit */
 var follows={"Aisha K.":1,"Layla M.":1};
 var FEEDS=[
+ /* demo Reel cards: exactly one pinned demo per feed tab, pinned to the top; tapping plays it in Reels */
+ {n:"Yusuf I.",cm:"",min:6,type:"reel",demoTabs:["foryou"],
+  img:"videos/v07.jpg",reel:{vid:"v07",t:"Morning in Madinah",handle:"cats.of.madinah"},
+  tx:{en:"The stray cats of Madinah own the morning streets 🐈",zh:"麦地那的流浪猫承包了清晨的街道 🐈"}},
+ {n:"Layla M.",cm:"",min:14,type:"reel",demoTabs:["following"],
+  img:"videos/v15.jpg",reel:{vid:"v15",t:"Nile at golden hour",handle:"nile.diaries"},
+  tx:{en:"Golden hour on the Nile, no filter needed 🌅",zh:"尼罗河的黄金时刻，无需滤镜 🌅"}},
+ {n:"Aisha K.",cm:"Ummah KC",min:22,type:"reel",demoTabs:["community"],
+  img:"videos/v21.jpg",reel:{vid:"v21",t:"Community kitchen day",handle:"chef.amina"},
+  tx:{en:"Ummah KC community kitchen: 300 plates in one afternoon 🍲",zh:"Ummah KC 社区厨房：一个下午 300 份餐食 🍲"}},
  {n:"Yusuf I.",cm:"Iftar Volunteers",min:12,type:"text",
   tx:{en:"Jumu'ah reminder: khutbah starts 12:30 at the community center. Carpool thread in Places.",zh:"主麻提醒：12:30 社区中心开始呼图白，拼车接龙见本地页。"}},
  {n:"Aisha K.",cm:"Ummah KC",min:60,type:"image",
@@ -7085,7 +7163,11 @@ var FEEDS=[
  {n:"Ahmad Rahman",cm:"",min:1500,type:"text",mine:true,
   tx:{en:"Reflection from tonight's halaqah: consistency beats intensity. Ten minutes of Quran daily will change your heart.",zh:"今晚学习班的感悟：贵在坚持而非强度。每天十分钟古兰经，足以改变内心。"}},
  {n:"Ahmad Rahman",cm:"Quran Study Circle",min:5760,type:"video",mine:true,
-  tx:{en:"Recap video: our masjid open day welcomed 150 neighbors — masjid tours, calligraphy workshop and a shared iftar.",zh:"回顾视频：清真寺开放日迎来 150 位邻居——参观导览、书法工坊与共享开斋饭。"}}
+  tx:{en:"Recap video: our masjid open day welcomed 150 neighbors — masjid tours, calligraphy workshop and a shared iftar.",zh:"回顾视频：清真寺开放日迎来 150 位邻居——参观导览、书法工坊与共享开斋饭。"}},
+ /* my demo Reel: shows in My Hub (Posts pinned + Reels tab), never in Feeds */
+ {n:"Ahmad Rahman",cm:"",min:35,type:"reel",mine:true,
+  img:"videos/v02.jpg",reel:{vid:"v02",t:"Blue Mosque Sunset",handle:"you"},
+  tx:{en:"Golden hour over the Blue Mosque — shot this on my trip 🕌",zh:"蓝色清真寺的黄金时刻——旅途中拍的 🕌"}}
 ];
 function timeLabel(min){
  if(min===0)return lang==="zh"?"\u521a\u521a":"now";
@@ -7096,9 +7178,10 @@ function timeLabel(min){
 }
 function feedMatches(f){
  if(f.mine&&!f.showInFeed)return false;
+ if(f.demoTabs&&f.demoTabs.indexOf(feedTab)<0)return false;
  if(feedTab==="following"&&!follows[f.n])return false;
  if(feedTab==="community"&&!f.cm)return false;
- if(fMedia!=="all"&&f.type!==fMedia)return false;
+ if(fMedia!=="all"&&f.type!==fMedia&&!(f.type==="reel"&&fMedia==="video"))return false;
  if(fDate==="today"&&f.min>=1440)return false;
  if(fDate==="week"&&f.min>=10080)return false;
  if(fDate==="month"&&f.min>=43200)return false;
@@ -7133,7 +7216,7 @@ function feedMediaBlock(type,f){
   var vid=String(f.reel.vid||"");
   var tap=vid?' onclick="event.stopPropagation();openReelCard(\''+vid+'\')"':"";
   return '<div class="feed-media feed-reel"'+tap+'>'
-   +(f.img?'<img src="assets/'+f.img+'" alt="" loading="lazy" onerror="this.remove()">':'')
+   +(f.img?'<img src="'+(/^data:|^blob:/.test(String(f.img))?f.img:"assets/"+f.img)+'" alt="" loading="lazy" onerror="this.remove()">':'')
    +'<span class="freel-play"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'
    +'<span class="freel-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Reels</span></div>';
  }
@@ -7163,6 +7246,9 @@ function toggleFollow(name){
 }
 /* ---------- post actions + detail ---------- */
 var FSTATS=[
+ {l:8934,c:512,r:233,fa:2104,lk:["Amira K.","Yusuf R."],rby:"Sara Ali"},
+ {l:6712,c:298,r:141,fa:1876,lk:["Omar F.","Hafsa W."],rby:"Bilal R."},
+ {l:12048,c:876,r:402,fa:3620,lk:["Zayd H.","Maryam S."],rby:"Nour S."},
  {l:2341,c:87,r:23,lk:["Amira K.","Yusuf R."],rby:"Sara Ali"},
  {l:1204,c:128,r:45,lk:["Layla M.","Omar F.","Hafsa W."],rby:"Ummah KC"},
  {l:862,c:64,r:12,lk:["Zayd H."],rby:"Bilal R."},
@@ -7180,16 +7266,18 @@ var FSTATS=[
  {l:1358,c:71,r:39,lk:["Zayd H.","Omar F."],rby:"Maryam S."},
  {l:486,c:23,r:7,lk:["Aisha K.","Omar F."],rby:"Layla M."},
  {l:1240,c:56,r:19,lk:["Yusuf I.","Hafsa W."],rby:"Bilal R."},
- {l:312,c:18,r:4,lk:["Kareem A."],rby:"Maryam S."}
+ {l:312,c:18,r:4,lk:["Kareem A."],rby:"Maryam S."},
+ {l:1876,c:64,r:31,fa:412,lk:["Layla M.","Omar F."],rby:"Aisha K."}
 ];
 FEEDS.forEach(function(f,i){
  var s=FSTATS[i];
- f.like=s.l;f.cmt=s.c;f.rp=s.r;f.lk=s.lk;f.rby=s.rby;
+ f.like=s.l;f.cmt=s.c;f.rp=s.r;f.lk=s.lk;f.rby=s.rby;f.fav=s.fa||0;
  f.likedByMe=false;f.repostedByMe=false;f.savedByMe=false;f.userCmts=[];
 });
-/* two posts pre-saved so the Hub Saved tab has content on first visit */
-FEEDS[1].savedByMe=true;FEEDS[5].savedByMe=true;
-function fmtN(n){return n>=1000?(Math.round(n/100)/10).toString().replace(/\.0$/,"")+"K":""+n}
+/* two posts pre-saved so the Hub Saved tab has content on first visit
+   (indices 4/8 = Aisha K. iftar photos / Kareem A. tafsir video, after the 3 pinned demo reels) */
+FEEDS[4].savedByMe=true;FEEDS[8].savedByMe=true;
+function fmtN(n){return n>=1e6?(Math.round(n/1e5)/10).toString().replace(/\.0$/,"")+"M":n>=1000?(Math.round(n/100)/10).toString().replace(/\.0$/,"")+"K":""+n}
 function icHeart(on){return on?'<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.5-9C1 8.5 3 5.5 6.2 5.5c2 0 3.6 1.1 4.6 2.7l1.2 1.9 1.2-1.9c1-1.6 2.6-2.7 4.6-2.7 3.2 0 5.2 3 3.7 6.5-2 4.4-9.5 9-9.5 9z"/></svg>'
  :'<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-7-4.3-8.9-8.4C1.7 9 3.5 6.2 6.4 6.2c1.8 0 3.3 1 4.2 2.5L12 11l1.4-2.3c.9-1.5 2.4-2.5 4.2-2.5 2.9 0 4.7 2.8 3.3 5.9-1.9 4.1-8.9 8.4-8.9 8.4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>'}
 function icBubble(){return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>'}
@@ -7507,7 +7595,8 @@ function renderHome(){
  var cards=list.map(function(f,i){
   var idx=FEEDS.indexOf(f);
   var chip=f.cm?'<div class="feed-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>'+f.cm+'</div>':"";
-  return '<div class="feed-card" onclick="openPost('+idx+')"><div class="feed-user">'+feedAv(f)+'<div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,idx)+'</div>';
+  var tap=f.type==="reel"&&f.reel&&f.reel.vid?"openReelCard('"+f.reel.vid+"')":"openPost("+idx+")";
+  return '<div class="feed-card" onclick="'+tap+'"><div class="feed-user">'+feedAv(f)+'<div'+authAttrs(f)+'><div class="feed-name'+authCls(f)+'">'+f.n+'</div><div class="feed-time">'+timeLabel(f.min)+'</div></div>'+followBtn(f)+'</div><div class="feed-text">'+feedTextHtml(f)+'</div>'+feedMediaBlock(f.type,f)+chip+faBar(f,idx)+'</div>';
  });
  if(feedTab==="foryou"){cards.splice(1,0,feedLiveCard());cards.splice(4,0,feedAdCard())}
  body.innerHTML=(feedTab==="following"?lvFollowingStrip():"")+cards.join("")+'<div class="feed-end">'+t("feed_end")+'</div>';
@@ -7685,6 +7774,10 @@ var pendingReelVid="";
 function openReelCard(vid){
  pendingReelVid=String(vid||"");
  if(!pendingReelVid)return;
+ /* reel cards live on stacked pages (Profile / post detail): close them or
+    they keep covering the Reels tab after the switch */
+ closeFProfile();
+ closePost();
  switchTab("reels");
  bxFlushReel();
 }
@@ -7707,16 +7800,7 @@ var MINIAPPS=[
  {k:"HX",n:{en:"Halal Expo",zh:"清真博览会购票"},ini:"HX",g:"#EAF3DE",c:"#3B6D11"},
  {k:"JM",n:{en:"Jumu'ah Maps",zh:"主麻时间地图"},ini:"JM",g:"#F1EFE8",c:"#5F5E5A"}
 ];
-var IT_TOOLS=[
- {k:"prayer",n:{en:"Prayer Times",zh:"礼拜时间"},ini:"P",bg:"rgba(14,124,102,.12)",c:"#0E7C66"},
- {k:"qibla",n:{en:"Qibla",zh:"朝向指引"},ini:"Qb",bg:"rgba(201,128,59,.13)",c:"#C9803B"},
- {k:"quran",n:{en:"Quran",zh:"古兰经"},ini:"Qr",bg:"rgba(107,92,165,.13)",c:"#6B5CA5"},
- {k:"tasbih",n:{en:"Tasbih",zh:"赞珠计数"},ini:"T",bg:"rgba(176,104,94,.13)",c:"#B0685E"},
- {k:"cal",n:{en:"Hijri Calendar",zh:"希吉来历"},ini:"C",bg:"rgba(94,122,139,.13)",c:"#5E7A8B"},
- {k:"duas",n:{en:"Duas",zh:"都阿"},ini:"D",bg:"rgba(201,162,75,.15)",c:"#C9A24B"},
- {k:"zakat",n:{en:"Zakat Calculator",zh:"天课计算"},ini:"Z",bg:"rgba(10,93,78,.12)",c:"#0A5D4E"},
- {k:"adhan",n:{en:"Adhan Alerts",zh:"宣礼提醒"},ini:"A",bg:"rgba(78,139,110,.14)",c:"#4E8B6E"}
-];
+/* islamic tools tiles removed from the quick panel; the Next Prayer banner is kept */
 var MA_REC_SEED=["HE","WP","QA","SM","RH","MC","HX","JM"];
 var maRec=(function(){try{var s=localStorage.getItem("wahda_ma_rec_v2");if(s)return JSON.parse(s)}catch(e){}return MA_REC_SEED.slice()})();
 if(maRec.indexOf("SB")<0){maRec.unshift("SB");if(maRec.length>8)maRec.length=8;maRecSave()}
@@ -7773,9 +7857,7 @@ function qpAppTile(a){
   +'<span class="qp-fav'+(maFavHas(a.k)?" on":"")+'" onclick="event.stopPropagation();maFavToggle(\''+a.k+'\')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg></span>'
   +'<span class="qp-app-n">'+txt(a.n)+'</span></button>';
 }
-function qpToolTile(x){
- return '<button class="qp-app" onclick="chTool(\''+x.k+'\')"><span class="qp-app-ic" style="background:'+x.bg+';color:'+x.c+'">'+x.ini+'</span><span class="qp-app-n">'+txt(x.n)+'</span></button>';
-}
+/* islamic tools tiles removed from the quick panel; the Next Prayer banner is kept */
 function qpOnSearch(v){renderQp(v)}
 function renderQp(q){
  q=(q||"").trim().toLowerCase();
@@ -7799,10 +7881,8 @@ function renderQp(q){
  }
  recent.style.display="none";native.style.display="none";spot.style.display="none";ad.style.display="none";
  var apps=MINIAPPS.filter(function(a){return schHit(a.n,q)});
- var tools=IT_TOOLS.filter(function(x){return schHit(x.n,q)});
  var html="";
  if(apps.length)html+='<div class="qp-sec">'+t("qp_ma_sec")+'</div><div class="qp-grid">'+apps.map(qpAppTile).join("")+'</div>';
- if(tools.length)html+='<div class="qp-sec">'+t("it_sec_it")+'</div><div class="qp-grid">'+tools.map(qpToolTile).join("")+'</div>';
  res.innerHTML=html||('<div class="qp-empty">'+t("qp_empty")+'</div>');
  res.style.display="";
 }
@@ -8783,7 +8863,7 @@ function switchTab(name){
  document.getElementById("nfHead").style.display=isNf?"flex":"none";
  document.getElementById("nfBody").style.display=isNf?"block":"none";
  if(isFeed)newFeedsSeen=true;
- if(isHub)renderHub();
+ if(isHub){hubTab="posts";renderHub()}   /* entering My Hub always lands on Posts */
  else if(isMsg)renderMsgs();
  else if(isPl){applyPlMode();renderPlaces();newPlacesSeen=true;updateDots()}
  else if(isNf){renderNotifs();markNotifsRead()}
@@ -8871,7 +8951,7 @@ function bxCreateReelCard(reel,cap){
  var f={n:txt(ACCOUNTS[curAcct].n),cm:"",min:0,type:"reel",mine:true,showInFeed:true,
   img:String(reel.img||""),reel:{vid:String(reel.vid||""),t:String(reel.t||""),handle:"you"},
   loc:t("hb_loc"),tx:{en:cap,zh:cap}};
- f.like=0;f.cmt=0;f.rp=0;f.lk=[];f.rby=null;f.likedByMe=false;f.repostedByMe=false;f.savedByMe=false;f.userCmts=[];
+ f.like=0;f.cmt=0;f.rp=0;f.fav=0;f.lk=[];f.rby=null;f.likedByMe=false;f.repostedByMe=false;f.savedByMe=false;f.userCmts=[];
  FEEDS.unshift(f);                       /* the reel card sits on top of Feeds */
  hubTab="posts";
  if(document.getElementById("hubHead").style.display==="flex")renderHub();
@@ -8900,7 +8980,99 @@ function bxReply(obj){
  var rf=document.getElementById("reelsFrame");
  if(rf&&rf.contentWindow){try{rf.contentWindow.postMessage(obj,"*")}catch(e){}}
 }
-/* guest tried an account-only Reels action (play / share / compose): sign-up gate, then come back to it */
+/* ---------- shell-owned camera capture (Create Reel → Shoot) ----------
+   The Reels composer asks the shell to record: getUserMedia inside the
+   iframe (srcdoc preview / file://) is always permission-denied, so the
+   top document owns the camera and hands the finished clip back. */
+var bxCamStream=null,bxCamRec=null,bxCamChunks=[],bxCamT0=0,bxCamTimerInt=0,bxCamFacing="user",bxCamAutoStop=0;
+function bxCamOpen(){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){
+  bxReply({wahdaMsg:"cam-fail"});toast(lang==="zh"?"无法访问摄像头":"Camera unavailable");return;
+ }
+ document.getElementById("bxCamHint").textContent=lang==="zh"?"点击按钮开始拍摄":"Tap the button to record";
+ document.getElementById("bxCamTimer").textContent="00:00";
+ document.getElementById("bxCamView").classList.add("show");
+ bxCamStartStream();
+}
+function bxCamStartStream(){
+ bxCamStopStream();
+ navigator.mediaDevices.getUserMedia({video:{facingMode:bxCamFacing,width:{ideal:720}},audio:false})
+  .then(function(s){bxCamStream=s;document.getElementById("bxCamVideo").srcObject=s;})
+  .catch(function(){
+   bxCamClose();
+   bxReply({wahdaMsg:"cam-fail"});
+   toast(lang==="zh"?"无法访问摄像头":"Camera unavailable");
+  });
+}
+function bxCamStopStream(){
+ if(bxCamStream){try{bxCamStream.getTracks().forEach(function(t){t.stop()})}catch(e){}bxCamStream=null}
+ var v=document.getElementById("bxCamVideo");if(v&&v.srcObject)v.srcObject=null;
+}
+function bxCamClose(){
+ if(bxCamRec&&bxCamRec.state==="recording"){try{bxCamRec.stop()}catch(e){}}
+ if(bxCamAutoStop){clearTimeout(bxCamAutoStop);bxCamAutoStop=0}
+ if(bxCamTimerInt){clearInterval(bxCamTimerInt);bxCamTimerInt=0}
+ bxCamStopStream();
+ document.getElementById("bxCamView").classList.remove("show","rec");
+}
+function bxCamFlip(){
+ bxCamFacing=bxCamFacing==="user"?"environment":"user";
+ if(!bxCamRec||bxCamRec.state!=="recording")bxCamStartStream();
+}
+function bxCamToggleRec(){
+ if(!bxCamStream){toast(lang==="zh"?"无法访问摄像头":"Camera unavailable");return}
+ if(bxCamRec&&bxCamRec.state==="recording"){try{bxCamRec.stop()}catch(e){}return}
+ try{bxCamRec=new MediaRecorder(bxCamStream,{mimeType:"video/webm"})}
+ catch(e){try{bxCamRec=new MediaRecorder(bxCamStream)}catch(e2){toast(lang==="zh"?"无法访问摄像头":"Camera unavailable");return}}
+ bxCamChunks=[];
+ bxCamRec.ondataavailable=function(ev){if(ev.data&&ev.data.size)bxCamChunks.push(ev.data)};
+ bxCamRec.onstop=bxCamFinish;
+ bxCamRec.start();
+ bxCamT0=Date.now();
+ document.getElementById("bxCamHint").textContent=lang==="zh"?"再次点击结束":"Tap again to finish";
+ document.getElementById("bxCamView").classList.add("rec");
+ bxCamTimerInt=setInterval(function(){
+  var s=Math.floor((Date.now()-bxCamT0)/1000);
+  document.getElementById("bxCamTimer").textContent="00:"+String(Math.min(59,s)).padStart(2,"0");
+ },250);
+ bxCamAutoStop=setTimeout(function(){
+  if(bxCamRec&&bxCamRec.state==="recording"){try{bxCamRec.stop()}catch(e){}toast(lang==="zh"?"已到 30 秒上限，自动结束":"Recording stopped (30s max)")}
+ },30000);
+}
+function bxCamFinish(){
+ if(bxCamTimerInt){clearInterval(bxCamTimerInt);bxCamTimerInt=0}
+ document.getElementById("bxCamView").classList.remove("rec");
+ var dur=Math.max(1,Math.round((Date.now()-bxCamT0)/1000));
+ var blob=new Blob(bxCamChunks,{type:(bxCamRec&&bxCamRec.mimeType)||"video/webm"});bxCamChunks=[];
+ bxCamClose();
+ /* blob -> dataURL so it survives the postMessage bridge into the iframe */
+ var fr=new FileReader();
+ fr.onload=function(){
+  var video=fr.result;
+  /* poster frame for the Feeds card */
+  var pv=document.createElement("video");
+  pv.muted=true;pv.playsInline=true;pv.preload="auto";
+  pv.src=video;
+  var settled=false;
+  var settle=function(poster){if(settled)return;settled=true;bxReply({wahdaMsg:"cam-clip",video:video,poster:poster||"",dur:dur})};
+  pv.addEventListener("loadeddata",function(){try{pv.currentTime=Math.min(0.1,pv.duration||0.1)}catch(e){settle("")}});
+  pv.addEventListener("seeked",function(){
+   try{
+    var c=document.createElement("canvas");
+    var ar=(pv.videoHeight&&pv.videoWidth)?pv.videoHeight/pv.videoWidth:16/9;
+    c.width=360;c.height=Math.round(360*ar);
+    c.getContext("2d").drawImage(pv,0,0,c.width,c.height);
+    settle(c.toDataURL("image/jpeg",0.72));
+   }catch(e){settle("")}
+   pv.src="";
+  });
+  pv.addEventListener("error",function(){settle("")});
+  setTimeout(function(){settle("")},1600);
+ };
+ fr.readAsDataURL(blob);
+}
+/* guest tried an account-only Reels action (like / fav / comment / share /
+   follow / profile / compose): sign-up gate, then come back to the Reels tab */
 function bxGateReels(action,title){
  guestGate(function(){
   if(action==="compose"){pendingCompose=true;switchTab("reels");bxFlushCompose();return}
@@ -8940,8 +9112,15 @@ window.addEventListener("message",function(e){
    bxReply({wahdaMsg:"reel-feed-ack",rid:d.rid,ok:bxCreateReelCard(d.reel,d.caption)});break;
   case "profile":
    /* a creator tapped in Reels opens the same Wahda user profile the rest of
-      the app uses, so the page stays identical everywhere */
-   if(d.name)openProfileByName(d.name,d.bio,d.loc);
+      the app uses, so the page stays identical everywhere; guests are bounced
+      to sign-up first (the iframe gate already stops this, this is the backstop) */
+   if(isGuest){bxGateReels("profile");break}
+   if(d.name)openProfileByName(d.name,d.bio,d.loc,d.reels);
+   break;
+  case "cam-request":
+   /* the Reels composer's Shoot tile: the shell owns the camera because the
+      iframe origin (srcdoc / file://) can never get the permission itself */
+   bxCamOpen();
    break;
  }
 });
