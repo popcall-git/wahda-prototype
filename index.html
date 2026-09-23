@@ -379,6 +379,10 @@
   .rc-follow{display:inline-flex;align-items:center;gap:3px;border:none;font-family:inherit;font-size:9.5px;font-weight:800;color:var(--ink-3,#9B9993);background:var(--bg,#F4F2EE);border-radius:999px;padding:4px 8px;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
   .rc-tile.sel .rc-follow{background:var(--brand,#0E7C66);color:#fff}
   .rc-tile .rc-meta{margin-left:auto;font-size:9px;font-weight:700;color:var(--ink-3,#9B9993);background:var(--bg,#F4F2EE);border-radius:999px;padding:3px 7px;flex:none}
+  /* follower count sits beside the avatar (stacked under the name) */
+  .rc-hrow{display:flex;align-items:center;gap:7px;width:100%;min-width:0}
+  .rc-hinfo{min-width:0;flex:1}
+  .rc-hrow .rc-meta{display:inline-block;margin-left:0;margin-top:2px;font-size:8.5px;padding:2px 6px}
   .rc-chip{align-self:flex-start;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--brand-dark,#0A5D4E);background:var(--brand-soft,#E3F2EE);border-radius:999px;padding:2px 7px}
   .rc-chip.ev{color:#8a6a1f;background:#F7EFDD}
   .rc-ad{margin:20px 0 8px;border:1.6px dashed var(--line,#E5E2DC);border-radius:14px;background:var(--bg,#F4F2EE);padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
@@ -3717,11 +3721,10 @@ function renderReco(){
   var c=RC_CREATORS[ci],on=!!follows[c.fn];
   h+='<div class="rc-tile'+(on?" sel":"")+'" onclick="recoOpenCreator('+ci+')">'
    +'<span class="rc-check">'+chk+'</span>'
-   +'<span class="rc-av" style="background:'+c.g+'">'+avaI(c.fn)+'</span>'
-   +'<span class="rc-n">'+txt(c.n)+'</span>'
+   +'<span class="rc-hrow"><span class="rc-av" style="background:'+c.g+'">'+avaI(c.fn)+'</span>'
+   +'<span class="rc-hinfo"><span class="rc-n">'+txt(c.n)+'</span><span class="rc-meta">'+c.meta+'</span></span></span>'
    +'<span class="rc-d">'+txt(c.d)+'</span>'
-   +'<span class="rc-foot"><button class="rc-follow" onclick="event.stopPropagation();recoToggleFollow('+ci+')">'+(on?"✓ ":"+ ")+t(on?"fw_on":"fw_add")+'</button>'
-   +'<span class="rc-meta">'+c.meta+'</span></span></div>';
+   +'<span class="rc-foot"><button class="rc-follow" onclick="event.stopPropagation();recoToggleFollow('+ci+')">'+(on?"✓ ":"+ ")+t(on?"fw_on":"fw_add")+'</button></span></div>';
  });
  h+='</div></div>';
  /* Bottom: communities & events together — one tiled 3-col grid */
