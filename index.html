@@ -360,7 +360,27 @@
   .rc-d{font-size:11.5px;color:var(--ink-3,#9B9993);margin-top:2px}
   .rc-check{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--brand,#0E7C66);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .rc-card.sel .rc-check{display:flex}
+  .rc-tile.sel .rc-check{display:flex}
   .rc-meta{margin-left:auto;flex:none;font-size:11px;font-weight:700;color:var(--ink-3,#9B9993);background:var(--bg,#F4F2EE);border-radius:999px;padding:4px 10px}
+  /* recommendation page: tiled layout (accounts grid on top, communities+events grid below) */
+  .rc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+  .rc-grid>.rc-tile{min-width:0}
+  .rc-grid .rc-tile .rc-n,.rc-grid .rc-tile .rc-d{min-width:0;max-width:100%}
+  .rc-refresh{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line,#E5E2DC);background:var(--card,#FFFFFF);color:var(--ink-2,#6B6A66);font-family:inherit;font-size:11px;font-weight:700;border-radius:999px;padding:5px 12px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .rc-refresh:active{background:var(--brand-soft,#E3F2EE);color:var(--brand-dark,#0A5D4E);border-color:var(--brand,#0E7C66)}
+  .rc-refresh svg{flex:none}
+  .rc-tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:5px;width:100%;background:var(--card,#FFFFFF);border:1.6px solid var(--line,#E5E2DC);border-radius:12px;padding:9px;cursor:pointer;font-family:inherit;text-align:left;transition:border-color .15s,background .15s}
+  .rc-tile.sel{border-color:var(--brand,#0E7C66);background:var(--brand-soft,#E3F2EE)}
+  .rc-tile .rc-av{width:38px;height:38px}
+  .rc-tile .rc-n{font-size:12px;line-height:1.25;display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rc-tile .rc-d{font-size:10px;line-height:1.3;display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rc-tile .rc-check{top:-6px;right:-6px}
+  .rc-foot{display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;margin-top:auto}
+  .rc-follow{display:inline-flex;align-items:center;gap:3px;border:none;font-family:inherit;font-size:9.5px;font-weight:800;color:var(--ink-3,#9B9993);background:var(--bg,#F4F2EE);border-radius:999px;padding:4px 8px;cursor:pointer;transition:background .15s,color .15s;white-space:nowrap}
+  .rc-tile.sel .rc-follow{background:var(--brand,#0E7C66);color:#fff}
+  .rc-tile .rc-meta{margin-left:auto;font-size:9px;font-weight:700;color:var(--ink-3,#9B9993);background:var(--bg,#F4F2EE);border-radius:999px;padding:3px 7px;flex:none}
+  .rc-chip{align-self:flex-start;font-size:8.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--brand-dark,#0A5D4E);background:var(--brand-soft,#E3F2EE);border-radius:999px;padding:2px 7px}
+  .rc-chip.ev{color:#8a6a1f;background:#F7EFDD}
   .rc-ad{margin:20px 0 8px;border:1.6px dashed var(--line,#E5E2DC);border-radius:14px;background:var(--bg,#F4F2EE);padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
   .rc-ad-badge{font-size:9.5px;font-weight:800;letter-spacing:.8px;color:var(--ink-3,#9B9993);border:1px solid var(--line,#E5E2DC);border-radius:4px;padding:2px 7px;background:var(--card,#FFFFFF)}
   .rc-ad-t{font-size:12px;font-weight:600;color:var(--ink-2,#6B6A66)}
@@ -1428,7 +1448,7 @@
         <button class="tab active" data-tab="feeds" onclick="switchTab('feeds')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v12H8l-4 4V5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_feeds">Feeds</span></button>
         <button class="tab" data-tab="reels" onclick="switchTab('reels')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 8.5h18M8.2 3l2.4 5.5M14.4 3l2.4 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="15" r="2.4" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="tab_reels">Reels</span></button>
         <button class="tab-fab" onclick="openCreateHub()" aria-label="Create"><div class="fab-plus"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div></button>
-        <button class="tab" data-tab="messages" onclick="switchTab('messages')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_messages">Chats</span><span class="badge" id="msgBadge">3</span></button>
+        <button class="tab" data-tab="messages" onclick="switchTab('messages')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H9l-5 4V6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-i18n="tab_messages">Chats</span><span class="badge" id="msgBadge" style="display:none">0</span></button>
         <button class="tab" data-tab="hub" onclick="switchTab('hub')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="tab_hub">My Hub</span></button>
       </div>
       <span style="display:none" aria-hidden="true"><span class="nf-dot" id="plDot"></span></span>
@@ -3047,6 +3067,7 @@ en:{
  rc_h:"Make Wahda yours", rc_sub:"A few starting points picked for you \u2014 tap any card to take a closer look.",
  rc_creators:"Creators", rc_creators_d:"Follow voices that inspire you", rc_comm:"Communities", rc_comm_d:"Join circles you belong to", rc_events:"Events", rc_events_d:"Save events you'd attend",
  rc_members:"{0} members", rc_ad_t:"Your ad space \u2014 reserved", rc_ad_s:"Google Ads integration planned for this slot",
+ rc_accounts:"You May Like", rc_both:"Communities & Events", rc_both_d:"Join circles and save events", rc_chip_cm:"Community", rc_chip_ev:"Event", rc_refresh:"Shuffle",
  rc_cta:"Start exploring", rc_saved:"You're all set \u2014 enjoy exploring Wahda", ad_label:"Ad", ad_cta:"Learn more", ad_feed_name:"Barakah Mart", ad_feed_x:"Halal groceries delivered \u00b7 5% off today with code WAHDA", ad_pl_sec:"Sponsored nearby", ad_pl_name:"Nakheel Mall Weekend Market", ad_pl_x:"Weekend halal market \u00b7 Sat\u2013Sun", ad_ev_sec:"Sponsored", ad_ev_name:"Riyadh Halal Expo 2026", ad_ev_x:"Sep 28\u201330 \u00b7 Riyadh Front Exhibition Center", ad_skip:"Skip {0}s", sp_t:"Experience AlUla", sp_s:"Ancient wonder awaits \u2014 plan your journey", sp_cta:"Learn more", sp_info:"Demo ad slot \u00b7 Google Ads integration planned", ad_tools_t:"MuslimTravel", ad_tools_s:"Compare halal-friendly flights \u2192", ad_toast:"Demo ad slot \u2014 Google Ads integration planned", tab_notif:"Notifications", nf_title:"Notifications", nf_sec_feed:"New in your circle", nf_sec_sys:"System", nf_sec_soc:"Interactions", nf_ch_follow:"New follower", nf_ch_mention:"Mention", nf_ch_like:"Like", nf_ch_comment:"Comment", nf_ch_sys:"System", nf_all_toast:"All caught up", li_otp_note:"We'll send a 6-digit one-time code to verify it's you.",
  w_login_toast:"Existing-user login uses the same fast flow — enter your number and verify.",
  w_legal:"By continuing you agree to our Terms of Service and Privacy Policy.",
@@ -3282,6 +3303,7 @@ zh:{
  rc_h:"让 Wahda 更懂你", rc_sub:"为你精选的一些起点——点击任意卡片可进一步了解。",
  rc_creators:"创作者", rc_creators_d:"关注打动你的声音", rc_comm:"社群", rc_comm_d:"加入你归属的圈子", rc_events:"活动", rc_events_d:"收藏你愿意参加的活动",
  rc_members:"{0} 位成员", rc_ad_t:"广告位——预留中", rc_ad_s:"此位置计划接入 Google Ads",
+ rc_accounts:"推荐账号", rc_both:"社群与活动", rc_both_d:"加入圈子，收藏想参加的活动", rc_chip_cm:"社群", rc_chip_ev:"活动", rc_refresh:"换一换",
  rc_cta:"开始探索", rc_saved:"一切就绪——开始探索 Wahda 吧", ad_label:"广告", ad_cta:"了解更多", ad_feed_name:"Barakah Mart 清真超市", ad_feed_x:"清真食材配送到家 · 今日 95 折，优惠码 WAHDA", ad_pl_sec:"附近推广", ad_pl_name:"Nakheel Mall 周末市集", ad_pl_x:"周末清真市集 · 周六至周日", ad_ev_sec:"赞助活动", ad_ev_name:"2026 利雅得清真博览会", ad_ev_x:"9月28–30日 · Riyadh Front 展览中心", ad_skip:"跳过 {0}s", sp_t:"体验 AlUla", sp_s:"古老的奇迹等你探索——立即规划旅程", sp_cta:"了解更多", sp_info:"示例广告位 · 计划接入 Google Ads", ad_tools_t:"MuslimTravel", ad_tools_s:"清真友好航班比价 →", ad_toast:"示例广告位——计划接入 Google Ads", tab_notif:"通知", nf_title:"通知", nf_sec_feed:"关注与附近的新动态", nf_sec_sys:"系统消息", nf_sec_soc:"互动消息", nf_ch_follow:"新增关注", nf_ch_mention:"提到你", nf_ch_like:"收到赞", nf_ch_comment:"新评论", nf_ch_sys:"系统", nf_all_toast:"全部已读", li_otp_note:"我们将发送 6 位一次性验证码确认是你本人。",
  w_login_toast:"老用户登录走同样的快速流程——输入号码并验证即可。",
  w_legal:"继续即表示你同意我们的服务条款与隐私政策。",
@@ -3618,7 +3640,25 @@ var RC_CREATORS=[
  {fn:"Ust. Maryam Haddad",n:{en:"Ust. Maryam Haddad",zh:"玛丽亚姆·哈达德老师"},d:{en:"Fiqh for daily life",zh:"日常生活教法"},meta:"86K",ic:"M",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",
   bio:{en:"Fiqh teacher making daily worship simple and practical.",zh:"教法讲师，让日常功修简单可行。"},loc:{en:"Amman, Jordan",zh:"安曼，约旦"}},
  {fn:"Coach Bilal Rahman",n:{en:"Coach Bilal Rahman",zh:"比拉勒·拉赫曼教练"},d:{en:"Halal fitness & health",zh:"清真健身与健康"},meta:"52K",ic:"B",g:"linear-gradient(135deg,#5262ED,#3a48b8)",
-  bio:{en:"Certified coach. Faith-friendly training & nutrition.",zh:"认证教练。信仰友好的训练与营养指导。"},loc:{en:"Kuala Lumpur, Malaysia",zh:"吉隆坡，马来西亚"}}
+  bio:{en:"Certified coach. Faith-friendly training & nutrition.",zh:"认证教练。信仰友好的训练与营养指导。"},loc:{en:"Kuala Lumpur, Malaysia",zh:"吉隆坡，马来西亚"}},
+ {fn:"Aisha K.",n:{en:"Aisha K.",zh:"阿伊莎·K"},d:{en:"Modest fashion & style",zh:"清真时尚穿搭"},meta:"96K",ic:"A",g:"linear-gradient(135deg,#E58BA2,#c05a78)",
+  bio:{en:"Modest fashion creator. Daily outfits & hijab styling tips.",zh:"清真时尚博主。每日穿搭与希贾布造型技巧。"},loc:{en:"London, UK",zh:"伦敦，英国"}},
+ {fn:"Omar F.",n:{en:"Omar F.",zh:"奥马尔·F"},d:{en:"Tajweed & Quran circles",zh:"诵经学与古兰经圈"},meta:"74K",ic:"O",g:"linear-gradient(135deg,#5E7A8B,#41586a)",
+  bio:{en:"Quran Study Circle host. Weekly tajweed sessions and recaps.",zh:"古兰经学习圈主持人。每周诵经课与回顾。"},loc:{en:"Riyadh, Saudi Arabia",zh:"利雅得，沙特阿拉伯"}},
+ {fn:"Layla M.",n:{en:"Layla M.",zh:"莱拉·M"},d:{en:"Iftar recipes & volunteer life",zh:"开斋饭食谱与志愿生活"},meta:"61K",ic:"L",g:"linear-gradient(135deg,#C9803B,#9a5f28)",
+  bio:{en:"Volunteer cook. Sharing iftar recipes and community kitchen life.",zh:"志愿厨师。分享开斋饭食谱与社区厨房日常。"},loc:{en:"Toronto, Canada",zh:"多伦多，加拿大"}},
+ {fn:"Hafsa W.",n:{en:"Hafsa W.",zh:"哈芙莎·W"},d:{en:"Islamic home decor",zh:"伊斯兰风格家居"},meta:"48K",ic:"H",g:"linear-gradient(135deg,#6B5CA5,#4a3f7d)",
+  bio:{en:"Turning homes into peaceful spaces. Calligraphy, light & linen.",zh:"把家变成安宁的空间。书法、灯光与亚麻。"},loc:{en:"Istanbul, Türkiye",zh:"伊斯坦布尔，土耳其"}},
+ {fn:"Sara D.",n:{en:"Sara D.",zh:"萨拉·D"},d:{en:"Muslim mom life",zh:"穆斯林妈妈的日常"},meta:"39K",ic:"S",g:"linear-gradient(135deg,#7BA05B,#5c7f42)",
+  bio:{en:"Raising little believers. Halal parenting, crafts and routines.",zh:"养育小小信士。清真育儿、手工与日常作息。"},loc:{en:"Berlin, Germany",zh:"柏林，德国"}},
+ {fn:"Kareem A.",n:{en:"Kareem A.",zh:"卡里姆·A"},d:{en:"Masjid life & youth",zh:"清真寺生活与青年"},meta:"57K",ic:"K",g:"linear-gradient(135deg,#3E8FB0,#2c6b85)",
+  bio:{en:"Youth mentor at Masjid An-Noor. Events, sports and halaqah.",zh:"An-Noor 清真寺青年导师。活动、运动与学习班。"},loc:{en:"Chicago, USA",zh:"芝加哥，美国"}},
+ {fn:"Zayd H.",n:{en:"Zayd H.",zh:"扎伊德·H"},d:{en:"Hifz journey & memorization",zh:"背经之旅与记忆法"},meta:"83K",ic:"Z",g:"linear-gradient(135deg,#0E7C66,#0a5c4d)",
+  bio:{en:"Documenting my hifz journey — tips, schedules and motivation.",zh:"记录我的背经之旅——技巧、计划与激励。"},loc:{en:"Kuala Lumpur, Malaysia",zh:"吉隆坡，马来西亚"}},
+ {fn:"Fatima Z.",n:{en:"Fatima Z.",zh:"法蒂玛·Z"},d:{en:"Halal food & bakeries",zh:"清真美食与烘焙"},meta:"112K",ic:"F",g:"linear-gradient(135deg,#C9A24B,#a08032)",
+  bio:{en:"Exploring halal eats city by city. Maamoul specialist.",zh:"逐城探索清真美食。玛慕勒专家。"},loc:{en:"Dubai, UAE",zh:"迪拜，阿联酋"}},
+ {fn:"Nour S.",n:{en:"Nour S.",zh:"努尔·S"},d:{en:"Arabic calligraphy art",zh:"阿拉伯书法艺术"},meta:"67K",ic:"N",g:"linear-gradient(135deg,#5262ED,#3a48b8)",
+  bio:{en:"Thuluth & diwani lettering. Commissions and free templates.",zh:"三一体与迪瓦尼体。接稿与免费字模。"},loc:{en:"Amman, Jordan",zh:"安曼，约旦"}}
 ];
 var RC_EV_IDX=[3,4,2];
 function recoOpenCreator(i){
@@ -3632,9 +3672,27 @@ function recoCrSel(){return RC_CREATORS.filter(function(c){return follows[c.fn]}
 function recoEvSel(){return RC_EV_IDX.filter(function(ei){return EVENTS[ei].role==="booked"}).length}
 function recoCount(){return recoCrSel()+Object.keys(recoPicks.cm).length+recoEvSel()}
 function openReco(){
+ /* suggested accounts come pre-followed: the check is on by default, tap to unfollow */
+ recoNextCrBatch();
+ recoNextCeBatch();
  recoPicks={cr:{},cm:{},ev:{}};
  renderReco();go("reco");
 }
+/* --- batch shuffle: 9 of 12 accounts / 9 of 11 communities+events per view --- */
+var RC_BATCH=9,recoCrBatch=[],recoCeBatch=[];
+function shuffleArr(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function recoNextCrBatch(){
+ recoCrBatch=shuffleArr(RC_CREATORS.map(function(c,i){return i})).slice(0,RC_BATCH);
+ recoCrBatch.forEach(function(i){follows[RC_CREATORS[i].fn]=1});
+}
+function recoCePool(){
+ var pool=EV_GROUPS.map(function(g){return {t:"cm",g:g}});
+ EVENTS.forEach(function(e,i){pool.push({t:"ev",i:i})});
+ return pool;
+}
+function recoNextCeBatch(){recoCeBatch=shuffleArr(recoCePool()).slice(0,RC_BATCH)}
+function recoShuffleCr(){recoNextCrBatch();renderReco()}
+function recoShuffleCe(){recoNextCeBatch();renderReco()}
 function recoPicksData(){
  return {creators:RC_CREATORS.filter(function(c){return follows[c.fn]}).map(function(c){return c.fn}),
   communities:[],
@@ -3648,32 +3706,42 @@ function recoConfirm(){
  enterApp();
 }
 function renderReco(){
+ var chk='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+ var shuf='<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 6h3.2c1.1 0 2.1.5 2.8 1.4L15.4 16c.7.9 1.7 1.4 2.8 1.4H21m0 0-2.5-2.5M21 17.4l-2.5 2.5M3 17.4h3.2c1.1 0 2.1-.5 2.8-1.4l1-1.3M13.7 8.5l1.7-2.1c.7-.9 1.7-1.4 2.8-1.4H21m0 0-2.5 2.5M21 5l-2.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+ if(!recoCrBatch.length)recoNextCrBatch();
+ if(!recoCeBatch.length)recoNextCeBatch();
  var h='';
- /* Creators */
- h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_creators")+'</span><span class="rc-sec-d">'+t("rc_creators_d")+'</span></div><div class="rc-list">';
- RC_CREATORS.forEach(function(c,i){
-  h+='<button class="rc-card" onclick="recoOpenCreator('+i+')">'
+ /* Top: suggested accounts — tiled 3-col grid, follow pre-checked */
+ h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_accounts")+'</span><button class="rc-refresh" onclick="recoShuffleCr()">'+shuf+t("rc_refresh")+'</button></div><div class="rc-grid">';
+ recoCrBatch.forEach(function(ci){
+  var c=RC_CREATORS[ci],on=!!follows[c.fn];
+  h+='<div class="rc-tile'+(on?" sel":"")+'" onclick="recoOpenCreator('+ci+')">'
+   +'<span class="rc-check">'+chk+'</span>'
    +'<span class="rc-av" style="background:'+c.g+'">'+avaI(c.fn)+'</span>'
-   +'<span style="flex:1;min-width:0"><span class="rc-n">'+txt(c.n)+'</span><span class="rc-d" style="display:block">'+txt(c.d)+'</span></span>'
-   +'<span class="rc-meta">'+c.meta+'</span></button>';
+   +'<span class="rc-n">'+txt(c.n)+'</span>'
+   +'<span class="rc-d">'+txt(c.d)+'</span>'
+   +'<span class="rc-foot"><button class="rc-follow" onclick="event.stopPropagation();recoToggleFollow('+ci+')">'+(on?"✓ ":"+ ")+t(on?"fw_on":"fw_add")+'</button>'
+   +'<span class="rc-meta">'+c.meta+'</span></span></div>';
  });
  h+='</div></div>';
- /* Communities */
- h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_comm")+'</span><span class="rc-sec-d">'+t("rc_comm_d")+'</span></div><div class="rc-list">';
- EV_GROUPS.forEach(function(g,i){
-  h+='<div class="rc-card">'
-   +'<span class="rc-av" style="background:linear-gradient(135deg,#6B5CA5,#4a3f7d)">'+g.n.charAt(0)+'</span>'
-   +'<span style="flex:1;min-width:0"><span class="rc-n">'+g.n+'</span></span>'
-   +'<span class="rc-meta">'+t("rc_members",g.f*1000)+'</span></div>';
- });
- h+='</div></div>';
- /* Events */
- h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_events")+'</span><span class="rc-sec-d">'+t("rc_events_d")+'</span></div><div class="rc-list">';
- RC_EV_IDX.forEach(function(ei,i){
-  var e=EVENTS[ei];
-  h+='<button class="rc-card" onclick="openEvent('+ei+')">'
-   +'<span class="rc-av ev" style="background:'+e.cover+'">'+e.emoji+'</span>'
-   +'<span style="flex:1;min-width:0"><span class="rc-n">'+txt(e.n)+'</span><span class="rc-d" style="display:block">'+txt(e.tm)+'</span></span></button>';
+ /* Bottom: communities & events together — one tiled 3-col grid */
+ h+='<div class="rc-sec"><div class="rc-sec-h"><span class="rc-sec-t">'+t("rc_both")+'</span><button class="rc-refresh" onclick="recoShuffleCe()">'+shuf+t("rc_refresh")+'</button></div><div class="rc-grid">';
+ recoCeBatch.forEach(function(it,k){
+  if(it.t==="cm"){
+   var g=it.g;
+   h+='<div class="rc-tile" onclick="recoOpenGroup(\''+String(g.n).replace(/'/g,"\\'")+'\')">'
+    +'<span class="rc-chip">'+t("rc_chip_cm")+'</span>'
+    +'<span class="rc-av" style="background:linear-gradient(135deg,#6B5CA5,#4a3f7d)">'+g.n.charAt(0)+'</span>'
+    +'<span class="rc-n">'+g.n+'</span>'
+    +'<span class="rc-d">'+t("rc_members",g.f*1000)+'</span></div>';
+  }else{
+   var e=EVENTS[it.i];
+   h+='<button class="rc-tile" onclick="openEvent('+it.i+')">'
+    +'<span class="rc-chip ev">'+t("rc_chip_ev")+'</span>'
+    +'<span class="rc-av ev" style="background:'+e.cover+'">'+e.emoji+'</span>'
+    +'<span class="rc-n">'+txt(e.n)+'</span>'
+    +'<span class="rc-d">'+txt(e.tm)+'</span></button>';
+  }
  });
  h+='</div></div>';
  /* Ad slot */
@@ -3681,6 +3749,17 @@ function renderReco(){
  document.getElementById("rcBody").innerHTML=h;
  document.getElementById("rcBody").scrollTop=0;
  document.getElementById("rcCtaText").textContent=t("rc_cta");
+}
+/* toggle the follow check on a suggested account card */
+function recoToggleFollow(i){
+ var c=RC_CREATORS[i];if(!c)return;
+ follows[c.fn]=!follows[c.fn];
+ renderReco();
+}
+/* open a suggested community: jump into its group chat when one exists */
+function recoOpenGroup(name){
+ for(var k=0;k<MSGS.length;k++){var m=MSGS[k];if(m.members&&txt(m.n)===name){openChat(k);return}}
+ toast(t("cm_row_toast"));
 }
 
 /* ---------- notifications ---------- */
@@ -4174,11 +4253,16 @@ function renderMsgs(){
    '<div class="msg-right"><span class="msg-time">'+txt(m.tm)+'</span>'+right+'</div></div>';
  }).join("");
  msgRendered=true;
+ /* the tab-bar badge is always derived from the rows just painted, so the two can never drift */
+ refreshMsgBadge();
 }
-function msgUnreadTotal(){return MSGS.reduce(function(s,m){return s+m.unread},0)}
+/* single source of truth for the Chats tab badge = sum of every conversation's unread */
+function msgUnreadTotal(){return MSGS.reduce(function(s,m){return s+(m.unread||0)},0)}
 function refreshMsgBadge(){
- var b=document.getElementById("msgBadge"),n=msgUnreadTotal();
- if(!isGuest&&n>0){b.style.display="flex";b.textContent=n}else{b.style.display="none"}
+ var b=document.getElementById("msgBadge");if(!b)return;
+ var n=msgUnreadTotal();
+ if(!isGuest&&n>0){b.style.display="flex";b.textContent=n>99?"99+":n}
+ else{b.style.display="none";b.textContent="0"}
 }
 function openChat(i){
  var m=MSGS[i];
@@ -4683,6 +4767,7 @@ function fpSendCard(i){
  dm.unread=0;
  dm.pv={en:"[Card] "+cn,zh:"[名片] "+cn};
  dm.tm={en:"Now",zh:"现在"};
+ renderMsgs();
  /* leave the profile page and enter that conversation */
  closeFProfile();
  openChatPeer(dm);
@@ -9480,6 +9565,8 @@ function toast(msg){
 
 renderCC();
 npTick();
+/* paint the Chats badge from the data at first paint (never a hard-coded number) */
+refreshMsgBadge();
 </script>
 <script>
 /* PWA：仅 https / localhost 环境注册 service worker，file:// 直接打开不受影响 */
